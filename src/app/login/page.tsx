@@ -14,18 +14,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-8 max-w-md mx-auto">
+    <div className="min-h-screen flex flex-col items-center justify-center px-8 max-w-md mx-auto animate-fade-in">
       <div className="w-full text-center">
-        <h1 className="text-[28px] font-bold tracking-tight mb-2">
+        <h1 className="font-serif text-[32px] font-semibold tracking-tight mb-2">
           ApproachAI
         </h1>
-        <p className="text-text-muted text-[15px] mb-10">
+        <p className="text-text-muted text-[15px] mb-12 font-light">
           Your confidence coach for cold approaches.
         </p>
 
         <button
           onClick={handleLogin}
-          className="flex items-center justify-center gap-3 w-full bg-black text-white py-4 rounded-full font-medium text-[15px] active:scale-[0.98] transition-transform"
+          className="flex items-center justify-center gap-3 w-full bg-primary text-white py-4 rounded-full font-medium text-[15px] press-scale"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#fff" />
@@ -36,7 +36,7 @@ export default function LoginPage() {
           Continue with Google
         </button>
 
-        <p className="text-[12px] text-text-muted mt-8">
+        <p className="text-[12px] text-text-muted/60 mt-8 font-light">
           By continuing, you agree to our terms.
         </p>
       </div>

@@ -95,23 +95,29 @@ export default function Home() {
   return (
     <main className="min-h-screen max-w-md mx-auto">
       {state === "home" && (
-        <div className="px-6 pt-16 pb-8 flex flex-col min-h-screen">
+        <div className="px-6 pt-16 pb-8 flex flex-col min-h-screen animate-fade-in">
           <div className="flex-1">
-            <h1 className="text-[28px] font-bold tracking-tight mb-1">
-              ApproachAI
-            </h1>
-            <p className="text-text-muted text-[15px] mb-10">
-              Your confidence coach for cold approaches.
-            </p>
+            {/* Serif headline like Hinge */}
+            <div className="mb-12 animate-slide-up">
+              <h1 className="font-serif text-[36px] font-semibold tracking-tight leading-[1.1] mb-3">
+                She caught<br />your eye.
+              </h1>
+              <p className="text-text-muted text-[16px] leading-relaxed font-light">
+                Get a real game plan and the confidence<br />to go talk to her.
+              </p>
+            </div>
 
-            <div className="space-y-3">
-              <label className="flex items-center gap-4 bg-bg-card rounded-xl p-4 cursor-pointer active:bg-bg-card-hover transition-colors">
-                <Camera size={20} strokeWidth={1.5} />
+            {/* Action cards with staggered animation */}
+            <div className="space-y-3 stagger-children">
+              <label className="flex items-center gap-4 bg-bg-card rounded-2xl px-5 py-4 cursor-pointer press-scale">
+                <div className="w-10 h-10 rounded-full bg-bg flex items-center justify-center shrink-0">
+                  <Camera size={18} strokeWidth={1.5} />
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-[15px]">Take a photo</p>
-                  <p className="text-text-muted text-[13px]">Use your camera right now</p>
+                  <p className="text-text-muted text-[13px] font-light">Use your camera right now</p>
                 </div>
-                <ChevronRight size={18} className="text-text-muted" />
+                <ChevronRight size={16} className="text-text-muted/60" />
                 <input
                   type="file"
                   accept="image/*"
@@ -121,13 +127,15 @@ export default function Home() {
                 />
               </label>
 
-              <label className="flex items-center gap-4 bg-bg-card rounded-xl p-4 cursor-pointer active:bg-bg-card-hover transition-colors">
-                <Upload size={20} strokeWidth={1.5} />
+              <label className="flex items-center gap-4 bg-bg-card rounded-2xl px-5 py-4 cursor-pointer press-scale">
+                <div className="w-10 h-10 rounded-full bg-bg flex items-center justify-center shrink-0">
+                  <Upload size={18} strokeWidth={1.5} />
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-[15px]">Upload a photo</p>
-                  <p className="text-text-muted text-[13px]">From your gallery or files</p>
+                  <p className="text-text-muted text-[13px] font-light">From your gallery or files</p>
                 </div>
-                <ChevronRight size={18} className="text-text-muted" />
+                <ChevronRight size={16} className="text-text-muted/60" />
                 <input
                   type="file"
                   accept="image/*"
@@ -138,26 +146,28 @@ export default function Home() {
 
               <button
                 onClick={() => updateState("chat", false)}
-                className="flex items-center gap-4 w-full bg-bg-card rounded-xl p-4 text-left active:bg-bg-card-hover transition-colors"
+                className="flex items-center gap-4 w-full bg-bg-card rounded-2xl px-5 py-4 text-left press-scale"
               >
-                <MessageCircle size={20} strokeWidth={1.5} />
+                <div className="w-10 h-10 rounded-full bg-bg flex items-center justify-center shrink-0">
+                  <MessageCircle size={18} strokeWidth={1.5} />
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-[15px]">Just talk to me</p>
-                  <p className="text-text-muted text-[13px]">Get coached through any situation</p>
+                  <p className="text-text-muted text-[13px] font-light">Get coached through any situation</p>
                 </div>
-                <ChevronRight size={18} className="text-text-muted" />
+                <ChevronRight size={16} className="text-text-muted/60" />
               </button>
             </div>
           </div>
 
-          <p className="text-center text-[12px] text-text-muted mt-10">
+          <p className="text-center text-[12px] text-text-muted/60 mt-12 font-light animate-fade-in" style={{ animationDelay: "500ms" }}>
             Your photos never leave your device.
           </p>
         </div>
       )}
 
       {state === "annotate" && capturedImage && (
-        <div className="px-5 pt-6 pb-8">
+        <div className="px-5 pt-6 pb-8 animate-fade-in">
           <ImageAnnotator
             imageData={capturedImage}
             onConfirm={() => updateState("chat", true)}
