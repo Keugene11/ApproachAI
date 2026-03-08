@@ -30,7 +30,7 @@ Keep it factual and descriptive, 2-3 sentences.`;
         Authorization: `Bearer ${process.env.DEDALUS_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "anthropic/claude-sonnet-4-20250514",
+        model: "openai/gpt-4o",
         messages: [
           {
             role: "user",

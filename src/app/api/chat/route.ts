@@ -122,7 +122,7 @@ export async function POST(req: Request) {
           Authorization: `Bearer ${process.env.DEDALUS_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "anthropic/claude-sonnet-4-20250514",
+          model: "openai/gpt-4o",
           messages: apiMessages,
           max_tokens: 3000,
           stream: true,
