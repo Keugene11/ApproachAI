@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Camera, Upload, ArrowRight, MessageCircle } from "lucide-react";
+import { Camera, Upload, MessageCircle, ChevronRight } from "lucide-react";
 import ImageAnnotator from "@/components/ImageAnnotator";
 import ChatCoach from "@/components/ChatCoach";
 
@@ -71,7 +71,6 @@ export default function Home() {
   const handleCapture = async (imageData: string) => {
     setCapturedImage(imageData);
     setState("annotate");
-    // Compress for AI analysis (keep original for annotator display)
     const compressed = await compressImage(imageData);
     try { sessionStorage.setItem("approachai-image", compressed); } catch {}
   };
@@ -96,32 +95,23 @@ export default function Home() {
   return (
     <main className="min-h-screen max-w-md mx-auto">
       {state === "home" && (
-        <div className="px-6 pt-14 pb-8 flex flex-col min-h-screen">
+        <div className="px-6 pt-16 pb-8 flex flex-col min-h-screen">
           <div className="flex-1">
-            <h1 className="text-[32px] font-bold tracking-tight leading-[1.15] mb-6">
-              Approach<span className="text-accent">AI</span>
+            <h1 className="text-[28px] font-bold tracking-tight mb-1">
+              ApproachAI
             </h1>
+            <p className="text-text-muted text-[15px] mb-10">
+              Your confidence coach for cold approaches.
+            </p>
 
-            <div className="mb-8">
-              <p className="text-[22px] font-semibold leading-snug mb-2">
-                She caught your eye.
-              </p>
-              <p className="text-text-muted text-[15px] leading-relaxed">
-                Get a real game plan and the confidence to go talk to her. No overthinking, just action.
-              </p>
-            </div>
-
-            {/* Action cards */}
             <div className="space-y-3">
-              <label className="flex items-center gap-4 rounded-2xl p-4 cursor-pointer active:scale-[0.98] transition-transform border border-border">
-                <div className="w-11 h-11 rounded-full bg-accent/15 flex items-center justify-center shrink-0">
-                  <Camera size={20} className="text-accent" />
-                </div>
+              <label className="flex items-center gap-4 bg-bg-card rounded-xl p-4 cursor-pointer active:bg-bg-card-hover transition-colors">
+                <Camera size={20} strokeWidth={1.5} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[15px]">Take a photo</p>
+                  <p className="font-medium text-[15px]">Take a photo</p>
                   <p className="text-text-muted text-[13px]">Use your camera right now</p>
                 </div>
-                <ArrowRight size={18} className="text-text-muted shrink-0" />
+                <ChevronRight size={18} className="text-text-muted" />
                 <input
                   type="file"
                   accept="image/*"
@@ -131,15 +121,13 @@ export default function Home() {
                 />
               </label>
 
-              <label className="flex items-center gap-4 rounded-2xl p-4 cursor-pointer active:scale-[0.98] transition-transform border border-border">
-                <div className="w-11 h-11 rounded-full bg-accent/15 flex items-center justify-center shrink-0">
-                  <Upload size={20} className="text-accent" />
-                </div>
+              <label className="flex items-center gap-4 bg-bg-card rounded-xl p-4 cursor-pointer active:bg-bg-card-hover transition-colors">
+                <Upload size={20} strokeWidth={1.5} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[15px]">Upload a screenshot</p>
+                  <p className="font-medium text-[15px]">Upload a photo</p>
                   <p className="text-text-muted text-[13px]">From your gallery or files</p>
                 </div>
-                <ArrowRight size={18} className="text-text-muted shrink-0" />
+                <ChevronRight size={18} className="text-text-muted" />
                 <input
                   type="file"
                   accept="image/*"
@@ -150,16 +138,14 @@ export default function Home() {
 
               <button
                 onClick={() => updateState("chat", false)}
-                className="flex items-center gap-4 w-full rounded-2xl p-4 text-left active:scale-[0.98] transition-transform border border-border"
+                className="flex items-center gap-4 w-full bg-bg-card rounded-xl p-4 text-left active:bg-bg-card-hover transition-colors"
               >
-                <div className="w-11 h-11 rounded-full bg-accent/15 flex items-center justify-center shrink-0">
-                  <MessageCircle size={20} className="text-accent" />
-                </div>
+                <MessageCircle size={20} strokeWidth={1.5} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[15px]">Just talk to me</p>
-                  <p className="text-text-muted text-[13px]">Get a pep talk for any situation</p>
+                  <p className="font-medium text-[15px]">Just talk to me</p>
+                  <p className="text-text-muted text-[13px]">Get coached through any situation</p>
                 </div>
-                <ArrowRight size={18} className="text-text-muted shrink-0" />
+                <ChevronRight size={18} className="text-text-muted" />
               </button>
             </div>
           </div>

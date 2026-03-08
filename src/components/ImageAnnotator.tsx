@@ -43,7 +43,7 @@ export default function ImageAnnotator({ imageData, onConfirm, onBack }: ImageAn
       ctx.drawImage(imageObj, 0, 0, canvas.width, canvas.height);
       const fp = points !== undefined ? points : freehandPoints;
       if (fp && fp.length > 1) {
-        ctx.strokeStyle = "#7cb8a5";
+        ctx.strokeStyle = "#000000";
         ctx.lineWidth = 3;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
@@ -121,7 +121,7 @@ export default function ImageAnnotator({ imageData, onConfirm, onBack }: ImageAn
 
       <button
         onClick={onConfirm}
-        className="flex items-center justify-center gap-2 w-full bg-accent hover:bg-accent-dark text-white py-4 rounded-full mt-5 font-semibold text-[15px] active:scale-[0.98] transition-transform shadow-sm"
+        className="flex items-center justify-center gap-2 w-full bg-black text-white py-4 rounded-full mt-5 font-medium text-[15px] active:scale-[0.98] transition-transform"
       >
         {hasDrawn ? "Continue" : "Skip marking"}
         <ArrowRight size={17} />
