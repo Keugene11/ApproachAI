@@ -73,9 +73,10 @@ export async function POST(req: Request) {
           Authorization: `Bearer ${process.env.DEDALUS_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "claude-opus-4.5",
+          model: "openai/gpt-4o",
           messages: apiMessages,
           max_tokens: 3000,
+          temperature: 1.0,
           stream: true,
         }),
       }
