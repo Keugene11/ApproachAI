@@ -1,33 +1,31 @@
 export const runtime = "edge";
 
 export async function POST(req: Request) {
-  const { imageData, hasCircle } = await req.json();
+  const { imageData } = await req.json();
 
-  const prompt = hasCircle
-    ? `You're a scene analyst for a cold approach coach app. The user has taken a photo and marked someone they want to approach.
+  if (!imageData) {
+    return Response.json({ analysis: "" });
+  }
 
-Describe the scene in detail:
-1. What kind of venue/setting is this? (bar, cafe, gym, park, library, club, street, campus, etc.)
-2. What's the vibe? (crowded, quiet, energetic, chill, etc.)
-3. What is the person of interest doing? (sitting alone, with friends, reading, working out, etc.)
-4. Any notable details that could be used in an opener? (what they're drinking, wearing, reading, the music, etc.)
+  const apiKey = process.env.DEDALUS_API_KEY;
+  if (!apiKey) {
+    return Response.json({ analysis: "" });
+  }
 
-Keep it factual and descriptive, 2-3 sentences. No motivational talk — just describe what you see.`
-    : `You're a scene analyst for a cold approach coach app. The user has taken a photo of a social scene.
+  const prompt = `Describe this photo in 2-3 sentences. Focus on:
+- The setting/location (indoor/outdoor, type of venue)
+- The general atmosphere and vibe
+- What people in the photo are doing
+- Any notable details about the environment
 
-Describe the scene in detail:
-1. What kind of venue/setting is this?
-2. What's the vibe?
-3. Any notable details useful for approaching someone here?
-
-Keep it factual and descriptive, 2-3 sentences.`;
+Be specific and factual. Just describe what you see.`;
 
   try {
     const response = await fetch("https://api.dedaluslabs.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.DEDALUS_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: "openai/gpt-4o",
@@ -46,23 +44,21 @@ Keep it factual and descriptive, 2-3 sentences.`;
             ],
           },
         ],
-        max_tokens: 300,
+        max_tokens: 200,
       }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
       console.error("[analyze] API error:", response.status, errText);
-      return Response.json({
-        analysis: "",
-      });
+      return Response.json({ analysis: "" });
     }
 
     const data = await response.json();
     const analysis = data.choices?.[0]?.message?.content || "";
 
     return Response.json({ analysis });
-  } catch (e) {
+  } catch (e: unknown) {
     console.error("[analyze] error:", e);
     return Response.json({ analysis: "" });
   }

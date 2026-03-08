@@ -125,21 +125,21 @@ export default function ChatCoach({ onBack, fromPhoto, imageData }: ChatCoachPro
           const res = await fetch("/api/analyze", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ imageData: photo, hasCircle: true }),
+            body: JSON.stringify({ imageData: photo }),
           });
           const data = await res.json();
           sceneDescription = data.analysis || "";
         } catch (e) {
           console.error("[ChatCoach] analyze failed:", e);
         }
-        const trigger: Message = {
-          role: "user",
-          content: sceneDescription
-            ? `I just spotted someone I want to approach. I'm in the moment right now. Here's what the scene looks like: "${sceneDescription}"\n\nReference this scene directly. Give me the motivation, a game plan tailored to THIS specific setting and situation, and help me crush my fears. I need to move NOW.`
-            : "I just spotted someone I want to approach. I'm in the moment right now. Give me the motivation, the game plan, and help me crush my fears about this. I need to move NOW.",
-        };
-        setMessages([trigger]);
-        streamResponse([trigger]);
+        const apiContent = sceneDescription
+          ? `I just spotted someone I want to approach. I'm in the moment right now. Here's what the scene looks like: "${sceneDescription}"\n\nReference this scene directly. Give me the motivation, a game plan tailored to THIS specific setting and situation, and help me crush my fears. I need to move NOW.`
+          : "I just spotted someone I want to approach. I'm in the moment right now. Give me the motivation, the game plan, and help me crush my fears about this. I need to move NOW.";
+        // Show a clean message to user, send full context to API
+        const displayMsg: Message = { role: "user", content: "I just spotted someone. Help me approach." };
+        const apiMsg: Message = { role: "user", content: apiContent };
+        setMessages([displayMsg]);
+        streamResponse([apiMsg]);
       };
       analyzeAndStart();
       return;
