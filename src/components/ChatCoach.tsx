@@ -133,7 +133,7 @@ export default function ChatCoach({ onBack, fromPhoto, imageData }: ChatCoachPro
           console.error("[ChatCoach] analyze failed:", e);
         }
         const apiContent = sceneDescription
-          ? `I just spotted someone I want to approach. I'm in the moment right now. Here's what the scene looks like: "${sceneDescription}"\n\nReference this scene directly. Give me the motivation, a game plan tailored to THIS specific setting and situation, and help me crush my fears. I need to move NOW.`
+          ? `I just spotted someone I want to approach. I'm in the moment right now.\n\nHere is EXACTLY what the scene looks like:\n${sceneDescription}\n\nYou MUST reference these specific details in your response — the setting, what they're doing, what's around them. Your opener MUST be tailored to this exact scene. Do NOT give generic advice. Give me the motivation, a game plan for THIS specific moment, and help me crush my fears. I need to move NOW.`
           : "I just spotted someone I want to approach. I'm in the moment right now. Give me the motivation, the game plan, and help me crush my fears about this. I need to move NOW.";
         // Show a clean message to user, send full context to API
         const displayMsg: Message = { role: "user", content: "I just spotted someone. Help me approach." };

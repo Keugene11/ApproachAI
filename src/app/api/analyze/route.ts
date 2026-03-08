@@ -12,13 +12,15 @@ export async function POST(req: Request) {
     return Response.json({ analysis: "" });
   }
 
-  const prompt = `Describe this photo in 2-3 sentences. Focus on:
-- The setting/location (indoor/outdoor, type of venue)
-- The general atmosphere and vibe
-- What people in the photo are doing
-- Any notable details about the environment
+  const prompt = `Describe this photo in detail for someone who needs to approach a person in this scene. Include:
 
-Be specific and factual. Just describe what you see.`;
+1. The exact setting — is this a gym, coffee shop, bar, park, library, street, etc.? Describe the space.
+2. What is the person of interest doing? Are they sitting, standing, working out, reading, on their phone, talking to someone?
+3. What is the vibe/energy of the place? Busy, quiet, chill, loud?
+4. Any specific details that could be used as conversation starters — what equipment they're using, what they're wearing, what's around them, what they're drinking/reading, etc.
+5. Are they alone or with friends? Do they seem relaxed or busy?
+
+Be specific and vivid. This description will be used to give tailored approach advice.`;
 
   try {
     const response = await fetch("https://api.dedaluslabs.ai/v1/chat/completions", {
@@ -44,7 +46,7 @@ Be specific and factual. Just describe what you see.`;
             ],
           },
         ],
-        max_tokens: 200,
+        max_tokens: 500,
       }),
     });
 
