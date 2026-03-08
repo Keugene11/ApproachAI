@@ -224,7 +224,7 @@ export default function ChatCoach({ onBack, fromPhoto, imageData }: ChatCoachPro
         <button onClick={handleBack} className="text-text press -ml-1 p-1">
           <ArrowLeft size={20} strokeWidth={1.5} />
         </button>
-        <button onClick={handleBack} className="font-display text-[17px] font-bold flex-1 text-left">
+        <button onClick={handleBack} className="font-display text-[17px] font-bold flex-1 text-left cursor-pointer">
           ApproachAI
         </button>
         {isLoading && (
