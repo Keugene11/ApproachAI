@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Check, CreditCard } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, Home } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type Subscription = {
   status: string;
@@ -68,13 +69,22 @@ export default function PlansPage() {
 
   return (
     <main className="min-h-screen max-w-md mx-auto px-5 pt-14 pb-8 animate-fade-in">
-      <button
-        onClick={() => router.back()}
-        className="flex items-center gap-1.5 text-text-muted text-[14px] mb-8 press"
-      >
-        <ArrowLeft size={16} strokeWidth={1.5} />
-        Back
-      </button>
+      <div className="flex items-center justify-between mb-8">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-1.5 text-text-muted text-[14px] press"
+        >
+          <ArrowLeft size={16} strokeWidth={1.5} />
+          Back
+        </button>
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 text-text-muted text-[14px] press"
+        >
+          <Home size={16} strokeWidth={1.5} />
+          Home
+        </Link>
+      </div>
 
       <div className="mb-10 animate-slide-up">
         <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-none mb-2">
