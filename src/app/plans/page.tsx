@@ -69,11 +69,11 @@ export default function PlansPage() {
   return (
     <main className="min-h-screen max-w-md mx-auto px-5 pt-14 pb-8 animate-fade-in">
       <button
-        onClick={() => router.push("/profile")}
+        onClick={() => router.back()}
         className="flex items-center gap-1.5 text-text-muted text-[14px] mb-8 press"
       >
         <ArrowLeft size={16} strokeWidth={1.5} />
-        Profile
+        Back
       </button>
 
       <div className="mb-10 animate-slide-up">
