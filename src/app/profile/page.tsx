@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, LogOut, CreditCard, User } from "lucide-react";
+import { ArrowLeft, LogOut, CreditCard, User, ChevronRight } from "lucide-react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 
@@ -15,7 +16,6 @@ export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<{ email?: string; name?: string; avatar?: string } | null>(null);
   const [subscription, setSubscription] = useState<Subscription>(null);
-  const [loadingPortal, setLoadingPortal] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -37,17 +37,6 @@ export default function ProfilePage() {
       })
       .catch(() => {});
   }, []);
-
-  const handleManageBilling = async () => {
-    setLoadingPortal(true);
-    try {
-      const res = await fetch("/api/stripe/portal", { method: "POST" });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch {
-      setLoadingPortal(false);
-    }
-  };
 
   const handleSignOut = async () => {
     setLoggingOut(true);
@@ -130,21 +119,19 @@ export default function ProfilePage() {
 
       {/* Actions */}
       <div className="space-y-2.5 mt-6 stagger">
-        {subscription && (
-          <button
-            onClick={handleManageBilling}
-            disabled={loadingPortal}
-            className="flex items-center gap-3.5 w-full bg-bg-card border border-border rounded-xl px-4 py-3.5 text-left press disabled:opacity-60"
-          >
-            <CreditCard size={20} strokeWidth={1.5} className="text-text-muted shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-[15px] leading-tight">
-                {loadingPortal ? "Redirecting..." : "Manage billing"}
-              </p>
-              <p className="text-text-muted text-[13px] mt-0.5">Update payment, view invoices</p>
-            </div>
-          </button>
-        )}
+        <Link
+          href="/plans"
+          className="flex items-center gap-3.5 w-full bg-bg-card border border-border rounded-xl px-4 py-3.5 text-left press"
+        >
+          <CreditCard size={20} strokeWidth={1.5} className="text-text-muted shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-[15px] leading-tight">Plans & billing</p>
+            <p className="text-text-muted text-[13px] mt-0.5">
+              {subscription ? "Manage your subscription" : "Choose a plan"}
+            </p>
+          </div>
+          <ChevronRight size={16} className="text-border shrink-0" />
+        </Link>
 
         <button
           onClick={handleSignOut}
