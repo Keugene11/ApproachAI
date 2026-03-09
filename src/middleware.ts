@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // For logged-in users on protected pages (not /pricing), check subscription
+  // For logged-in users on protected pages (not /pricing or /profile), check subscription
   if (user && pathname === "/") {
     const { data: subscription } = await supabase
       .from("subscriptions")

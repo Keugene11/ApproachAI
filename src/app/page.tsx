@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Camera, Upload, MessageCircle, ChevronRight } from "lucide-react";
+import { Camera, Upload, MessageCircle, ChevronRight, User } from "lucide-react";
+import Link from "next/link";
 import ImageAnnotator from "@/components/ImageAnnotator";
 import ChatCoach from "@/components/ChatCoach";
 
@@ -97,13 +98,21 @@ export default function Home() {
       {state === "home" && (
         <div className="px-5 pt-14 pb-8 flex flex-col min-h-screen animate-fade-in">
           <div className="flex-1">
-            <div className="mb-10 animate-slide-up">
-              <h1 className="font-display text-[30px] font-extrabold tracking-tight leading-none mb-2">
-                ApproachAI
-              </h1>
-              <p className="text-text-muted text-[15px]">
-                Your confidence coach for cold approaches.
-              </p>
+            <div className="mb-10 animate-slide-up flex items-start justify-between">
+              <div>
+                <h1 className="font-display text-[30px] font-extrabold tracking-tight leading-none mb-2">
+                  ApproachAI
+                </h1>
+                <p className="text-text-muted text-[15px]">
+                  Your confidence coach for cold approaches.
+                </p>
+              </div>
+              <Link
+                href="/profile"
+                className="w-9 h-9 rounded-full bg-bg-card border border-border flex items-center justify-center press shrink-0 mt-1"
+              >
+                <User size={16} strokeWidth={1.5} className="text-text-muted" />
+              </Link>
             </div>
 
             <div className="space-y-2.5 stagger">
