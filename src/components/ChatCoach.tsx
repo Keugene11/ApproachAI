@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { ArrowLeft, ArrowUp } from "lucide-react";
+import { ArrowLeft, ArrowUp, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Message {
   role: "user" | "assistant";
@@ -38,10 +39,13 @@ export function clearSavedMessages() {
 }
 
 export default function ChatCoach({ onBack, fromPhoto, imageData }: ChatCoachProps) {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [limitReached, setLimitReached] = useState(false);
+  const [sessionsRemaining, setSessionsRemaining] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -53,6 +57,32 @@ export default function ChatCoach({ onBack, fromPhoto, imageData }: ChatCoachPro
       if (toSave.length > 0) saveMessages(toSave);
     }
   }, [messages, initialized]);
+
+  // Check usage and increment session count on mount
+  useEffect(() => {
+    const saved = getSavedMessages();
+    // Only check/increment for new sessions (no saved messages)
+    if (saved && saved.length > 0) return;
+
+    fetch("/api/usage")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.subscribed) return;
+        if (data.sessionsRemaining <= 0) {
+          setLimitReached(true);
+          return;
+        }
+        setSessionsRemaining(data.sessionsRemaining);
+        // Increment usage for this new session
+        fetch("/api/usage", { method: "POST" })
+          .then((res) => res.json())
+          .then((d) => {
+            if (d.sessionsRemaining !== undefined) setSessionsRemaining(d.sessionsRemaining);
+          })
+          .catch(() => {});
+      })
+      .catch(() => {});
+  }, []);
 
   const streamResponse = useCallback(
     async (messagesToSend: Message[]) => {
@@ -274,31 +304,56 @@ export default function ChatCoach({ onBack, fromPhoto, imageData }: ChatCoachPro
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="px-4 py-3 shrink-0 border-t border-border">
-        <form
-          onSubmit={handleSubmit}
-          className="flex items-end gap-2 bg-bg-input rounded-full pl-5 pr-2 py-2"
-        >
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={handleTextareaInput}
-            onKeyDown={handleKeyDown}
-            placeholder="Message..."
-            rows={1}
-            className="flex-1 bg-transparent text-text text-[15px] placeholder-text-muted focus:outline-none resize-none leading-normal py-1"
-            disabled={isLoading}
-          />
+      {/* Paywall */}
+      {limitReached ? (
+        <div className="px-5 py-6 shrink-0 border-t border-border text-center animate-fade-in">
+          <Lock size={20} strokeWidth={1.5} className="mx-auto text-text-muted mb-2" />
+          <p className="font-display font-bold text-[16px] mb-1">Free sessions used up</p>
+          <p className="text-text-muted text-[13px] mb-4">
+            Upgrade to keep your AI coach in your pocket.
+          </p>
           <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="bg-primary disabled:opacity-15 text-white p-2 rounded-full press shrink-0 transition-opacity"
+            onClick={() => router.push("/pricing")}
+            className="w-full bg-primary text-white py-3 rounded-xl font-medium text-[14px] press"
           >
-            <ArrowUp size={15} strokeWidth={2.5} />
+            Unlock ApproachAI
           </button>
-        </form>
-      </div>
+        </div>
+      ) : (
+        <>
+          {/* Free session counter */}
+          {sessionsRemaining !== null && sessionsRemaining >= 0 && (
+            <div className="text-center py-1.5 text-[11px] text-text-muted border-t border-border">
+              {sessionsRemaining} free {sessionsRemaining === 1 ? "session" : "sessions"} remaining
+            </div>
+          )}
+          {/* Input */}
+          <div className={`px-4 py-3 shrink-0 ${sessionsRemaining === null ? "border-t border-border" : ""}`}>
+            <form
+              onSubmit={handleSubmit}
+              className="flex items-end gap-2 bg-bg-input rounded-full pl-5 pr-2 py-2"
+            >
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={handleTextareaInput}
+                onKeyDown={handleKeyDown}
+                placeholder="Message..."
+                rows={1}
+                className="flex-1 bg-transparent text-text text-[15px] placeholder-text-muted focus:outline-none resize-none leading-normal py-1"
+                disabled={isLoading}
+              />
+              <button
+                type="submit"
+                disabled={isLoading || !input.trim()}
+                className="bg-primary disabled:opacity-15 text-white p-2 rounded-full press shrink-0 transition-opacity"
+              >
+                <ArrowUp size={15} strokeWidth={2.5} />
+              </button>
+            </form>
+          </div>
+        </>
+      )}
     </div>
   );
 }
