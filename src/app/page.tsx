@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Camera, Upload, MessageCircle, ChevronRight, User, Sparkles } from "lucide-react";
+import { Camera, Upload, MessageCircle, ChevronRight, User, Sparkles, Eye, Zap, Heart } from "lucide-react";
 import Link from "next/link";
 import ImageAnnotator from "@/components/ImageAnnotator";
 import ChatCoach from "@/components/ChatCoach";
@@ -98,14 +98,12 @@ export default function Home() {
       {state === "home" && (
         <div className="px-5 pt-14 pb-8 flex flex-col min-h-screen animate-fade-in">
           <div className="flex-1">
-            <div className="mb-10 animate-slide-up flex items-start justify-between">
+            {/* Header */}
+            <div className="mb-6 animate-slide-up flex items-start justify-between">
               <div>
-                <h1 className="font-display text-[30px] font-extrabold tracking-tight leading-none mb-2">
+                <h1 className="font-display text-[30px] font-extrabold tracking-tight leading-none">
                   ApproachAI
                 </h1>
-                <p className="text-text-muted text-[15px]">
-                  Your confidence coach for cold approaches.
-                </p>
               </div>
               <div className="flex items-center gap-2 shrink-0 mt-1">
                 <Link
@@ -124,14 +122,25 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="space-y-2.5 stagger">
-              <label className="flex items-center gap-3.5 bg-bg-card border border-border rounded-xl px-4 py-3.5 cursor-pointer press">
-                <Camera size={20} strokeWidth={1.5} className="text-text-muted shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-[15px] leading-tight">Take a photo</p>
-                  <p className="text-text-muted text-[13px] mt-0.5">Use your camera right now</p>
+            {/* Hero */}
+            <div className="mb-8 animate-slide-up" style={{ animationDelay: "50ms" }}>
+              <p className="font-display text-[22px] font-bold tracking-tight leading-snug mb-2">
+                See someone you like?<br />
+                <span className="text-text-muted">We&apos;ll help you approach them.</span>
+              </p>
+              <p className="text-text-muted text-[14px] leading-relaxed">
+                Snap a photo of the situation, and your AI coach will give you a personalized game plan to make your move.
+              </p>
+            </div>
+
+            {/* Primary CTA — Take a photo */}
+            <div className="mb-3 animate-slide-up" style={{ animationDelay: "100ms" }}>
+              <label className="flex flex-col items-center gap-2 bg-primary text-white rounded-2xl px-5 py-6 cursor-pointer press">
+                <Camera size={28} strokeWidth={1.5} />
+                <div className="text-center">
+                  <p className="font-display font-bold text-[17px] leading-tight">Take a photo</p>
+                  <p className="text-white/60 text-[13px] mt-1">Snap the scene — your coach takes it from there</p>
                 </div>
-                <ChevronRight size={16} className="text-border shrink-0" />
                 <input
                   type="file"
                   accept="image/*"
@@ -140,7 +149,10 @@ export default function Home() {
                   onChange={handleFileUpload}
                 />
               </label>
+            </div>
 
+            {/* Secondary actions */}
+            <div className="space-y-2.5 mb-10 stagger" style={{ "--stagger-base": "150ms" } as React.CSSProperties}>
               <label className="flex items-center gap-3.5 bg-bg-card border border-border rounded-xl px-4 py-3.5 cursor-pointer press">
                 <Upload size={20} strokeWidth={1.5} className="text-text-muted shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -167,6 +179,33 @@ export default function Home() {
                 </div>
                 <ChevronRight size={16} className="text-border shrink-0" />
               </button>
+            </div>
+
+            {/* How it works */}
+            <div className="animate-fade-in" style={{ animationDelay: "300ms" }}>
+              <p className="text-[12px] font-semibold text-text-muted uppercase tracking-wide mb-3">
+                How it works
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center">
+                  <div className="w-10 h-10 rounded-full bg-bg-card border border-border flex items-center justify-center mx-auto mb-2">
+                    <Eye size={18} strokeWidth={1.5} className="text-text-muted" />
+                  </div>
+                  <p className="text-[12px] font-medium leading-tight">Spot someone<br/>you like</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-10 h-10 rounded-full bg-bg-card border border-border flex items-center justify-center mx-auto mb-2">
+                    <Zap size={18} strokeWidth={1.5} className="text-text-muted" />
+                  </div>
+                  <p className="text-[12px] font-medium leading-tight">Get your<br/>game plan</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-10 h-10 rounded-full bg-bg-card border border-border flex items-center justify-center mx-auto mb-2">
+                    <Heart size={18} strokeWidth={1.5} className="text-text-muted" />
+                  </div>
+                  <p className="text-[12px] font-medium leading-tight">Make your<br/>move</p>
+                </div>
+              </div>
             </div>
           </div>
 
