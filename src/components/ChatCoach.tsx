@@ -147,7 +147,7 @@ export default function ChatCoach({ onBack, fromPhoto, imageData, checkinMode }:
       }
       setIsLoading(false);
     },
-    [fromPhoto]
+    [fromPhoto, checkinMode]
   );
 
   useEffect(() => {

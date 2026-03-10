@@ -132,6 +132,7 @@ export default function Home() {
     setCapturedImage(null);
     try { sessionStorage.removeItem("approachai-image"); } catch {}
     setCameFromPhoto(false);
+    setCheckinTalked(null);
     updateState("home", false);
   };
 
