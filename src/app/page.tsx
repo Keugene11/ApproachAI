@@ -303,8 +303,8 @@ export default function Home() {
                 <Upload size={20} strokeWidth={1.5} className="text-text-muted" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-[15px] leading-tight">Upload a screenshot</p>
-                <p className="text-[12px] text-text-muted mt-0.5">Dating app or DM — I&apos;ll help you reply</p>
+                <p className="font-semibold text-[15px] leading-tight">Upload from gallery</p>
+                <p className="text-[12px] text-text-muted mt-0.5">Already took a photo of the scene</p>
               </div>
               <ChevronRight size={16} className="text-border shrink-0" />
               <input
