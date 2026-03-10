@@ -273,8 +273,106 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
 
 
 
+  const approachStatsSection = (
+      <div className="bg-bg-card border border-border rounded-2xl px-5 py-4">
+        <h3 className="text-[13px] font-semibold text-text-muted uppercase tracking-wide mb-3">Approach stats</h3>
+
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-bg-card-hover rounded-xl px-2 py-3 text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Eye size={14} strokeWidth={1.5} className="text-purple-500" />
+              <span className="font-display text-[22px] font-bold">{data.totalOpportunities}</span>
+            </div>
+            <p className="text-[11px] text-text-muted">Opportunities</p>
+          </div>
+          <div className="bg-bg-card-hover rounded-xl px-2 py-3 text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <Target size={14} strokeWidth={1.5} className="text-blue-500" />
+              <span className="font-display text-[22px] font-bold">{data.totalApproaches}</span>
+            </div>
+            <p className="text-[11px] text-text-muted">Approaches</p>
+          </div>
+          <div className="bg-bg-card-hover rounded-xl px-2 py-3 text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <ThumbsUp size={14} strokeWidth={1.5} className="text-green-500" />
+              <span className="font-display text-[22px] font-bold">{data.totalSuccesses}</span>
+            </div>
+            <p className="text-[11px] text-text-muted">Went well</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mt-3">
+          <div className="bg-bg-card-hover rounded-xl px-2 py-2.5 text-center">
+            <span className="font-display text-[18px] font-bold text-blue-500">{data.approachConversionRate}%</span>
+            <p className="text-[10px] text-text-muted">Approach rate</p>
+          </div>
+          <div className="bg-bg-card-hover rounded-xl px-2 py-2.5 text-center">
+            <span className="font-display text-[18px] font-bold text-green-500">{data.successRate}%</span>
+            <p className="text-[10px] text-text-muted">Success rate</p>
+          </div>
+        </div>
+
+        {/* Today's inline counters */}
+        {(() => {
+          const dispOpp = todayOpportunities ?? data.opportunitiesCount;
+          const dispAppr = todayApproaches ?? data.approachesCount;
+          const dispSucc = todaySuccesses ?? data.successesCount;
+          const hasChanges = todayOpportunities !== null || todayApproaches !== null || todaySuccesses !== null;
+          const isDirty = hasChanges && (dispOpp !== data.opportunitiesCount || dispAppr !== data.approachesCount || dispSucc !== data.successesCount);
+
+          const mkCounter = (label: string, value: number, onDec: () => void, onInc: () => void) => (
+            <div className="flex-1 text-center">
+              <p className="text-[11px] text-text-muted mb-1">{label}</p>
+              <div className="flex items-center justify-center gap-2">
+                <button onClick={onDec} className="w-7 h-7 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[14px] font-bold press">−</button>
+                <span className="font-display text-[22px] font-extrabold w-7 text-center">{value}</span>
+                <button onClick={onInc} className="w-7 h-7 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[14px] font-bold press">+</button>
+              </div>
+            </div>
+          );
+
+          const initIfNeeded = () => {
+            if (todayOpportunities === null) setTodayOpportunities(data.opportunitiesCount);
+            if (todayApproaches === null) setTodayApproaches(data.approachesCount);
+            if (todaySuccesses === null) setTodaySuccesses(data.successesCount);
+          };
+
+          return (
+            <div className="mt-3 pt-3 border-t border-border">
+              <div className="flex items-center gap-1">
+                {mkCounter("Seen", dispOpp,
+                  () => { initIfNeeded(); setTodayOpportunities(Math.max(0, dispOpp - 1)); if (dispAppr > dispOpp - 1) setTodayApproaches(Math.max(0, dispOpp - 1)); },
+                  () => { initIfNeeded(); setTodayOpportunities(dispOpp + 1); }
+                )}
+                {mkCounter("Approached", dispAppr,
+                  () => { initIfNeeded(); setTodayApproaches(Math.max(0, dispAppr - 1)); if (dispSucc > dispAppr - 1) setTodaySuccesses(Math.max(0, dispAppr - 1)); },
+                  () => { initIfNeeded(); setTodayApproaches(Math.min(dispOpp, dispAppr + 1)); }
+                )}
+                {mkCounter("Went well", dispSucc,
+                  () => { initIfNeeded(); setTodaySuccesses(Math.max(0, dispSucc - 1)); },
+                  () => { initIfNeeded(); setTodaySuccesses(Math.min(dispAppr, dispSucc + 1)); }
+                )}
+              </div>
+              {isDirty && (
+                <div className="flex gap-2 mt-3 animate-fade-in">
+                  <button onClick={() => { setTodayOpportunities(null); setTodayApproaches(null); setTodaySuccesses(null); }}
+                    className="flex-1 py-2.5 rounded-xl bg-bg-card-hover border border-border text-[13px] font-medium press">Cancel</button>
+                  <button onClick={saveToday} disabled={savingToday}
+                    className="flex-1 py-2.5 rounded-xl bg-[#1a1a1a] text-white text-[13px] font-medium press disabled:opacity-60">
+                    {savingToday ? "..." : "Save"}</button>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+      </div>
+  );
+
   return (
     <div className="space-y-4">
+      {/* Show approach stats first when already checked in */}
+      {data.checkedInToday && approachStatsSection}
+
       {/* Main check-in card */}
       <div className={`rounded-2xl px-5 py-6 ${justCheckedIn ? "animate-fade-in" : ""} ${!data.checkedInToday ? "bg-[#1a1a1a] text-white" : "bg-bg-card border border-border"}`}>
         {!data.checkedInToday ? (
@@ -462,99 +560,8 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
         )}
       </div>
 
-      {/* Approach stats */}
-      <div className="bg-bg-card border border-border rounded-2xl px-5 py-4">
-        <h3 className="text-[13px] font-semibold text-text-muted uppercase tracking-wide mb-3">Approach stats</h3>
-
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-bg-card-hover rounded-xl px-2 py-3 text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <Eye size={14} strokeWidth={1.5} className="text-purple-500" />
-              <span className="font-display text-[22px] font-bold">{data.totalOpportunities}</span>
-            </div>
-            <p className="text-[11px] text-text-muted">Opportunities</p>
-          </div>
-          <div className="bg-bg-card-hover rounded-xl px-2 py-3 text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <Target size={14} strokeWidth={1.5} className="text-blue-500" />
-              <span className="font-display text-[22px] font-bold">{data.totalApproaches}</span>
-            </div>
-            <p className="text-[11px] text-text-muted">Approaches</p>
-          </div>
-          <div className="bg-bg-card-hover rounded-xl px-2 py-3 text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <ThumbsUp size={14} strokeWidth={1.5} className="text-green-500" />
-              <span className="font-display text-[22px] font-bold">{data.totalSuccesses}</span>
-            </div>
-            <p className="text-[11px] text-text-muted">Went well</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 mt-3">
-          <div className="bg-bg-card-hover rounded-xl px-2 py-2.5 text-center">
-            <span className="font-display text-[18px] font-bold text-blue-500">{data.approachConversionRate}%</span>
-            <p className="text-[10px] text-text-muted">Approach rate</p>
-          </div>
-          <div className="bg-bg-card-hover rounded-xl px-2 py-2.5 text-center">
-            <span className="font-display text-[18px] font-bold text-green-500">{data.successRate}%</span>
-            <p className="text-[10px] text-text-muted">Success rate</p>
-          </div>
-        </div>
-
-        {/* Today's inline counters */}
-        {(() => {
-          const dispOpp = todayOpportunities ?? data.opportunitiesCount;
-          const dispAppr = todayApproaches ?? data.approachesCount;
-          const dispSucc = todaySuccesses ?? data.successesCount;
-          const hasChanges = todayOpportunities !== null || todayApproaches !== null || todaySuccesses !== null;
-          const isDirty = hasChanges && (dispOpp !== data.opportunitiesCount || dispAppr !== data.approachesCount || dispSucc !== data.successesCount);
-
-          const mkCounter = (label: string, value: number, onDec: () => void, onInc: () => void) => (
-            <div className="flex-1 text-center">
-              <p className="text-[11px] text-text-muted mb-1">{label}</p>
-              <div className="flex items-center justify-center gap-2">
-                <button onClick={onDec} className="w-7 h-7 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[14px] font-bold press">−</button>
-                <span className="font-display text-[22px] font-extrabold w-7 text-center">{value}</span>
-                <button onClick={onInc} className="w-7 h-7 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[14px] font-bold press">+</button>
-              </div>
-            </div>
-          );
-
-          const initIfNeeded = () => {
-            if (todayOpportunities === null) setTodayOpportunities(data.opportunitiesCount);
-            if (todayApproaches === null) setTodayApproaches(data.approachesCount);
-            if (todaySuccesses === null) setTodaySuccesses(data.successesCount);
-          };
-
-          return (
-            <div className="mt-3 pt-3 border-t border-border">
-              <div className="flex items-center gap-1">
-                {mkCounter("Seen", dispOpp,
-                  () => { initIfNeeded(); setTodayOpportunities(Math.max(0, dispOpp - 1)); if (dispAppr > dispOpp - 1) setTodayApproaches(Math.max(0, dispOpp - 1)); },
-                  () => { initIfNeeded(); setTodayOpportunities(dispOpp + 1); }
-                )}
-                {mkCounter("Approached", dispAppr,
-                  () => { initIfNeeded(); setTodayApproaches(Math.max(0, dispAppr - 1)); if (dispSucc > dispAppr - 1) setTodaySuccesses(Math.max(0, dispAppr - 1)); },
-                  () => { initIfNeeded(); setTodayApproaches(Math.min(dispOpp, dispAppr + 1)); }
-                )}
-                {mkCounter("Went well", dispSucc,
-                  () => { initIfNeeded(); setTodaySuccesses(Math.max(0, dispSucc - 1)); },
-                  () => { initIfNeeded(); setTodaySuccesses(Math.min(dispAppr, dispSucc + 1)); }
-                )}
-              </div>
-              {isDirty && (
-                <div className="flex gap-2 mt-3 animate-fade-in">
-                  <button onClick={() => { setTodayOpportunities(null); setTodayApproaches(null); setTodaySuccesses(null); }}
-                    className="flex-1 py-2.5 rounded-xl bg-bg-card-hover border border-border text-[13px] font-medium press">Cancel</button>
-                  <button onClick={saveToday} disabled={savingToday}
-                    className="flex-1 py-2.5 rounded-xl bg-[#1a1a1a] text-white text-[13px] font-medium press disabled:opacity-60">
-                    {savingToday ? "..." : "Save"}</button>
-                </div>
-              )}
-            </div>
-          );
-        })()}
-      </div>
+      {/* Show approach stats after main card when NOT checked in */}
+      {!data.checkedInToday && approachStatsSection}
 
       {/* Quick stats row */}
       <div className="grid grid-cols-3 gap-3">
