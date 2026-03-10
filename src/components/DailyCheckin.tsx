@@ -150,7 +150,12 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
     await fetch("/api/checkin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ talked: data?.talked, note: noteInput.trim() }),
+      body: JSON.stringify({
+        talked: data?.talked,
+        note: noteInput.trim(),
+        approachesCount: data?.approachesCount,
+        successesCount: data?.successesCount,
+      }),
     });
     setData((prev) => prev ? { ...prev, note: noteInput.trim() } : prev);
     setNoteSaved(true);
