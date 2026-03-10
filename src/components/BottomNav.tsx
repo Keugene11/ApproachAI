@@ -13,7 +13,7 @@ interface BottomNavProps {
 
 const tabs: { id: Tab; label: string; icon: typeof Flame }[] = [
   { id: "checkin", label: "Check-in", icon: Flame },
-  { id: "coach", label: "Coach", icon: MessageCircle },
+  { id: "coach", label: "Wingman", icon: MessageCircle },
   { id: "community", label: "Community", icon: Users },
 ];
 
