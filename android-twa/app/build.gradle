@@ -9,12 +9,12 @@ def twaVersionName = System.getenv("TWA_VERSION_NAME") ?: "1.0.${twaVersionCode}
 
 android {
     namespace twaPackageId
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId twaPackageId
         minSdk 21
-        targetSdk 34
+        targetSdk 35
         versionCode twaVersionCode
         versionName twaVersionName
 
