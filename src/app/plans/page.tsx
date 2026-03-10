@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Check, CreditCard, ChevronDown, Zap } from "lucide-react";
+import { ArrowLeft, Check, Minus, CreditCard, ChevronDown, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 
@@ -12,39 +12,32 @@ type Subscription = {
   cancel_at_period_end: boolean;
 } | null;
 
-const PRO_FEATURES = [
-  "Unlimited AI coaching sessions",
-  "Photo situation analysis",
-  "Personalized approach openers",
-  "Text & DM conversation coaching",
-  "Dating profile reviews",
-  "Situational game plans",
-];
-
-const FREE_FEATURES = [
-  "Daily check-ins & streaks",
-  "XP, levels & badges",
-  "Weekly competitive leagues",
-  "Community feed access",
-  "3 AI coaching sessions per day",
+const COMPARISON = [
+  { feature: "AI coaching sessions", free: "3 / day", pro: "Unlimited" },
+  { feature: "Photo situation analysis", free: false, pro: true },
+  { feature: "Personalized openers", free: false, pro: true },
+  { feature: "Text & DM coaching", free: false, pro: true },
+  { feature: "Dating profile reviews", free: false, pro: true },
+  { feature: "Custom approach plans", free: false, pro: true },
+  { feature: "Daily check-ins", free: true, pro: true },
+  { feature: "Streaks, XP & levels", free: true, pro: true },
+  { feature: "Badges & achievements", free: true, pro: true },
+  { feature: "Weekly leagues", free: true, pro: true },
+  { feature: "Community feed", free: true, pro: true },
 ];
 
 const FAQ = [
   {
     q: "Can I try it for free?",
-    a: "Absolutely. Streaks, badges, leagues, community — all free forever. You also get 3 AI coaching sessions per day. Upgrade only when you want more.",
+    a: "You're already using it! Streaks, badges, leagues, community — all free forever. Upgrade for unlimited AI coaching and photo analysis.",
   },
   {
     q: "How is this different from ChatGPT?",
-    a: "Wingmate is built for one thing: helping you approach. It reads photos of your situation, gives you exact openers for that moment, and tracks your confidence growth over time. No generic advice.",
-  },
-  {
-    q: "Are my photos private?",
-    a: "Your photos never leave your device. They're analyzed locally and never uploaded or stored. Chat sessions aren't saved after they end.",
+    a: "Wingmate is purpose-built for approaching. It reads photos of your situation, gives you exact openers for that moment, and tracks your progress over time.",
   },
   {
     q: "Can I cancel anytime?",
-    a: "One tap. No questions, no hoops. You keep access until the end of your billing period.",
+    a: "One tap. No questions asked. You keep access until the end of your billing period.",
   },
 ];
 
@@ -118,24 +111,21 @@ export default function PlansPage() {
           <h1 className="font-display text-[20px] font-bold tracking-tight">Your Plan</h1>
         </div>
 
-        {/* Current plan card */}
-        <div className="bg-[#1a1a1a] text-white rounded-3xl px-6 py-7 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Zap size={18} strokeWidth={2} className="text-yellow-400" />
-            <span className="text-[13px] font-bold tracking-widest uppercase text-white/60">
+        <div className="bg-[#1a1a1a] text-white rounded-2xl px-5 py-6 mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Zap size={16} strokeWidth={2} className="text-yellow-400" />
+            <span className="text-[12px] font-bold tracking-widest uppercase text-white/50">
               Wingmate Pro
             </span>
           </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-display text-[42px] font-extrabold leading-none">
+          <div className="flex items-baseline gap-1">
+            <span className="font-display text-[36px] font-extrabold leading-none">
               ${isYearly ? "10" : "15"}
             </span>
-            <span className="text-white/50 text-[16px]">/mo</span>
+            <span className="text-white/40 text-[15px]">/mo</span>
           </div>
-          {isYearly && (
-            <p className="text-white/40 text-[13px] mt-1.5">$120 billed annually</p>
-          )}
-          <div className="mt-5 pt-5 border-t border-white/10">
+          {isYearly && <p className="text-white/30 text-[12px] mt-1">$120 billed annually</p>}
+          <div className="mt-4 pt-4 border-t border-white/10">
             <p className="text-white/50 text-[13px]">
               {subscription?.cancel_at_period_end
                 ? `Cancels ${formatDate(subscription.current_period_end)}`
@@ -158,24 +148,12 @@ export default function PlansPage() {
           </div>
         </button>
 
-        <h2 className="font-display text-[13px] font-bold tracking-widest uppercase text-text-muted mb-5">
-          Your features
-        </h2>
-        <div className="space-y-4 mb-4">
-          {PRO_FEATURES.map((f) => (
-            <div key={f} className="flex items-start gap-3.5">
-              <div className="w-5 h-5 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0 mt-0.5">
-                <Check size={12} strokeWidth={3} className="text-white" />
-              </div>
-              <span className="text-[15px] font-medium leading-snug">{f}</span>
-            </div>
-          ))}
-          {FREE_FEATURES.map((f) => (
-            <div key={f} className="flex items-start gap-3.5">
-              <div className="w-5 h-5 rounded-full bg-bg-input flex items-center justify-center shrink-0 mt-0.5">
-                <Check size={12} strokeWidth={3} className="text-text-muted" />
-              </div>
-              <span className="text-[15px] text-text-muted leading-snug">{f}</span>
+        <h2 className="font-display text-[18px] font-bold tracking-tight mb-4">Your features</h2>
+        <div className="space-y-3">
+          {["Unlimited AI sessions", "Photo analysis", "Custom openers", "Text coaching", "Profile reviews", "Approach plans", "Check-ins & streaks", "XP, badges & levels", "Weekly leagues", "Community feed"].map((f) => (
+            <div key={f} className="flex items-center gap-3">
+              <Check size={15} strokeWidth={2.5} className="text-[#1a1a1a] shrink-0" />
+              <span className="text-[14px]">{f}</span>
             </div>
           ))}
         </div>
@@ -185,147 +163,188 @@ export default function PlansPage() {
     );
   }
 
-  // ─── Not subscribed — sales page ───
+  // ─── Not subscribed ───
   return (
     <main className="min-h-screen max-w-md mx-auto px-5 pb-24 animate-fade-in">
-      {/* Back */}
-      <div className="pt-6 mb-4">
+      {/* Nav */}
+      <div className="flex items-center gap-3 pt-6 mb-10">
         <button onClick={() => router.back()} className="p-1 -ml-1 press">
           <ArrowLeft size={20} strokeWidth={1.5} />
         </button>
       </div>
 
       {/* Hero */}
-      <div className="text-center mb-12 animate-slide-up">
-        <p className="text-[13px] font-semibold tracking-widest uppercase text-text-muted mb-4">
-          Wingmate Pro
-        </p>
-        <h1 className="font-display text-[34px] font-extrabold tracking-tight leading-[1.05] mb-4">
-          You already know<br />what to do.<br />
-          <span className="text-text-muted">Now actually do it.</span>
+      <div className="text-center mb-10 animate-slide-up">
+        <h1 className="font-display text-[32px] font-extrabold tracking-tight leading-[1.1] mb-3">
+          Start for free.
         </h1>
-        <p className="text-text-muted text-[15px] leading-relaxed max-w-[300px] mx-auto">
-          Unlimited AI coaching. Photo analysis. Zero excuses left.
+        <p className="text-text-muted text-[15px] leading-relaxed max-w-[340px] mx-auto">
+          Whether you&apos;re building a streak, reviewing a situation, or need a push — it&apos;s free to start.
         </p>
       </div>
 
       {/* Billing toggle */}
-      <div className="flex items-center justify-center gap-3 mb-6">
-        <button
-          onClick={() => setBilling("monthly")}
-          className={`text-[14px] font-medium transition-colors ${
-            billing === "monthly" ? "text-text" : "text-text-muted/50"
-          }`}
-        >
-          Monthly
-        </button>
-        <button
-          onClick={() => setBilling(billing === "yearly" ? "monthly" : "yearly")}
-          className={`relative w-12 h-7 rounded-full transition-colors ${
-            billing === "yearly" ? "bg-[#1a1a1a]" : "bg-border"
-          }`}
-        >
-          <div
-            className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow-sm transition-transform ${
-              billing === "yearly" ? "left-[calc(100%-1.625rem)]" : "left-0.5"
+      <div className="flex items-center justify-center mb-6">
+        <div className="bg-bg-card border border-border rounded-full p-1 flex">
+          <button
+            onClick={() => setBilling("monthly")}
+            className={`px-5 py-2 rounded-full text-[13px] font-semibold transition-colors ${
+              billing === "monthly" ? "bg-[#1a1a1a] text-white" : "text-text-muted"
             }`}
-          />
-        </button>
-        <button
-          onClick={() => setBilling("yearly")}
-          className={`text-[14px] font-medium transition-colors ${
-            billing === "yearly" ? "text-text" : "text-text-muted/50"
-          }`}
-        >
-          Yearly
-          <span className="ml-1.5 text-[11px] font-bold text-green-600">-33%</span>
-        </button>
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setBilling("yearly")}
+            className={`px-5 py-2 rounded-full text-[13px] font-semibold transition-colors relative ${
+              billing === "yearly" ? "bg-[#1a1a1a] text-white" : "text-text-muted"
+            }`}
+          >
+            Annually
+            {billing === "yearly" && (
+              <span className="absolute -top-2 -right-1 text-[9px] font-bold bg-green-500 text-white px-1.5 py-0.5 rounded-full">
+                -33%
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Price */}
-      <div className="text-center mb-2">
-        <div className="flex items-baseline justify-center gap-1">
-          <span className="font-display text-[56px] font-extrabold leading-none tracking-tight">
-            ${price}
-          </span>
-          <span className="text-text-muted text-[18px] font-medium">/mo</span>
-        </div>
-        {billing === "yearly" ? (
-          <p className="text-text-muted text-[14px] mt-2">
-            $120/year &middot; <span className="text-green-600 font-semibold">saves $60</span>
+      {/* Pricing cards */}
+      <div className="grid grid-cols-2 gap-3 mb-12 stagger">
+        {/* Free */}
+        <div className="bg-bg-card border border-border rounded-2xl px-4 py-5 flex flex-col">
+          <p className="text-[12px] font-semibold text-text-muted uppercase tracking-wide mb-1">
+            Starter
           </p>
-        ) : (
-          <p className="text-text-muted text-[14px] mt-2">Billed monthly &middot; cancel anytime</p>
-        )}
+          <p className="text-text-muted text-[12px] mb-4 leading-snug">
+            All the essentials
+          </p>
+          <div className="mb-4">
+            <span className="font-display text-[32px] font-extrabold leading-none">Free</span>
+          </div>
+          <div className="w-full bg-bg-input text-text py-2.5 rounded-xl font-semibold text-[13px] text-center mb-5">
+            Current plan
+          </div>
+          <div className="space-y-2.5 mt-auto">
+            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide mb-1">Includes</p>
+            {["3 AI sessions/day", "Check-ins & streaks", "XP & badges", "Community feed", "Weekly leagues"].map((f) => (
+              <div key={f} className="flex items-center gap-2">
+                <Check size={13} strokeWidth={2.5} className="text-text-muted shrink-0" />
+                <span className="text-[12px] leading-snug">{f}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Pro */}
+        <div className="bg-[#1a1a1a] text-white rounded-2xl px-4 py-5 flex flex-col">
+          <p className="text-[12px] font-semibold text-white/50 uppercase tracking-wide mb-1">
+            Pro
+          </p>
+          <p className="text-white/40 text-[12px] mb-4 leading-snug">
+            Unlimited everything
+          </p>
+          <div className="flex items-baseline gap-0.5 mb-1">
+            <span className="font-display text-[32px] font-extrabold leading-none">${price}</span>
+            <span className="text-white/40 text-[14px] font-medium">/mo</span>
+          </div>
+          {billing === "yearly" && (
+            <p className="text-white/30 text-[11px] mb-3">$120/yr</p>
+          )}
+          {billing === "monthly" && <div className="mb-3" />}
+          <button
+            onClick={() => handleCheckout(billing)}
+            disabled={!!loading}
+            className="w-full bg-white text-[#1a1a1a] py-2.5 rounded-xl font-semibold text-[13px] press disabled:opacity-60 mb-5"
+          >
+            {loading ? "..." : "Subscribe"}
+          </button>
+          <div className="space-y-2.5 mt-auto">
+            <p className="text-[11px] font-semibold text-white/30 uppercase tracking-wide mb-1">
+              Everything in Starter, plus
+            </p>
+            {["Unlimited AI sessions", "Photo analysis", "Custom openers", "Text coaching", "Profile reviews"].map((f) => (
+              <div key={f} className="flex items-center gap-2">
+                <Check size={13} strokeWidth={2.5} className="text-white/70 shrink-0" />
+                <span className="text-[12px] text-white/80 leading-snug">{f}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* CTA */}
-      <button
-        onClick={() => handleCheckout(billing)}
-        disabled={!!loading}
-        className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press disabled:opacity-60 mt-6 mb-2"
-      >
-        {loading ? "Redirecting..." : "Get Wingmate Pro"}
-      </button>
-      <p className="text-center text-[12px] text-text-muted mb-12">
-        7-day money-back guarantee &middot; Cancel anytime
-      </p>
-
-      {/* Pro features */}
+      {/* Feature comparison */}
       <div className="mb-12">
-        <h2 className="font-display text-[13px] font-bold tracking-widest uppercase text-text-muted mb-5">
-          What you unlock
+        <h2 className="font-display text-[18px] font-bold tracking-tight mb-4">
+          Compare plans
         </h2>
-        <div className="space-y-4">
-          {PRO_FEATURES.map((f) => (
-            <div key={f} className="flex items-start gap-3.5">
-              <div className="w-5 h-5 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0 mt-0.5">
-                <Check size={12} strokeWidth={3} className="text-white" />
+
+        <div className="rounded-2xl border border-border overflow-hidden">
+          <div className="grid grid-cols-[1fr,72px,72px] bg-bg-input/60">
+            <div className="px-4 py-3">
+              <span className="text-[12px] font-semibold text-text-muted uppercase tracking-wide">Feature</span>
+            </div>
+            <div className="px-2 py-3 text-center">
+              <span className="text-[12px] font-semibold text-text-muted uppercase tracking-wide">Starter</span>
+            </div>
+            <div className="px-2 py-3 text-center bg-[#1a1a1a]/5 rounded-tr-xl">
+              <span className="text-[12px] font-semibold text-text uppercase tracking-wide">Pro</span>
+            </div>
+          </div>
+
+          {COMPARISON.map((row, i) => (
+            <div
+              key={row.feature}
+              className={`grid grid-cols-[1fr,72px,72px] ${
+                i < COMPARISON.length - 1 ? "border-b border-border/60" : ""
+              } ${i % 2 === 1 ? "bg-bg-input/30" : ""}`}
+            >
+              <div className="px-4 py-3 flex items-center">
+                <span className="text-[13px]">{row.feature}</span>
               </div>
-              <span className="text-[15px] font-medium leading-snug">{f}</span>
+              <div className="px-2 py-3 flex items-center justify-center">
+                {row.free === true ? (
+                  <Check size={15} strokeWidth={2.5} className="text-text-muted" />
+                ) : row.free === false ? (
+                  <Minus size={15} strokeWidth={2} className="text-border" />
+                ) : (
+                  <span className="text-[11px] text-text-muted font-medium">{row.free}</span>
+                )}
+              </div>
+              <div className="px-2 py-3 flex items-center justify-center bg-[#1a1a1a]/[0.02]">
+                {row.pro === true ? (
+                  <Check size={15} strokeWidth={2.5} className="text-[#1a1a1a]" />
+                ) : (
+                  <span className="text-[11px] font-semibold">{row.pro}</span>
+                )}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Free features */}
-      <div className="mb-12">
-        <h2 className="font-display text-[13px] font-bold tracking-widest uppercase text-text-muted mb-5">
-          Already free
+      {/* Bottom CTA */}
+      <div className="text-center mb-12">
+        <h2 className="font-display text-[22px] font-bold tracking-tight mb-2">
+          Your AI wingman, always ready.
         </h2>
-        <div className="space-y-4">
-          {FREE_FEATURES.map((f) => (
-            <div key={f} className="flex items-start gap-3.5">
-              <div className="w-5 h-5 rounded-full bg-bg-input flex items-center justify-center shrink-0 mt-0.5">
-                <Check size={12} strokeWidth={3} className="text-text-muted" />
-              </div>
-              <span className="text-[15px] text-text-muted leading-snug">{f}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Pitch */}
-      <div className="bg-[#1a1a1a] text-white rounded-3xl px-6 py-8 mb-12 text-center">
-        <p className="font-display text-[22px] font-bold leading-snug mb-3">
-          Remember the last time you didn&apos;t go talk to them?
-        </p>
-        <p className="text-white/50 text-[14px] leading-relaxed mb-6 max-w-[280px] mx-auto">
-          That feeling of &ldquo;I should have&rdquo; costs way more than ${price}/mo.
+        <p className="text-text-muted text-[14px] leading-relaxed mb-6 max-w-[300px] mx-auto">
+          Try Wingmate Pro on your next approach.
         </p>
         <button
           onClick={() => handleCheckout(billing)}
           disabled={!!loading}
-          className="bg-white text-[#1a1a1a] py-3.5 px-8 rounded-2xl font-semibold text-[15px] press disabled:opacity-60"
+          className="bg-[#1a1a1a] text-white py-3.5 px-10 rounded-2xl font-semibold text-[15px] press disabled:opacity-60"
         >
-          {loading ? "Redirecting..." : "Start now"}
+          {loading ? "Redirecting..." : "Get Wingmate Pro"}
         </button>
       </div>
 
       {/* FAQ */}
       <div className="mb-12">
-        <h2 className="font-display text-[13px] font-bold tracking-widest uppercase text-text-muted mb-5">
-          Questions
+        <h2 className="font-display text-[18px] font-bold tracking-tight mb-4">
+          Frequently asked questions
         </h2>
         <div>
           {FAQ.map((item, i) => (
@@ -334,18 +353,20 @@ export default function PlansPage() {
               onClick={() => setOpenFaq(openFaq === i ? null : i)}
               className="w-full text-left press"
             >
-              <div className="flex items-start justify-between gap-4 py-4 border-b border-border">
+              <div className={`flex items-start justify-between gap-4 py-4 ${
+                i < FAQ.length - 1 ? "border-b border-border" : ""
+              }`}>
                 <div className="flex-1">
-                  <p className="font-medium text-[15px] leading-snug">{item.q}</p>
+                  <p className="font-medium text-[14px] leading-snug">{item.q}</p>
                   {openFaq === i && (
-                    <p className="text-text-muted text-[14px] leading-relaxed mt-2 pr-4">
+                    <p className="text-text-muted text-[13px] leading-relaxed mt-2.5 pr-4">
                       {item.a}
                     </p>
                   )}
                 </div>
                 <ChevronDown
-                  size={18}
-                  strokeWidth={1.5}
+                  size={16}
+                  strokeWidth={2}
                   className={`text-text-muted shrink-0 mt-0.5 transition-transform ${
                     openFaq === i ? "rotate-180" : ""
                   }`}
@@ -357,8 +378,8 @@ export default function PlansPage() {
       </div>
 
       {/* Footer */}
-      <div className="text-center">
-        <p className="text-[12px] text-text-muted">Secure payment via Stripe</p>
+      <div className="text-center text-[12px] text-text-muted pb-4">
+        <p>Secure payment via Stripe &middot; Cancel anytime</p>
       </div>
 
       <BottomNav />
