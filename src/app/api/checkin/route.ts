@@ -301,3 +301,62 @@ export async function POST(req: Request) {
     streakFreezes: currentFreezes,
   });
 }
+
+// PATCH — adjust totals by modifying today's check-in
+export async function PATCH(req: Request) {
+  const supabase = await getSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { totalApproaches, totalSuccesses } = await req.json();
+  if (totalApproaches === undefined || totalSuccesses === undefined) {
+    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+
+  // Get all checkins to compute current totals
+  const { data: allCheckins } = await supabase
+    .from("checkins")
+    .select("checked_in_at, approaches_count, successes_count")
+    .eq("user_id", user.id);
+
+  const checkins = allCheckins || [];
+  const todayCheckin = checkins.find((c: any) => c.checked_in_at === today);
+  const otherTotal = checkins
+    .filter((c: any) => c.checked_in_at !== today)
+    .reduce((sum: number, c: any) => sum + (c.approaches_count || 0), 0);
+  const otherSuccesses = checkins
+    .filter((c: any) => c.checked_in_at !== today)
+    .reduce((sum: number, c: any) => sum + (c.successes_count || 0), 0);
+
+  const newTodayApproaches = Math.max(0, totalApproaches - otherTotal);
+  const newTodaySuccesses = Math.max(0, Math.min(newTodayApproaches, totalSuccesses - otherSuccesses));
+
+  if (todayCheckin) {
+    await supabase.from("checkins").update({
+      approaches_count: newTodayApproaches,
+      successes_count: newTodaySuccesses,
+      talked: newTodayApproaches > 0,
+    }).eq("user_id", user.id).eq("checked_in_at", today);
+  } else {
+    await supabase.from("checkins").insert({
+      user_id: user.id,
+      checked_in_at: today,
+      talked: newTodayApproaches > 0,
+      approaches_count: newTodayApproaches,
+      successes_count: newTodaySuccesses,
+    });
+  }
+
+  const stats = await getFullStats(supabase, user.id);
+  return NextResponse.json({
+    totalApproaches: stats.totalApproaches,
+    totalSuccesses: stats.totalSuccesses,
+    totalFailures: stats.totalFailures,
+    totalDidntApproach: stats.totalDidntApproach,
+    successRate: stats.successRate,
+    approachesCount: newTodayApproaches,
+    successesCount: newTodaySuccesses,
+  });
+}

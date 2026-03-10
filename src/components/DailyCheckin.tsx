@@ -50,6 +50,9 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
   const [editing, setEditing] = useState(false);
   const [editApproaches, setEditApproaches] = useState(0);
   const [editSuccesses, setEditSuccesses] = useState(0);
+  const [editingTotals, setEditingTotals] = useState(false);
+  const [editTotalApproaches, setEditTotalApproaches] = useState(0);
+  const [editTotalSuccesses, setEditTotalSuccesses] = useState(0);
 
   useEffect(() => {
     fetch("/api/checkin")
@@ -156,6 +159,41 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
         : prev
     );
     setEditing(false);
+    setSubmitting(false);
+  };
+
+  const startEditingTotals = () => {
+    setEditTotalApproaches(data?.totalApproaches ?? 0);
+    setEditTotalSuccesses(data?.totalSuccesses ?? 0);
+    setEditingTotals(true);
+  };
+
+  const saveTotals = async () => {
+    setSubmitting(true);
+    const res = await fetch("/api/checkin", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        totalApproaches: editTotalApproaches,
+        totalSuccesses: editTotalSuccesses,
+      }),
+    });
+    const result = await res.json();
+    setData((prev) =>
+      prev
+        ? {
+            ...prev,
+            totalApproaches: result.totalApproaches,
+            totalSuccesses: result.totalSuccesses,
+            totalFailures: result.totalFailures,
+            totalDidntApproach: result.totalDidntApproach,
+            successRate: result.successRate,
+            approachesCount: result.approachesCount,
+            successesCount: result.successesCount,
+          }
+        : prev
+    );
+    setEditingTotals(false);
     setSubmitting(false);
   };
 
@@ -449,37 +487,89 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
 
         {/* Approach stats */}
         <div className="bg-bg-card border border-border rounded-2xl px-5 py-4">
-          <h3 className="text-[13px] font-semibold text-text-muted uppercase tracking-wide mb-3">Approach stats</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-bg-card-hover rounded-xl px-3 py-3 text-center">
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <Target size={14} strokeWidth={1.5} className="text-blue-500" />
-                <span className="font-display text-[22px] font-bold">{data.totalApproaches}</span>
-              </div>
-              <p className="text-[11px] text-text-muted">Total approaches</p>
-            </div>
-            <div className="bg-bg-card-hover rounded-xl px-3 py-3 text-center">
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <ThumbsUp size={14} strokeWidth={1.5} className="text-green-500" />
-                <span className="font-display text-[22px] font-bold">{data.totalSuccesses}</span>
-              </div>
-              <p className="text-[11px] text-text-muted">Succeeded</p>
-            </div>
-            <div className="bg-bg-card-hover rounded-xl px-3 py-3 text-center">
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <ThumbsDown size={14} strokeWidth={1.5} className="text-red-400" />
-                <span className="font-display text-[22px] font-bold">{data.totalFailures}</span>
-              </div>
-              <p className="text-[11px] text-text-muted">Didn&apos;t work out</p>
-            </div>
-            <div className="bg-bg-card-hover rounded-xl px-3 py-3 text-center">
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <TrendingUp size={14} strokeWidth={1.5} className="text-orange-500" />
-                <span className="font-display text-[22px] font-bold">{data.successRate}%</span>
-              </div>
-              <p className="text-[11px] text-text-muted">Success rate</p>
-            </div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[13px] font-semibold text-text-muted uppercase tracking-wide">Approach stats</h3>
+            {!editingTotals && (
+              <button onClick={startEditingTotals} className="p-1 press text-text-muted hover:text-text transition-colors">
+                <Pencil size={14} strokeWidth={1.5} />
+              </button>
+            )}
           </div>
+
+          {editingTotals ? (
+            <div className="animate-fade-in">
+              <div className="mb-4">
+                <p className="text-[13px] font-medium mb-2 text-center">Total approaches</p>
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    onClick={() => setEditTotalApproaches(Math.max(0, editTotalApproaches - 1))}
+                    className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press"
+                  >−</button>
+                  <span className="font-display text-[36px] font-extrabold leading-none w-14 text-center">{editTotalApproaches}</span>
+                  <button
+                    onClick={() => setEditTotalApproaches(editTotalApproaches + 1)}
+                    className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press"
+                  >+</button>
+                </div>
+              </div>
+              <div className="mb-5">
+                <p className="text-[13px] font-medium mb-2 text-center">Total succeeded</p>
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    onClick={() => setEditTotalSuccesses(Math.max(0, editTotalSuccesses - 1))}
+                    className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press"
+                  >−</button>
+                  <span className="font-display text-[36px] font-extrabold leading-none w-14 text-center">{editTotalSuccesses}</span>
+                  <button
+                    onClick={() => setEditTotalSuccesses(Math.min(editTotalApproaches, editTotalSuccesses + 1))}
+                    className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press"
+                  >+</button>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setEditingTotals(false)}
+                  className="flex-1 py-3 rounded-xl bg-bg-card-hover border border-border text-[14px] font-medium press"
+                >Cancel</button>
+                <button
+                  onClick={saveTotals}
+                  disabled={submitting}
+                  className="flex-1 py-3 rounded-xl bg-[#1a1a1a] text-white text-[14px] font-medium press disabled:opacity-60"
+                >{submitting ? "..." : "Save"}</button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-bg-card-hover rounded-xl px-3 py-3 text-center">
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  <Target size={14} strokeWidth={1.5} className="text-blue-500" />
+                  <span className="font-display text-[22px] font-bold">{data.totalApproaches}</span>
+                </div>
+                <p className="text-[11px] text-text-muted">Total approaches</p>
+              </div>
+              <div className="bg-bg-card-hover rounded-xl px-3 py-3 text-center">
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  <ThumbsUp size={14} strokeWidth={1.5} className="text-green-500" />
+                  <span className="font-display text-[22px] font-bold">{data.totalSuccesses}</span>
+                </div>
+                <p className="text-[11px] text-text-muted">Succeeded</p>
+              </div>
+              <div className="bg-bg-card-hover rounded-xl px-3 py-3 text-center">
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  <ThumbsDown size={14} strokeWidth={1.5} className="text-red-400" />
+                  <span className="font-display text-[22px] font-bold">{data.totalFailures}</span>
+                </div>
+                <p className="text-[11px] text-text-muted">Didn&apos;t work out</p>
+              </div>
+              <div className="bg-bg-card-hover rounded-xl px-3 py-3 text-center">
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  <TrendingUp size={14} strokeWidth={1.5} className="text-orange-500" />
+                  <span className="font-display text-[22px] font-bold">{data.successRate}%</span>
+                </div>
+                <p className="text-[11px] text-text-muted">Success rate</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Quick stats row */}
