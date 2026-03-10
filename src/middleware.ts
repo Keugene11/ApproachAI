@@ -34,7 +34,8 @@ export async function middleware(request: NextRequest) {
   // Public paths: login, auth, pricing (visible to logged-in users without sub)
   const isPublicPath =
     pathname.startsWith("/login") || pathname.startsWith("/auth") ||
-    pathname.startsWith("/privacy") || pathname.startsWith("/offline");
+    pathname.startsWith("/privacy") || pathname.startsWith("/offline") ||
+    pathname.startsWith("/delete-account");
 
   // If not logged in and not on public page, redirect to login
   if (!user && !isPublicPath) {
