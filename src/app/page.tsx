@@ -277,7 +277,7 @@ export default function Home() {
               {greeting}
             </h1>
             <p className="text-text-muted text-[15px] leading-relaxed">
-              See someone? Let&apos;s get you over there.
+              Your AI coach for approaching someone new.
             </p>
           </div>
 
@@ -290,7 +290,7 @@ export default function Home() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-[16px]">Snap & get advice</p>
-                  <p className="text-[12px] text-white/50 mt-0.5">See someone? Take a quick photo of the situation and get real-time coaching on how to approach.</p>
+                  <p className="text-[12px] text-white/50 mt-0.5">You see someone you like right now — snap a photo of the scene and get a tailored game plan to go talk to them.</p>
                 </div>
                 <ChevronRight size={16} className="text-white/30 shrink-0" />
               </div>
@@ -311,7 +311,7 @@ export default function Home() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-[16px]">Review a moment</p>
-                  <p className="text-[12px] text-text-muted mt-0.5">Upload a photo from earlier — a dating profile, a text convo, or a situation you want to break down.</p>
+                  <p className="text-[12px] text-text-muted mt-0.5">Upload a screenshot — a dating profile, a text conversation, or a past situation you want coaching on.</p>
                 </div>
                 <ChevronRight size={16} className="text-border shrink-0" />
               </div>
@@ -333,8 +333,8 @@ export default function Home() {
                   <MessageCircle size={20} strokeWidth={1.5} className="text-text-muted" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-[16px]">I see someone</p>
-                  <p className="text-[12px] text-text-muted mt-0.5">You see someone you want to talk to right now? Tell your coach the situation and get hyped up with an exact game plan.</p>
+                  <p className="font-medium text-[16px]">I need a push</p>
+                  <p className="text-[12px] text-text-muted mt-0.5">You see an attractive person and can&apos;t get yourself to go over? Tell your coach the situation and get fired up to approach.</p>
                 </div>
                 <ChevronRight size={16} className="text-border shrink-0" />
               </div>
