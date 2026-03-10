@@ -46,6 +46,7 @@ export default function Home() {
   const [greeting, setGreeting] = useState("");
   const [checkedInToday, setCheckedInToday] = useState<boolean | null>(null);
   const [isPro, setIsPro] = useState<boolean | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   // Community state
   const [posts, setPosts] = useState<any[]>([]);
@@ -71,7 +72,14 @@ export default function Home() {
       const full = meta?.full_name || meta?.name || "";
       const first = full.split(" ")[0] || undefined;
       setGreeting(getGreeting(first));
-      if (data.user) setUserId(data.user.id);
+      if (data.user) {
+        setUserId(data.user.id);
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+        setGreeting(getGreeting());
+        setActiveTab("checkin");
+      }
     });
 
     const now = new Date();
@@ -245,6 +253,7 @@ export default function Home() {
               updateState("checkin-chat");
             }}
             onCheckedIn={() => setCheckedInToday(true)}
+            isLoggedIn={isLoggedIn !== false}
           />
         </div>
       )}

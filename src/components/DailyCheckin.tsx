@@ -30,7 +30,7 @@ interface CheckinData {
 
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
-export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn }: { greeting?: string; onTalkAboutIt: (talked: boolean) => void; onCheckedIn?: () => void }) {
+export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isLoggedIn = true }: { greeting?: string; onTalkAboutIt: (talked: boolean) => void; onCheckedIn?: () => void; isLoggedIn?: boolean }) {
   const [data, setData] = useState<CheckinData | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [justCheckedIn, setJustCheckedIn] = useState(false);
@@ -187,6 +187,28 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn }: {
   };
 
   if (!data) {
+    if (!isLoggedIn) {
+      const todayDate = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+      return (
+        <div className="space-y-4">
+          <div className="mb-2 animate-slide-up">
+            {greeting && <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.2] mb-1">{greeting}</h1>}
+            <p className="text-text-muted text-[13px] font-medium uppercase tracking-wide mb-1">{todayDate}</p>
+            <p className="text-text-muted text-[14px] leading-relaxed">
+              Track how many girls you saw, approached, and how many went well. Build the habit — check in every day.
+            </p>
+          </div>
+          <div className="rounded-2xl px-5 py-6 bg-[#1a1a1a] text-white text-center">
+            <Flame size={32} strokeWidth={1.5} className="text-orange-400 mx-auto mb-3" />
+            <h2 className="font-display text-[18px] font-bold mb-2">Start tracking your approaches</h2>
+            <p className="text-white/50 text-[14px] mb-5">Sign in to log your daily stats, build streaks, and track your progress over time.</p>
+            <a href="/login" className="inline-flex items-center justify-center gap-3 w-full bg-white text-[#1a1a1a] py-3.5 rounded-xl font-semibold text-[15px] press">
+              Sign in to get started
+            </a>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="space-y-4">
         <div className="bg-bg-card border border-border rounded-2xl h-48 animate-pulse" />
