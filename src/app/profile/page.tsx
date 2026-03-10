@@ -5,6 +5,7 @@ import { ArrowLeft, LogOut, CreditCard, Camera, Check, ChevronRight, Trash2, Fla
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
+import BottomNav from "@/components/BottomNav";
 
 type Subscription = {
   status: string;
@@ -132,7 +133,7 @@ export default function ProfilePage() {
   const avatarSrc = profile?.avatar_url || undefined;
 
   return (
-    <main className="min-h-screen max-w-md mx-auto px-5 pt-6 pb-10 animate-fade-in">
+    <main className="min-h-screen max-w-md mx-auto px-5 pt-6 pb-24 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <button onClick={() => router.push("/")} className="p-1 -ml-1 press">
@@ -281,6 +282,8 @@ export default function ProfilePage() {
           Privacy Policy
         </Link>
       </div>
+
+      <BottomNav />
     </main>
   );
 }

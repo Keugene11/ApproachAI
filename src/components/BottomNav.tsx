@@ -2,12 +2,13 @@
 
 import { Flame, MessageCircle, Users, User } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export type Tab = "checkin" | "coach" | "community";
 
 interface BottomNavProps {
-  active: Tab;
-  onChange: (tab: Tab) => void;
+  active?: Tab;
+  onChange?: (tab: Tab) => void;
 }
 
 const tabs: { id: Tab; label: string; icon: typeof Flame }[] = [
@@ -17,26 +18,43 @@ const tabs: { id: Tab; label: string; icon: typeof Flame }[] = [
 ];
 
 export default function BottomNav({ active, onChange }: BottomNavProps) {
+  const pathname = usePathname();
+  const isProfilePage = pathname === "/profile";
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-bg border-t border-border z-50">
       <div className="max-w-md mx-auto flex items-center justify-around py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-        {tabs.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => onChange(id)}
-            className={`flex flex-col items-center gap-0.5 px-4 py-1 press transition-colors ${
-              active === id ? "text-text" : "text-text-muted/50"
-            }`}
-          >
-            <Icon size={20} strokeWidth={active === id ? 2 : 1.5} />
-            <span className="text-[10px] font-medium">{label}</span>
-          </button>
-        ))}
+        {tabs.map(({ id, label, icon: Icon }) => {
+          const isActive = !isProfilePage && active === id;
+          return onChange ? (
+            <button
+              key={id}
+              onClick={() => onChange(id)}
+              className={`flex flex-col items-center gap-0.5 px-4 py-1 press transition-colors ${
+                isActive ? "text-text" : "text-text-muted/50"
+              }`}
+            >
+              <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
+              <span className="text-[10px] font-medium">{label}</span>
+            </button>
+          ) : (
+            <Link
+              key={id}
+              href="/"
+              className={`flex flex-col items-center gap-0.5 px-4 py-1 press text-text-muted/50`}
+            >
+              <Icon size={20} strokeWidth={1.5} />
+              <span className="text-[10px] font-medium">{label}</span>
+            </Link>
+          );
+        })}
         <Link
           href="/profile"
-          className="flex flex-col items-center gap-0.5 px-4 py-1 press text-text-muted/50"
+          className={`flex flex-col items-center gap-0.5 px-4 py-1 press transition-colors ${
+            isProfilePage ? "text-text" : "text-text-muted/50"
+          }`}
         >
-          <User size={20} strokeWidth={1.5} />
+          <User size={20} strokeWidth={isProfilePage ? 2 : 1.5} />
           <span className="text-[10px] font-medium">Profile</span>
         </Link>
       </div>
