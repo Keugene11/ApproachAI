@@ -70,11 +70,12 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn }: {
 
   const submitCheckin = async (talked: boolean, opportunities: number, approaches: number, successes: number) => {
     setSubmitting(true);
-    await fetch("/api/checkin", {
+    const res = await fetch("/api/checkin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ talked, opportunitiesCount: opportunities, approachesCount: approaches, successesCount: successes, clientDate: getLocalDate() }),
     });
+    if (!res.ok) console.error("POST /api/checkin failed:", await res.text());
     await refreshData();
     setJustCheckedIn(true);
     setShowNoteField(true);
@@ -116,11 +117,12 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn }: {
     const successes = todaySuccesses ?? data?.successesCount ?? 0;
     setSavingToday(true);
     try {
-      await fetch("/api/checkin", {
+      const res = await fetch("/api/checkin", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date: today, opportunities, approaches, successes }),
       });
+      if (!res.ok) console.error("PATCH /api/checkin failed:", await res.text());
       await refreshData();
       setTodayOpportunities(null);
       setTodayApproaches(null);

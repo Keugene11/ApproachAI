@@ -185,23 +185,37 @@ export async function POST(req: Request) {
   const { talked, note, opportunitiesCount, approachesCount, successesCount, clientDate } = await req.json();
   const today = clientDate || new Date().toISOString().split("T")[0];
 
+  const opps = Math.max(0, opportunitiesCount ?? 0);
+  const appr = Math.max(0, approachesCount ?? (talked ? 1 : 0));
+  const succ = Math.max(0, successesCount ?? 0);
+
   // Check if this is a new check-in or update
   const { data: existing } = await supabase
     .from("checkins").select("id").eq("user_id", user.id).eq("checked_in_at", today).single();
   const isNew = !existing;
 
-  const { error } = await supabase.from("checkins").upsert(
-    {
+  let error: any = null;
+  if (existing) {
+    const res = await supabase.from("checkins").update({
+      talked,
+      note: note || null,
+      opportunities_count: opps,
+      approaches_count: appr,
+      successes_count: succ,
+    }).eq("user_id", user.id).eq("checked_in_at", today);
+    error = res.error;
+  } else {
+    const res = await supabase.from("checkins").insert({
       user_id: user.id,
       talked,
       note: note || null,
       checked_in_at: today,
-      opportunities_count: opportunitiesCount || 0,
-      approaches_count: approachesCount || (talked ? 1 : 0),
-      successes_count: successesCount || 0,
-    },
-    { onConflict: "user_id,checked_in_at" }
-  );
+      opportunities_count: opps,
+      approaches_count: appr,
+      successes_count: succ,
+    });
+    error = res.error;
+  }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const stats = await getFullStats(supabase, user.id, today);
@@ -319,14 +333,15 @@ export async function PATCH(req: Request) {
       .from("checkins").select("id").eq("user_id", user.id).eq("checked_in_at", date).single();
 
     if (existing) {
-      await supabase.from("checkins").update({
+      const { error: updateErr } = await supabase.from("checkins").update({
         opportunities_count: opps,
         approaches_count: appr,
         successes_count: succ,
         talked: appr > 0,
       }).eq("user_id", user.id).eq("checked_in_at", date);
+      if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
     } else {
-      await supabase.from("checkins").insert({
+      const { error: insertErr } = await supabase.from("checkins").insert({
         user_id: user.id,
         checked_in_at: date,
         talked: appr > 0,
@@ -334,6 +349,7 @@ export async function PATCH(req: Request) {
         approaches_count: appr,
         successes_count: succ,
       });
+      if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 });
     }
 
     const stats = await getFullStats(supabase, user.id, date);
