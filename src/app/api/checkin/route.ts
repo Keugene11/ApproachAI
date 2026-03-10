@@ -24,12 +24,10 @@ async function getSupabase() {
 
 function computeStreak(dates: string[]): number {
   if (dates.length === 0) return 0;
-  // dates are sorted desc from the query
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const first = new Date(dates[0] + "T00:00:00");
-  // If most recent check-in isn't today or yesterday, streak is 0
   const diffFirst = Math.floor((today.getTime() - first.getTime()) / 86400000);
   if (diffFirst > 1) return 0;
 
@@ -47,7 +45,27 @@ function computeStreak(dates: string[]): number {
   return streak;
 }
 
-// GET — fetch today's check-in status + streak + last 7 days
+function computeBestStreak(dates: string[]): number {
+  if (dates.length === 0) return 0;
+  // dates are sorted desc
+  const sorted = [...dates].reverse(); // now asc
+  let best = 1;
+  let current = 1;
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = new Date(sorted[i - 1] + "T00:00:00");
+    const curr = new Date(sorted[i] + "T00:00:00");
+    const diff = Math.floor((curr.getTime() - prev.getTime()) / 86400000);
+    if (diff === 1) {
+      current++;
+      if (current > best) best = current;
+    } else {
+      current = 1;
+    }
+  }
+  return best;
+}
+
+// GET — fetch today's check-in status + streak + last 7 days + stats + history
 export async function GET() {
   const supabase = await getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
@@ -63,19 +81,20 @@ export async function GET() {
     .eq("checked_in_at", today)
     .single();
 
-  // Get last 30 days for streak calculation
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-  const { data: recentCheckins } = await supabase
+  // Get all check-ins for stats
+  const { data: allCheckins } = await supabase
     .from("checkins")
-    .select("checked_in_at, talked")
+    .select("checked_in_at, talked, note")
     .eq("user_id", user.id)
-    .gte("checked_in_at", thirtyDaysAgo.toISOString().split("T")[0])
     .order("checked_in_at", { ascending: false });
 
-  const dates = (recentCheckins || []).map((c) => c.checked_in_at);
+  const checkins = allCheckins || [];
+  const dates = checkins.map((c) => c.checked_in_at);
   const streak = computeStreak(dates);
+  const bestStreak = computeBestStreak(dates);
+  const totalCheckins = checkins.length;
+  const totalTalked = checkins.filter((c) => c.talked).length;
+  const approachRate = totalCheckins > 0 ? Math.round((totalTalked / totalCheckins) * 100) : 0;
 
   // Build last 7 days map
   const last7: { date: string; talked: boolean | null }[] = [];
@@ -83,18 +102,31 @@ export async function GET() {
     const d = new Date();
     d.setDate(d.getDate() - i);
     const dateStr = d.toISOString().split("T")[0];
-    const checkin = (recentCheckins || []).find((c) => c.checked_in_at === dateStr);
+    const checkin = checkins.find((c) => c.checked_in_at === dateStr);
     last7.push({
       date: dateStr,
       talked: checkin ? checkin.talked : null,
     });
   }
 
+  // Recent history (last 14 entries with notes)
+  const history = checkins.slice(0, 14).map((c) => ({
+    date: c.checked_in_at,
+    talked: c.talked,
+    note: c.note,
+  }));
+
   return NextResponse.json({
     checkedInToday: !!todayCheckin,
     talked: todayCheckin?.talked ?? null,
+    note: todayCheckin?.note ?? null,
     streak,
+    bestStreak,
+    totalCheckins,
+    totalTalked,
+    approachRate,
     last7,
+    history,
   });
 }
 
@@ -122,19 +154,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Re-fetch streak
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-  const { data: recentCheckins } = await supabase
+  // Re-fetch stats
+  const { data: allCheckins } = await supabase
     .from("checkins")
-    .select("checked_in_at")
+    .select("checked_in_at, talked")
     .eq("user_id", user.id)
-    .gte("checked_in_at", thirtyDaysAgo.toISOString().split("T")[0])
     .order("checked_in_at", { ascending: false });
 
-  const dates = (recentCheckins || []).map((c) => c.checked_in_at);
+  const checkins = allCheckins || [];
+  const dates = checkins.map((c) => c.checked_in_at);
   const streak = computeStreak(dates);
+  const bestStreak = computeBestStreak(dates);
+  const totalCheckins = checkins.length;
+  const totalTalked = checkins.filter((c) => c.talked).length;
+  const approachRate = totalCheckins > 0 ? Math.round((totalTalked / totalCheckins) * 100) : 0;
 
-  return NextResponse.json({ success: true, streak });
+  return NextResponse.json({ success: true, streak, bestStreak, totalCheckins, totalTalked, approachRate });
 }
