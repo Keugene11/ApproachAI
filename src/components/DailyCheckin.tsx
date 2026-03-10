@@ -60,46 +60,22 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn }: {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   };
 
-  useEffect(() => {
+  const refreshData = () =>
     fetch(`/api/checkin?today=${getLocalDate()}`)
       .then((res) => res.json())
       .then(setData)
       .catch(() => {});
-  }, []);
+
+  useEffect(() => { refreshData(); }, []);
 
   const submitCheckin = async (talked: boolean, opportunities: number, approaches: number, successes: number) => {
     setSubmitting(true);
-
-    const res = await fetch("/api/checkin", {
+    await fetch("/api/checkin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ talked, opportunitiesCount: opportunities, approachesCount: approaches, successesCount: successes, clientDate: getLocalDate() }),
     });
-    const result = await res.json();
-
-    setData((prev) =>
-      prev ? {
-        ...prev,
-        checkedInToday: true,
-        talked,
-        opportunitiesCount: opportunities,
-        approachesCount: approaches,
-        successesCount: successes,
-        streak: result.streak,
-        bestStreak: result.bestStreak,
-        totalCheckins: result.totalCheckins,
-        totalTalked: result.totalTalked,
-        approachRate: result.approachRate,
-        totalOpportunities: result.totalOpportunities,
-        totalApproaches: result.totalApproaches,
-        totalSuccesses: result.totalSuccesses,
-        totalFailures: result.totalFailures,
-        totalDidntApproach: result.totalDidntApproach,
-        successRate: result.successRate,
-        approachConversionRate: result.approachConversionRate,
-        last7: prev.last7.map((d, i) => i === prev.last7.length - 1 ? { ...d, talked, approaches } : d),
-      } : prev
-    );
+    await refreshData();
     setJustCheckedIn(true);
     setShowNoteField(true);
     setSubmitting(false);
@@ -114,39 +90,20 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn }: {
   };
 
   const saveEdit = async () => {
-    const talked = editApproaches > 0;
     setSubmitting(true);
-    const res = await fetch("/api/checkin", {
+    await fetch("/api/checkin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        talked,
+        talked: editApproaches > 0,
         opportunitiesCount: editOpportunities,
         approachesCount: editApproaches,
         successesCount: editSuccesses,
         note: data?.note,
+        clientDate: getLocalDate(),
       }),
     });
-    const result = await res.json();
-    setData((prev) =>
-      prev ? {
-        ...prev,
-        talked,
-        opportunitiesCount: editOpportunities,
-        approachesCount: editApproaches,
-        successesCount: editSuccesses,
-        totalOpportunities: result.totalOpportunities,
-        totalApproaches: result.totalApproaches,
-        totalSuccesses: result.totalSuccesses,
-        totalFailures: result.totalFailures,
-        totalDidntApproach: result.totalDidntApproach,
-        successRate: result.successRate,
-        approachConversionRate: result.approachConversionRate,
-        totalTalked: result.totalTalked,
-        approachRate: result.approachRate,
-        last7: prev.last7.map((d, i) => i === prev.last7.length - 1 ? { ...d, talked, approaches: editApproaches } : d),
-      } : prev
-    );
+    await refreshData();
     setEditing(false);
     setSubmitting(false);
   };
@@ -159,33 +116,12 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn }: {
     const successes = todaySuccesses ?? data?.successesCount ?? 0;
     setSavingToday(true);
     try {
-      const res = await fetch("/api/checkin", {
+      await fetch("/api/checkin", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date: today, opportunities, approaches, successes }),
       });
-      const result = await res.json();
-      const talked = approaches > 0;
-      setData((prev) =>
-        prev ? {
-          ...prev,
-          talked,
-          opportunitiesCount: opportunities,
-          approachesCount: approaches,
-          successesCount: successes,
-          totalOpportunities: result.totalOpportunities,
-          totalApproaches: result.totalApproaches,
-          totalSuccesses: result.totalSuccesses,
-          totalFailures: result.totalFailures,
-          totalDidntApproach: result.totalDidntApproach,
-          successRate: result.successRate,
-          approachConversionRate: result.approachConversionRate,
-          totalTalked: result.totalTalked ?? prev.totalTalked,
-          approachRate: result.approachRate ?? prev.approachRate,
-          last7: prev.last7.map((d, i) => i === prev.last7.length - 1 ? { ...d, talked, approaches } : d),
-          history: result.history || prev.history,
-        } : prev
-      );
+      await refreshData();
       setTodayOpportunities(null);
       setTodayApproaches(null);
       setTodaySuccesses(null);
@@ -205,9 +141,10 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn }: {
         opportunitiesCount: data?.opportunitiesCount,
         approachesCount: data?.approachesCount,
         successesCount: data?.successesCount,
+        clientDate: getLocalDate(),
       }),
     });
-    setData((prev) => prev ? { ...prev, note: noteInput.trim() } : prev);
+    await refreshData();
     setNoteSaved(true);
     setShowNoteField(false);
   };
