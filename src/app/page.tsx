@@ -148,7 +148,8 @@ export default function Home() {
 
   const handleTabChange = (tab: Tab) => {
     if (tab === "coach") {
-      updateState("conversations");
+      setActiveConversationId(null);
+      updateState("chat");
       return;
     }
     setActiveTab(tab);
