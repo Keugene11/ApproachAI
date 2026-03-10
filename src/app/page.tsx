@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Camera, Upload, MessageCircle, ChevronRight, User, Sparkles } from "lucide-react";
+import { Camera, Upload, MessageCircle, ChevronRight, User, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
 import ImageAnnotator from "@/components/ImageAnnotator";
@@ -154,6 +154,13 @@ export default function Home() {
                 Wingmate
               </h1>
               <div className="flex items-center gap-2">
+                <Link
+                  href="/community"
+                  className="h-9 px-3.5 rounded-full bg-bg-card border border-border flex items-center gap-1.5 press text-[13px] font-medium text-text-muted"
+                >
+                  <Users size={13} strokeWidth={1.5} />
+                  Community
+                </Link>
                 <Link
                   href="/plans"
                   className="h-9 px-3.5 rounded-full bg-bg-card border border-border flex items-center gap-1.5 press text-[13px] font-medium text-text-muted"
