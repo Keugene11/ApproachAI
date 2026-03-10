@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Camera, Upload, MessageCircle, ChevronRight, User, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
@@ -10,28 +10,12 @@ import DailyCheckin from "@/components/DailyCheckin";
 
 function getGreeting(name?: string): string {
   const hour = new Date().getHours();
-  const day = new Date().getDay();
-  const isWeekend = day === 0 || day === 6;
-  const isFriday = day === 5;
+  const suffix = name ? `, ${name}` : "";
 
-  const greetings: string[] = [];
-
-  if (hour >= 5 && hour < 12) {
-    greetings.push(`Good morning${name ? `, ${name}` : ""}`);
-    if (isFriday) greetings.push(`That Friday feeling${name ? `, ${name}` : ""}`);
-    if (isWeekend) greetings.push(`Welcome to the weekend${name ? `, ${name}` : ""}`);
-  } else if (hour >= 12 && hour < 17) {
-    greetings.push(`Good afternoon${name ? `, ${name}` : ""}`);
-    if (name) greetings.push(`What's new, ${name}?`);
-  } else if (hour >= 17 && hour < 21) {
-    greetings.push(`Good evening${name ? `, ${name}` : ""}`);
-    if (name) greetings.push(`How was your day, ${name}?`);
-  } else {
-    greetings.push(`Hey${name ? `, ${name}` : ""}`);
-    if (name) greetings.push(`What's on your mind, ${name}?`);
-  }
-
-  return greetings[Math.floor(Math.random() * greetings.length)];
+  if (hour >= 5 && hour < 12) return `Good morning${suffix}`;
+  if (hour >= 12 && hour < 17) return `Good afternoon${suffix}`;
+  if (hour >= 17 && hour < 22) return `Good evening${suffix}`;
+  return `Good night${suffix}`;
 }
 
 type AppState = "home" | "annotate" | "chat" | "checkin-chat";
@@ -52,9 +36,8 @@ export default function Home() {
   const [checkinTalked, setCheckinTalked] = useState<boolean | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [firstName, setFirstName] = useState<string | undefined>();
-  const [displayedGreeting, setDisplayedGreeting] = useState("");
 
-  const greeting = useMemo(() => getGreeting(firstName), [firstName]);
+  const [greeting, setGreeting] = useState("");
 
   useEffect(() => {
     const saved = getSessionState();
@@ -71,22 +54,11 @@ export default function Home() {
     createClient().auth.getUser().then(({ data }) => {
       const meta = data.user?.user_metadata;
       const full = meta?.full_name || meta?.name || "";
-      setFirstName(full.split(" ")[0] || undefined);
+      const first = full.split(" ")[0] || undefined;
+      setFirstName(first);
+      setGreeting(getGreeting(first));
     });
   }, []);
-
-  // Typing animation
-  useEffect(() => {
-    if (!greeting) return;
-    let i = 0;
-    setDisplayedGreeting("");
-    const interval = setInterval(() => {
-      i++;
-      setDisplayedGreeting(greeting.slice(0, i));
-      if (i >= greeting.length) clearInterval(interval);
-    }, 40);
-    return () => clearInterval(interval);
-  }, [greeting]);
 
   const updateState = useCallback(
     (newState: AppState, fromPhoto?: boolean) => {
@@ -181,12 +153,11 @@ export default function Home() {
             </div>
 
             {/* Greeting */}
-            <div className="mb-14">
-              <h2 className="font-display text-[32px] font-extrabold tracking-tight leading-[1.15] mb-3">
-                {displayedGreeting}
-                <span className="inline-block w-[2px] h-[28px] bg-text-muted/40 ml-0.5 align-middle animate-pulse" />
+            <div className="mb-14 animate-slide-up" style={{ animationDelay: "100ms" }}>
+              <h2 className="font-display text-[28px] font-bold tracking-tight leading-[1.2] mb-2">
+                {greeting}
               </h2>
-              <p className="text-text-muted text-[16px] leading-relaxed animate-fade-in" style={{ animationDelay: "600ms" }}>
+              <p className="text-text-muted text-[16px] leading-relaxed">
                 Ready to make a move?
               </p>
             </div>
