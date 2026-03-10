@@ -350,7 +350,12 @@ export default function Home() {
       {/* ===== COMMUNITY TAB ===== */}
       {activeTab === "community" && (
         <div className="px-5 pt-14 pb-10 animate-fade-in">
-          {/* Gate: must check in first */}
+          {/* Gate: must check in first (null = loading) */}
+          {checkedInToday === null && (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-5 h-5 border-2 border-text-muted border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
           {checkedInToday === false && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="w-16 h-16 rounded-full bg-orange-50 flex items-center justify-center mb-4">
@@ -369,7 +374,7 @@ export default function Home() {
             </div>
           )}
 
-          {checkedInToday !== false && (<div>
+          {checkedInToday === true && (<div>
           <div className="flex items-center justify-between mb-6">
             <h1 className="font-display text-[28px] font-bold tracking-tight">Community</h1>
             <Link

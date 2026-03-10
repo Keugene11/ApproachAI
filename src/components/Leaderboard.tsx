@@ -47,24 +47,30 @@ export default function Leaderboard() {
 
   const handleOptIn = async () => {
     setOptingIn(true);
-    await fetch("/api/leaderboard", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "opt-in" }),
-    });
-    await fetchLeaderboard();
-    setOptingIn(false);
+    try {
+      await fetch("/api/leaderboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "opt-in" }),
+      });
+      await fetchLeaderboard();
+    } catch {} finally {
+      setOptingIn(false);
+    }
   };
 
   const handleOptOut = async () => {
     setOptingIn(true);
-    await fetch("/api/leaderboard", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "opt-out" }),
-    });
-    await fetchLeaderboard();
-    setOptingIn(false);
+    try {
+      await fetch("/api/leaderboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "opt-out" }),
+      });
+      await fetchLeaderboard();
+    } catch {} finally {
+      setOptingIn(false);
+    }
   };
 
   if (loading) {
@@ -132,7 +138,7 @@ export default function Leaderboard() {
 
           return (
             <div
-              key={i}
+              key={`${player.rank}-${player.username}`}
               className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-colors ${
                 player.isYou
                   ? "bg-[#1a1a1a] text-white"

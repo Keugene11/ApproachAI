@@ -18,9 +18,6 @@ async function getSupabase() {
   );
 }
 
-const TIERS = ["bronze", "silver", "gold", "diamond"] as const;
-type Tier = typeof TIERS[number];
-
 function getTierLabel(tier: string): string {
   const labels: Record<string, string> = { bronze: "Bronze", silver: "Silver", gold: "Gold", diamond: "Diamond" };
   return labels[tier] || "Bronze";
@@ -42,7 +39,24 @@ export async function GET() {
     return NextResponse.json({ optedIn: false });
   }
 
-  // Get all players in the same tier, ranked by weekly_xp
+  // Get total player count in tier
+  const { count: totalPlayers } = await supabase
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("league_opted_in", true)
+    .eq("league_tier", profile.league_tier);
+
+  // Get user's actual rank (count of players with more weekly_xp + 1)
+  const { count: playersAbove } = await supabase
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("league_opted_in", true)
+    .eq("league_tier", profile.league_tier)
+    .gt("weekly_xp", profile.weekly_xp);
+
+  const userRank = (playersAbove ?? 0) + 1;
+
+  // Get top 30 players in the same tier
   const { data: leaderboard } = await supabase
     .from("profiles")
     .select("id, username, weekly_xp, league_tier")
@@ -58,16 +72,13 @@ export async function GET() {
     isYou: p.id === user.id,
   }));
 
-  // Find user's rank
-  const userRank = players.findIndex((p) => p.isYou) + 1;
-
   return NextResponse.json({
     optedIn: true,
     tier: profile.league_tier,
     tierLabel: getTierLabel(profile.league_tier),
     weeklyXp: profile.weekly_xp,
     userRank,
-    totalPlayers: players.length,
+    totalPlayers: totalPlayers ?? players.length,
     leaderboard: players,
   });
 }

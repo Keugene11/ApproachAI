@@ -172,14 +172,21 @@ export async function POST(req: Request) {
 
   const stats = await getFullStats(supabase, user.id);
 
-  // Get profile
+  // Get profile (single query with all needed fields)
   let { data: profile } = await supabase
-    .from("profiles").select("xp, streak_freezes").eq("id", user.id).single();
+    .from("profiles")
+    .select("xp, streak_freezes, league_opted_in, weekly_xp")
+    .eq("id", user.id)
+    .single();
 
   if (!profile) {
     await supabase.from("profiles").upsert({ id: user.id, username: "", xp: 0, streak_freezes: 0 });
-    profile = { xp: 0, streak_freezes: 0 };
+    profile = { xp: 0, streak_freezes: 0, league_opted_in: false, weekly_xp: 0 };
   }
+
+  let currentXp = profile.xp || 0;
+  let currentFreezes = profile.streak_freezes || 0;
+  let currentWeeklyXp = profile.weekly_xp || 0;
 
   // Calculate XP earned (only for new check-ins)
   let xpEarned = 0;
@@ -192,20 +199,17 @@ export async function POST(req: Request) {
     // Award streak freeze every 7 days
     const newFreezes = stats.streak > 0 && stats.streak % 7 === 0 ? 1 : 0;
 
-    // Also increment weekly_xp for leaderboard
-    const { data: leagueProfile } = await supabase
-      .from("profiles")
-      .select("league_opted_in, weekly_xp")
-      .eq("id", user.id)
-      .single();
+    currentXp += xpEarned;
+    currentFreezes = Math.min(currentFreezes + newFreezes, 3);
 
     const updateData: Record<string, any> = {
-      xp: (profile.xp || 0) + xpEarned,
-      streak_freezes: Math.min((profile.streak_freezes || 0) + newFreezes, 3),
+      xp: currentXp,
+      streak_freezes: currentFreezes,
     };
 
-    if (leagueProfile?.league_opted_in) {
-      updateData.weekly_xp = (leagueProfile.weekly_xp || 0) + xpEarned;
+    if (profile.league_opted_in) {
+      currentWeeklyXp += xpEarned;
+      updateData.weekly_xp = currentWeeklyXp;
     }
 
     await supabase
@@ -214,7 +218,7 @@ export async function POST(req: Request) {
       .eq("id", user.id);
   }
 
-  // Compute badges
+  // Compute badges (runs on both new and update to catch badges from talked changes)
   const { data: existingBadges } = await supabase
     .from("user_badges").select("badge_id").eq("user_id", user.id);
   const existingBadgeIds = new Set((existingBadges || []).map((b: any) => b.badge_id));
@@ -247,18 +251,12 @@ export async function POST(req: Request) {
 
   if (badgeXp > 0) {
     xpEarned += badgeXp;
-    // Update total XP and weekly_xp for badges
-    const { data: latestProfile } = await supabase
-      .from("profiles")
-      .select("xp, weekly_xp, league_opted_in")
-      .eq("id", user.id)
-      .single();
+    currentXp += badgeXp;
 
-    const badgeUpdate: Record<string, any> = {
-      xp: (latestProfile?.xp || 0) + badgeXp,
-    };
-    if (latestProfile?.league_opted_in) {
-      badgeUpdate.weekly_xp = (latestProfile.weekly_xp || 0) + badgeXp;
+    const badgeUpdate: Record<string, any> = { xp: currentXp };
+    if (profile.league_opted_in) {
+      currentWeeklyXp += badgeXp;
+      badgeUpdate.weekly_xp = currentWeeklyXp;
     }
     await supabase.from("profiles").update(badgeUpdate).eq("id", user.id);
   }
@@ -270,9 +268,9 @@ export async function POST(req: Request) {
     totalCheckins: stats.totalCheckins,
     totalTalked: stats.totalTalked,
     approachRate: stats.approachRate,
-    xp: (profile.xp || 0) + xpEarned,
+    xp: currentXp,
     xpEarned,
     newBadges,
-    streakFreezes: profile.streak_freezes || 0,
+    streakFreezes: currentFreezes,
   });
 }
