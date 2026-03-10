@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Flame, Check, X, MessageCircle, Trophy, TrendingUp, Calendar, Shield, Target, ThumbsUp, ThumbsDown, UserX } from "lucide-react";
+import { Flame, Check, X, MessageCircle, Trophy, TrendingUp, Calendar, Shield, Target, ThumbsUp, ThumbsDown, UserX, Pencil } from "lucide-react";
 import { getFlameLevel } from "@/lib/gamification";
 
 interface CheckinData {
@@ -47,6 +47,9 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
   const [approachStep, setApproachStep] = useState<"count" | "success" | null>(null);
   const [approachCount, setApproachCount] = useState(1);
   const [successCount, setSuccessCount] = useState(0);
+  const [editing, setEditing] = useState(false);
+  const [editApproaches, setEditApproaches] = useState(0);
+  const [editSuccesses, setEditSuccesses] = useState(0);
 
   useEffect(() => {
     fetch("/api/checkin")
@@ -108,6 +111,52 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
     setShowNoteField(true);
     setSubmitting(false);
     onCheckedIn?.();
+  };
+
+  const startEditing = () => {
+    setEditApproaches(data?.approachesCount ?? 0);
+    setEditSuccesses(data?.successesCount ?? 0);
+    setEditing(true);
+  };
+
+  const saveEdit = async () => {
+    const talked = editApproaches > 0;
+    setSubmitting(true);
+
+    const res = await fetch("/api/checkin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        talked,
+        approachesCount: editApproaches,
+        successesCount: editSuccesses,
+        note: data?.note,
+      }),
+    });
+    const result = await res.json();
+
+    setData((prev) =>
+      prev
+        ? {
+            ...prev,
+            talked,
+            approachesCount: editApproaches,
+            successesCount: editSuccesses,
+            totalApproaches: result.totalApproaches,
+            totalSuccesses: result.totalSuccesses,
+            totalFailures: result.totalFailures,
+            totalDidntApproach: result.totalDidntApproach,
+            successRate: result.successRate,
+            totalTalked: result.totalTalked,
+            approachRate: result.approachRate,
+            last7: prev.last7.map((d, i) =>
+              i === prev.last7.length - 1 ? { ...d, talked } : d
+            ),
+          }
+        : prev
+    );
+    setEditing(false);
+    setSubmitting(false);
   };
 
   const saveNote = async () => {
@@ -240,15 +289,86 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
                 </div>
               )}
             </>
+          ) : editing ? (
+            <div className="text-center animate-fade-in">
+              <h2 className="font-display text-[18px] font-bold mb-1">Edit today&apos;s check-in</h2>
+              <p className="text-text-muted text-[13px] mb-5">Update your approach counts</p>
+
+              <div className="mb-5">
+                <p className="text-[13px] font-medium mb-2">People approached</p>
+                <div className="flex items-center justify-center gap-5">
+                  <button
+                    onClick={() => setEditApproaches(Math.max(0, editApproaches - 1))}
+                    className="w-11 h-11 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[20px] font-bold press"
+                  >
+                    −
+                  </button>
+                  <span className="font-display text-[40px] font-extrabold leading-none w-16 text-center">{editApproaches}</span>
+                  <button
+                    onClick={() => setEditApproaches(editApproaches + 1)}
+                    className="w-11 h-11 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[20px] font-bold press"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-[13px] font-medium mb-2">Went well</p>
+                <div className="flex items-center justify-center gap-5">
+                  <button
+                    onClick={() => setEditSuccesses(Math.max(0, editSuccesses - 1))}
+                    className="w-11 h-11 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[20px] font-bold press"
+                  >
+                    −
+                  </button>
+                  <span className="font-display text-[40px] font-extrabold leading-none w-16 text-center">{editSuccesses}</span>
+                  <button
+                    onClick={() => setEditSuccesses(Math.min(editApproaches, editSuccesses + 1))}
+                    className="w-11 h-11 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[20px] font-bold press"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setEditing(false)}
+                  className="flex-1 py-3.5 rounded-xl bg-bg-card-hover border border-border text-[15px] font-medium press"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveEdit}
+                  disabled={submitting}
+                  className="flex-1 py-3.5 rounded-xl bg-[#1a1a1a] text-white text-[15px] font-medium press disabled:opacity-60"
+                >
+                  {submitting ? "..." : "Save"}
+                </button>
+              </div>
+            </div>
           ) : (
             <>
-              <div className="text-center mb-4">
+              <div className="text-center mb-4 relative">
+                <button
+                  onClick={startEditing}
+                  className="absolute top-0 right-0 p-2 press text-text-muted hover:text-text transition-colors"
+                  title="Edit today's check-in"
+                >
+                  <Pencil size={16} strokeWidth={1.5} />
+                </button>
                 <div className={`w-18 h-18 rounded-full flex items-center justify-center mx-auto mb-3 ${flame.bgColor} ${justCheckedIn ? "streak-pop" : ""}`}
                   style={{ width: 72, height: 72 }}>
                   <Flame size={flame.size} strokeWidth={1.5} className={flame.color} />
                 </div>
                 <p className="font-display text-[40px] font-extrabold leading-none mb-0.5">{data.streak}</p>
                 <p className="text-text-muted text-[14px]">day streak</p>
+                {data.approachesCount > 0 && (
+                  <p className="text-text-muted text-[12px] mt-1">
+                    {data.approachesCount} approached · {data.successesCount} went well
+                  </p>
+                )}
               </div>
             </>
           )}
