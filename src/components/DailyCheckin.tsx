@@ -48,10 +48,8 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
   const [showNoteField, setShowNoteField] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
 
-  // Check-in flow: opportunities → approaches → successes
-  const [checkinStep, setCheckinStep] = useState<"opportunities" | "approaches" | "successes" | null>(null);
-  const [flowOpportunities, setFlowOpportunities] = useState(1);
-  const [flowApproaches, setFlowApproaches] = useState(1);
+  const [flowOpportunities, setFlowOpportunities] = useState(0);
+  const [flowApproaches, setFlowApproaches] = useState(0);
   const [flowSuccesses, setFlowSuccesses] = useState(0);
 
   // Edit today's check-in (pencil button)
@@ -79,21 +77,8 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
       .catch(() => {});
   }, []);
 
-  const handleCheckin = async (talked: boolean) => {
-    if (submitting) return;
-    if (talked) {
-      setCheckinStep("opportunities");
-      setFlowOpportunities(1);
-      setFlowApproaches(1);
-      setFlowSuccesses(0);
-      return;
-    }
-    await submitCheckin(talked, 0, 0, 0);
-  };
-
   const submitCheckin = async (talked: boolean, opportunities: number, approaches: number, successes: number) => {
     setSubmitting(true);
-    setCheckinStep(null);
 
     const res = await fetch("/api/checkin", {
       method: "POST",
@@ -286,106 +271,70 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
 
   const flame = getFlameLevel(data.streak);
 
-  // Counter component for the 3-step flow
-  const StepCounter = ({ label, sublabel, value, min, max, onChange }: {
-    label: string; sublabel: string; value: number; min: number; max?: number;
-    onChange: (v: number) => void;
-  }) => (
-    <div className="text-center animate-fade-in">
-      <h2 className="font-display text-[18px] font-bold mb-1">{label}</h2>
-      <p className="text-text-muted text-[13px] mb-5">{sublabel}</p>
-      <div className="flex items-center justify-center gap-5 mb-6">
-        <button
-          onClick={() => onChange(Math.max(min, value - 1))}
-          className="w-11 h-11 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[20px] font-bold press"
-        >−</button>
-        <span className="font-display text-[48px] font-extrabold leading-none w-16 text-center">{value}</span>
-        <button
-          onClick={() => onChange(max !== undefined ? Math.min(max, value + 1) : value + 1)}
-          className="w-11 h-11 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[20px] font-bold press"
-        >+</button>
-      </div>
-    </div>
-  );
+
 
   return (
     <div className="space-y-4">
       {/* Main check-in card */}
-      <div className={`bg-bg-card rounded-2xl px-5 py-6 ${justCheckedIn ? "animate-fade-in" : ""} ${!data.checkedInToday && !checkinStep ? "border-2 border-orange-300/40" : "border border-border"}`}>
+      <div className={`rounded-2xl px-5 py-6 ${justCheckedIn ? "animate-fade-in" : ""} ${!data.checkedInToday ? "bg-[#1a1a1a] text-white" : "bg-bg-card border border-border"}`}>
         {!data.checkedInToday ? (
           <>
-            {!checkinStep ? (
-              <>
-                <div className="flex items-center gap-3 mb-5">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${flame.bgColor}`}>
-                    <Flame size={flame.size - 4} strokeWidth={1.5} className={flame.color} />
-                  </div>
-                  <div>
-                    <h2 className="font-display text-[17px] font-bold">Not logged yet</h2>
-                    <p className="text-text-muted text-[13px]">
-                      {data.streak > 0 ? `${data.streak}-day streak — don't break it` : "Start your streak today"}
-                    </p>
-                  </div>
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="font-display text-[18px] font-bold">Enter today&apos;s stats</h2>
+                <p className="text-white/50 text-[13px]">
+                  {data.streak > 0 ? `${data.streak}-day streak — don't break it` : "Start your streak today"}
+                </p>
+              </div>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-white/10`}>
+                <Flame size={20} strokeWidth={1.5} className="text-orange-400" />
+              </div>
+            </div>
+
+            <div className="space-y-4 mb-5">
+              <div>
+                <p className="text-[13px] text-white/50 mb-2">Girls you saw</p>
+                <div className="flex items-center gap-4">
+                  <button onClick={() => setFlowOpportunities(Math.max(0, flowOpportunities - 1))}
+                    className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">−</button>
+                  <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">{flowOpportunities}</span>
+                  <button onClick={() => setFlowOpportunities(flowOpportunities + 1)}
+                    className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">+</button>
                 </div>
-                <p className="text-[15px] font-medium mb-3">Did you approach anyone today?</p>
-                <div className="flex gap-2">
-                  <button onClick={() => handleCheckin(true)} disabled={submitting}
-                    className="flex-1 py-3.5 rounded-xl bg-[#1a1a1a] text-white text-[15px] font-semibold press">
-                    Yes — enter stats
-                  </button>
-                  <button onClick={() => handleCheckin(false)} disabled={submitting}
-                    className="flex-1 py-3.5 rounded-xl bg-bg-card-hover border border-border text-[15px] font-semibold press">
-                    No approaches
-                  </button>
+              </div>
+              <div>
+                <p className="text-[13px] text-white/50 mb-2">Girls you approached</p>
+                <div className="flex items-center gap-4">
+                  <button onClick={() => setFlowApproaches(Math.max(0, flowApproaches - 1))}
+                    className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">−</button>
+                  <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">{flowApproaches}</span>
+                  <button onClick={() => { setFlowApproaches(Math.min(flowOpportunities, flowApproaches + 1)); }}
+                    className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">+</button>
                 </div>
-              </>
-            ) : checkinStep === "opportunities" ? (
-              <>
-                <StepCounter
-                  label="How many opportunities did you see?"
-                  sublabel="People you could have approached"
-                  value={flowOpportunities} min={1}
-                  onChange={setFlowOpportunities}
-                />
-                <button onClick={() => { setCheckinStep("approaches"); setFlowApproaches(Math.min(flowApproaches, flowOpportunities)); }}
-                  className="w-full py-3.5 rounded-xl bg-[#1a1a1a] text-white text-[15px] font-medium press">
-                  Next
-                </button>
-              </>
-            ) : checkinStep === "approaches" ? (
-              <>
-                <StepCounter
-                  label="How many did you approach?"
-                  sublabel="Conversations you actually initiated"
-                  value={flowApproaches} min={0} max={flowOpportunities}
-                  onChange={setFlowApproaches}
-                />
-                <div className="flex gap-2">
-                  <button onClick={() => setCheckinStep("opportunities")}
-                    className="flex-1 py-3.5 rounded-xl bg-bg-card-hover border border-border text-[15px] font-medium press">Back</button>
-                  <button onClick={() => { setCheckinStep("successes"); setFlowSuccesses(Math.min(flowSuccesses, flowApproaches)); }}
-                    className="flex-1 py-3.5 rounded-xl bg-[#1a1a1a] text-white text-[15px] font-medium press">Next</button>
+              </div>
+              <div>
+                <p className="text-[13px] text-white/50 mb-2">Went well</p>
+                <div className="flex items-center gap-4">
+                  <button onClick={() => setFlowSuccesses(Math.max(0, flowSuccesses - 1))}
+                    className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">−</button>
+                  <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">{flowSuccesses}</span>
+                  <button onClick={() => setFlowSuccesses(Math.min(flowApproaches, flowSuccesses + 1))}
+                    className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">+</button>
                 </div>
-              </>
-            ) : (
-              <>
-                <StepCounter
-                  label="How many went well?"
-                  sublabel="Got a number, a date, or a good convo"
-                  value={flowSuccesses} min={0} max={flowApproaches}
-                  onChange={setFlowSuccesses}
-                />
-                <div className="flex gap-2">
-                  <button onClick={() => setCheckinStep("approaches")}
-                    className="flex-1 py-3.5 rounded-xl bg-bg-card-hover border border-border text-[15px] font-medium press">Back</button>
-                  <button onClick={() => submitCheckin(true, flowOpportunities, flowApproaches, flowSuccesses)}
-                    disabled={submitting}
-                    className="flex-1 py-3.5 rounded-xl bg-[#1a1a1a] text-white text-[15px] font-medium press disabled:opacity-60">
-                    {submitting ? "..." : "Submit"}
-                  </button>
-                </div>
-              </>
-            )}
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button onClick={() => submitCheckin(false, 0, 0, 0)} disabled={submitting}
+                className="flex-1 py-3.5 rounded-xl bg-white/10 text-white/70 text-[14px] font-medium press">
+                No approaches today
+              </button>
+              <button onClick={() => submitCheckin(true, flowOpportunities, flowApproaches, flowSuccesses)}
+                disabled={submitting}
+                className="flex-1 py-3.5 rounded-xl bg-white text-[#1a1a1a] text-[14px] font-semibold press disabled:opacity-60">
+                {submitting ? "..." : "Save"}
+              </button>
+            </div>
           </>
         ) : editing ? (
           <div className="text-center animate-fade-in">
