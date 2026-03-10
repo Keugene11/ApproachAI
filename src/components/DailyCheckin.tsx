@@ -274,6 +274,7 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
 
 
   const approachStatsSection = (
+    <>
       <div className="bg-bg-card border border-border rounded-2xl px-5 py-4">
         <h3 className="text-[13px] font-semibold text-text-muted uppercase tracking-wide mb-3">Approach stats</h3>
 
@@ -376,6 +377,7 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
           </div>
         );
       })()}
+    </>
   );
 
   return (
