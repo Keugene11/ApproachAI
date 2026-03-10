@@ -311,27 +311,30 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
   return (
     <div className="space-y-4">
       {/* Main check-in card */}
-      <div className={`bg-bg-card border-2 border-dashed border-text-muted/20 rounded-2xl px-5 py-8 ${justCheckedIn ? "animate-fade-in" : ""} ${!data.checkedInToday && !checkinStep ? "border-orange-300/50" : "border-border !border-solid"}`}>
+      <div className={`bg-bg-card rounded-2xl px-5 py-6 ${justCheckedIn ? "animate-fade-in" : ""} ${!data.checkedInToday && !checkinStep ? "border-2 border-orange-300/40" : "border border-border"}`}>
         {!data.checkedInToday ? (
           <>
             {!checkinStep ? (
               <>
-                <div className="text-center mb-6">
-                  <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${flame.bgColor}`}>
-                    <Flame size={flame.size + 4} strokeWidth={1.5} className={flame.color} />
+                <div className="flex items-center gap-3 mb-5">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${flame.bgColor}`}>
+                    <Flame size={flame.size - 4} strokeWidth={1.5} className={flame.color} />
                   </div>
-                  <h2 className="font-display text-[22px] font-bold mb-2">You haven&apos;t logged today yet</h2>
-                  <p className="text-text-muted text-[14px] leading-relaxed max-w-[280px] mx-auto">
-                    Enter your approach numbers to keep your {data.streak > 0 ? `${data.streak}-day streak` : "streak"} going.
-                  </p>
+                  <div>
+                    <h2 className="font-display text-[17px] font-bold">Not logged yet</h2>
+                    <p className="text-text-muted text-[13px]">
+                      {data.streak > 0 ? `${data.streak}-day streak — don't break it` : "Start your streak today"}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex gap-2 mb-2">
+                <p className="text-[15px] font-medium mb-3">Did you approach anyone today?</p>
+                <div className="flex gap-2">
                   <button onClick={() => handleCheckin(true)} disabled={submitting}
-                    className="flex-1 py-4 rounded-xl bg-[#1a1a1a] text-white text-[16px] font-semibold press">
-                    I approached
+                    className="flex-1 py-3.5 rounded-xl bg-[#1a1a1a] text-white text-[15px] font-semibold press">
+                    Yes — enter stats
                   </button>
                   <button onClick={() => handleCheckin(false)} disabled={submitting}
-                    className="flex-1 py-4 rounded-xl bg-bg-card-hover border border-border text-[16px] font-semibold press">
+                    className="flex-1 py-3.5 rounded-xl bg-bg-card-hover border border-border text-[15px] font-semibold press">
                     No approaches
                   </button>
                 </div>
