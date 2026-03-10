@@ -111,6 +111,8 @@ async function getFullStats(supabase: any, userId: string) {
     date: c.checked_in_at,
     talked: c.talked,
     note: c.note,
+    approaches: c.approaches_count || 0,
+    successes: c.successes_count || 0,
   }));
 
   return {
@@ -302,20 +304,58 @@ export async function POST(req: Request) {
   });
 }
 
-// PATCH — adjust totals by modifying today's check-in
+// PATCH — edit stats for a specific day, or adjust totals
 export async function PATCH(req: Request) {
   const supabase = await getSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { totalApproaches, totalSuccesses } = await req.json();
+  const body = await req.json();
+
+  // Mode 1: edit a specific day's stats
+  if (body.date !== undefined) {
+    const { date, approaches, successes } = body;
+    const appr = Math.max(0, approaches ?? 0);
+    const succ = Math.max(0, Math.min(appr, successes ?? 0));
+
+    const { data: existing } = await supabase
+      .from("checkins").select("id").eq("user_id", user.id).eq("checked_in_at", date).single();
+
+    if (existing) {
+      await supabase.from("checkins").update({
+        approaches_count: appr,
+        successes_count: succ,
+        talked: appr > 0,
+      }).eq("user_id", user.id).eq("checked_in_at", date);
+    } else {
+      await supabase.from("checkins").insert({
+        user_id: user.id,
+        checked_in_at: date,
+        talked: appr > 0,
+        approaches_count: appr,
+        successes_count: succ,
+      });
+    }
+
+    const stats = await getFullStats(supabase, user.id);
+    return NextResponse.json({
+      totalApproaches: stats.totalApproaches,
+      totalSuccesses: stats.totalSuccesses,
+      totalFailures: stats.totalFailures,
+      totalDidntApproach: stats.totalDidntApproach,
+      successRate: stats.successRate,
+      history: stats.history,
+    });
+  }
+
+  // Mode 2: adjust totals by modifying today's check-in
+  const { totalApproaches, totalSuccesses } = body;
   if (totalApproaches === undefined || totalSuccesses === undefined) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
   const today = new Date().toISOString().split("T")[0];
 
-  // Get all checkins to compute current totals
   const { data: allCheckins } = await supabase
     .from("checkins")
     .select("checked_in_at, approaches_count, successes_count")

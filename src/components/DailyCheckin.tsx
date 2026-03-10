@@ -21,7 +21,7 @@ interface CheckinData {
   totalDidntApproach: number;
   successRate: number;
   last7: { date: string; talked: boolean | null }[];
-  history: { date: string; talked: boolean; note: string | null }[];
+  history: { date: string; talked: boolean; note: string | null; approaches: number; successes: number }[];
   streakFreezes: number;
 }
 
@@ -53,6 +53,9 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
   const [editingTotals, setEditingTotals] = useState(false);
   const [editTotalApproaches, setEditTotalApproaches] = useState(0);
   const [editTotalSuccesses, setEditTotalSuccesses] = useState(0);
+  const [editingDay, setEditingDay] = useState<string | null>(null);
+  const [editDayApproaches, setEditDayApproaches] = useState(0);
+  const [editDaySuccesses, setEditDaySuccesses] = useState(0);
 
   useEffect(() => {
     fetch("/api/checkin")
@@ -194,6 +197,46 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
         : prev
     );
     setEditingTotals(false);
+    setSubmitting(false);
+  };
+
+  const startEditingDay = (date: string, approaches: number, successes: number) => {
+    setEditDayApproaches(approaches);
+    setEditDaySuccesses(successes);
+    setEditingDay(date);
+  };
+
+  const saveDay = async () => {
+    if (!editingDay) return;
+    setSubmitting(true);
+    const res = await fetch("/api/checkin", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        date: editingDay,
+        approaches: editDayApproaches,
+        successes: editDaySuccesses,
+      }),
+    });
+    const result = await res.json();
+    setData((prev) =>
+      prev
+        ? {
+            ...prev,
+            totalApproaches: result.totalApproaches,
+            totalSuccesses: result.totalSuccesses,
+            totalFailures: result.totalFailures,
+            totalDidntApproach: result.totalDidntApproach,
+            successRate: result.successRate,
+            history: result.history || prev.history.map((h) =>
+              h.date === editingDay
+                ? { ...h, approaches: editDayApproaches, successes: editDaySuccesses, talked: editDayApproaches > 0 }
+                : h
+            ),
+          }
+        : prev
+    );
+    setEditingDay(null);
     setSubmitting(false);
   };
 
@@ -605,19 +648,75 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
             </h3>
             <div className="space-y-2">
               {data.history.map((entry) => (
-                <div key={entry.date} className="flex items-start gap-3 bg-bg-card border border-border rounded-xl px-4 py-3">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                    entry.talked ? "bg-green-500 text-white" : "bg-orange-100 text-orange-600"
-                  }`}>
-                    {entry.talked ? <Check size={13} strokeWidth={2.5} /> : <X size={13} strokeWidth={2.5} />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[13px] font-medium">{entry.talked ? "Talked to someone" : "Checked in"}</span>
-                      <span className="text-[12px] text-text-muted">{formatHistoryDate(entry.date)}</span>
+                <div key={entry.date}>
+                  {editingDay === entry.date ? (
+                    <div className="bg-bg-card border-2 border-[#1a1a1a] rounded-xl px-4 py-4 animate-fade-in">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[13px] font-semibold">{formatHistoryDate(entry.date)}</span>
+                      </div>
+                      <div className="mb-3">
+                        <p className="text-[12px] text-text-muted mb-1.5 text-center">Approached</p>
+                        <div className="flex items-center justify-center gap-4">
+                          <button
+                            onClick={() => setEditDayApproaches(Math.max(0, editDayApproaches - 1))}
+                            className="w-9 h-9 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[16px] font-bold press"
+                          >−</button>
+                          <span className="font-display text-[28px] font-extrabold leading-none w-10 text-center">{editDayApproaches}</span>
+                          <button
+                            onClick={() => setEditDayApproaches(editDayApproaches + 1)}
+                            className="w-9 h-9 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[16px] font-bold press"
+                          >+</button>
+                        </div>
+                      </div>
+                      <div className="mb-4">
+                        <p className="text-[12px] text-text-muted mb-1.5 text-center">Went well</p>
+                        <div className="flex items-center justify-center gap-4">
+                          <button
+                            onClick={() => setEditDaySuccesses(Math.max(0, editDaySuccesses - 1))}
+                            className="w-9 h-9 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[16px] font-bold press"
+                          >−</button>
+                          <span className="font-display text-[28px] font-extrabold leading-none w-10 text-center">{editDaySuccesses}</span>
+                          <button
+                            onClick={() => setEditDaySuccesses(Math.min(editDayApproaches, editDaySuccesses + 1))}
+                            className="w-9 h-9 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[16px] font-bold press"
+                          >+</button>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setEditingDay(null)}
+                          className="flex-1 py-2.5 rounded-xl bg-bg-card-hover border border-border text-[13px] font-medium press"
+                        >Cancel</button>
+                        <button
+                          onClick={saveDay}
+                          disabled={submitting}
+                          className="flex-1 py-2.5 rounded-xl bg-[#1a1a1a] text-white text-[13px] font-medium press disabled:opacity-60"
+                        >{submitting ? "..." : "Save"}</button>
+                      </div>
                     </div>
-                    {entry.note && <p className="text-[13px] text-text-muted leading-relaxed">{entry.note}</p>}
-                  </div>
+                  ) : (
+                    <button
+                      onClick={() => startEditingDay(entry.date, entry.approaches, entry.successes)}
+                      className="w-full flex items-start gap-3 bg-bg-card border border-border rounded-xl px-4 py-3 text-left press"
+                    >
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                        entry.talked ? "bg-green-500 text-white" : "bg-orange-100 text-orange-600"
+                      }`}>
+                        {entry.talked ? <Check size={13} strokeWidth={2.5} /> : <X size={13} strokeWidth={2.5} />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-[13px] font-medium">
+                            {entry.approaches > 0
+                              ? `${entry.approaches} approached · ${entry.successes} went well`
+                              : entry.talked ? "Talked to someone" : "Didn\u2019t approach"}
+                          </span>
+                          <span className="text-[12px] text-text-muted shrink-0 ml-2">{formatHistoryDate(entry.date)}</span>
+                        </div>
+                        {entry.note && <p className="text-[13px] text-text-muted leading-relaxed">{entry.note}</p>}
+                      </div>
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
