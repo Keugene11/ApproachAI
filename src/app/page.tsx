@@ -145,6 +145,10 @@ export default function Home() {
   );
 
   const handleTabChange = (tab: Tab) => {
+    if (tab === "coach") {
+      updateState("chat");
+      return;
+    }
     setActiveTab(tab);
     try {
       sessionStorage.setItem(
@@ -201,29 +205,6 @@ export default function Home() {
             onCheckedIn={() => setCheckedInToday(true)}
           />
 
-        </div>
-      )}
-
-      {/* ===== COACH TAB ===== */}
-      {activeTab === "coach" && (
-        <div className="px-5 pt-14 pb-10 animate-fade-in">
-          <div className="mb-10 animate-slide-up">
-            <p className="text-[15px] text-text-muted mb-3">{greeting}</p>
-            <h1 className="text-[32px] font-extrabold tracking-tight leading-[1.15] mb-4">
-              Too nervous to<br />
-              <span className="italic text-orange-500">cold approach?</span>
-            </h1>
-            <p className="text-[17px] leading-relaxed text-text-muted">
-              Talk to your AI wingman first. Get out of your head, build your confidence, and go say hi.
-            </p>
-          </div>
-
-          <button
-            onClick={() => updateState("chat")}
-            className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
-          >
-            Talk to Wingman
-          </button>
         </div>
       )}
 
