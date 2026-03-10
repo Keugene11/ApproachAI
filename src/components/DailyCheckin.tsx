@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Flame, Check, X, MessageCircle, Trophy, TrendingUp, Calendar, Shield, Zap, Target, ThumbsUp, ThumbsDown, UserX } from "lucide-react";
-import { getLevelInfo, getFlameLevel, BADGES, getBadgeById, type BadgeDef } from "@/lib/gamification";
+import { getLevelInfo, getFlameLevel } from "@/lib/gamification";
 
 interface CheckinData {
   checkedInToday: boolean;
@@ -24,7 +24,6 @@ interface CheckinData {
   history: { date: string; talked: boolean; note: string | null }[];
   xp: number;
   streakFreezes: number;
-  badges: string[];
 }
 
 const MOTIVATION = [
@@ -57,10 +56,7 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
   const [noteInput, setNoteInput] = useState("");
   const [showNoteField, setShowNoteField] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
-  const [newBadgeQueue, setNewBadgeQueue] = useState<BadgeDef[]>([]);
-  const [showBadgeModal, setShowBadgeModal] = useState<BadgeDef | null>(null);
   const [xpGain, setXpGain] = useState(0);
-  const [showBadges, setShowBadges] = useState(false);
   const [approachStep, setApproachStep] = useState<"count" | "success" | null>(null);
   const [approachCount, setApproachCount] = useState(1);
   const [successCount, setSuccessCount] = useState(0);
@@ -71,15 +67,6 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
       .then(setData)
       .catch(() => {});
   }, []);
-
-  // Show badge modals one by one
-  useEffect(() => {
-    if (newBadgeQueue.length > 0 && !showBadgeModal) {
-      const [next, ...rest] = newBadgeQueue;
-      setShowBadgeModal(next);
-      setNewBadgeQueue(rest);
-    }
-  }, [newBadgeQueue, showBadgeModal]);
 
   const handleCheckin = async (talked: boolean) => {
     if (submitting) return;
@@ -125,7 +112,6 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
             totalDidntApproach: result.totalDidntApproach,
             successRate: result.successRate,
             xp: result.xp,
-            badges: [...prev.badges, ...(result.newBadges || [])],
             last7: prev.last7.map((d, i) =>
               i === prev.last7.length - 1 ? { ...d, talked } : d
             ),
@@ -137,12 +123,6 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
     setXpGain(result.xpEarned || 0);
     setSubmitting(false);
     onCheckedIn?.();
-
-    // Queue new badge celebrations
-    if (result.newBadges?.length) {
-      const badges = result.newBadges.map((id: string) => getBadgeById(id)).filter(Boolean) as BadgeDef[];
-      setNewBadgeQueue(badges);
-    }
   };
 
   const saveNote = async () => {
@@ -177,26 +157,6 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
   const flame = getFlameLevel(data.streak);
 
   return (
-    <>
-      {/* Badge celebration modal */}
-      {showBadgeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in" onClick={() => setShowBadgeModal(null)}>
-          <div className="bg-bg rounded-2xl px-8 py-8 mx-6 text-center max-w-sm animate-slide-up" onClick={(e) => e.stopPropagation()}>
-            <div className="text-[56px] mb-3">{showBadgeModal.icon}</div>
-            <h3 className="font-display text-[20px] font-bold mb-1">Badge unlocked!</h3>
-            <p className="font-display text-[17px] font-semibold mb-1">{showBadgeModal.name}</p>
-            <p className="text-text-muted text-[14px] mb-1">{showBadgeModal.description}</p>
-            <p className="text-orange-500 text-[13px] font-medium mb-5">+50 XP</p>
-            <button
-              onClick={() => setShowBadgeModal(null)}
-              className="w-full py-3 bg-[#1a1a1a] text-white rounded-xl font-medium text-[15px] press"
-            >
-              Nice!
-            </button>
-          </div>
-        </div>
-      )}
-
       <div className="space-y-4">
         {/* XP / Level bar */}
         <div className="bg-bg-card border border-border rounded-2xl px-5 py-3">
@@ -470,51 +430,6 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
           </div>
         </div>
 
-        {/* Badges section */}
-        <div className="bg-bg-card border border-border rounded-2xl px-5 py-4">
-          <button
-            onClick={() => setShowBadges(!showBadges)}
-            className="flex items-center justify-between w-full text-left"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-[13px] font-semibold uppercase tracking-wide text-text-muted">Badges</span>
-              <span className="text-[12px] text-text-muted">{data.badges.length}/{BADGES.length}</span>
-            </div>
-            <span className="text-[12px] text-text-muted">{showBadges ? "Hide" : "Show all"}</span>
-          </button>
-
-          {/* Recent badges (always show last 3 earned) */}
-          {!showBadges && data.badges.length > 0 && (
-            <div className="flex gap-2 mt-3">
-              {data.badges.slice(-3).map((id) => {
-                const badge = getBadgeById(id);
-                if (!badge) return null;
-                return (
-                  <div key={id} className="flex items-center gap-1.5 bg-bg-card-hover rounded-full px-3 py-1.5">
-                    <span className="text-[14px]">{badge.icon}</span>
-                    <span className="text-[12px] font-medium">{badge.name}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Full badge grid */}
-          {showBadges && (
-            <div className="grid grid-cols-4 gap-3 mt-4">
-              {BADGES.map((badge) => {
-                const earned = data.badges.includes(badge.id);
-                return (
-                  <div key={badge.id} className={`flex flex-col items-center text-center ${earned ? "" : "opacity-30"}`}>
-                    <span className={`text-[28px] mb-1 ${earned ? "" : "grayscale"}`}>{badge.icon}</span>
-                    <span className="text-[10px] font-medium leading-tight">{badge.name}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
         {/* Motivation */}
         <div className="bg-bg-card border border-border rounded-xl px-4 py-3">
           <p className="text-[14px] leading-relaxed text-center italic text-text-muted">
@@ -558,6 +473,5 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
           </div>
         )}
       </div>
-    </>
   );
 }
