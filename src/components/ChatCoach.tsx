@@ -315,54 +315,57 @@ export default function ChatCoach({ onBack, fromPhoto, imageData, checkinMode }:
   return (
     <div className="flex flex-col h-screen max-w-md mx-auto bg-bg animate-fade-in">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 py-3.5 shrink-0 border-b border-border">
-        <button onClick={handleBack} className="text-text press -ml-1 p-1">
-          <ArrowLeft size={20} strokeWidth={1.5} />
+      <div className="flex items-center gap-3 px-5 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 shrink-0 bg-bg/80 backdrop-blur-lg sticky top-0 z-10">
+        <button onClick={handleBack} className="text-text-muted press p-1.5 rounded-full hover:bg-bg-card-hover transition-colors">
+          <ArrowLeft size={18} strokeWidth={2} />
         </button>
-        <button onClick={handleBack} className="font-display text-[17px] font-bold flex-1 text-left cursor-pointer">
-          Wingmate
-        </button>
-        {isLoading && (
-          <span className="text-[12px] text-text-muted animate-fade-in">typing...</span>
-        )}
+        <div className="flex-1 text-center">
+          <p className="font-display text-[15px] font-bold">Wingman</p>
+          {isLoading && (
+            <p className="text-[11px] text-orange-500 font-medium animate-fade-in">thinking...</p>
+          )}
+        </div>
+        <div className="w-[34px]" />
       </div>
 
       {/* Messages */}
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-5 pb-4 space-y-5 pt-5"
+        className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 pt-3"
       >
         {messages.map((msg, i) =>
           msg.role === "user" ? (
             <div key={i} className="flex justify-end msg-in">
-              <div className="max-w-[80%] bg-[#1a1a1a] text-white rounded-[18px] rounded-br-[4px] px-4 py-2.5">
-                <p className="text-[15px] leading-[1.5] whitespace-pre-wrap">{msg.content}</p>
+              <div className="max-w-[82%] bg-[#1a1a1a] text-white rounded-2xl rounded-br-sm px-4 py-3 shadow-sm">
+                <p className="text-[15px] leading-[1.55] whitespace-pre-wrap">{msg.content}</p>
               </div>
             </div>
           ) : (
             <div key={i} className="msg-in">
-              {msg.content.split("\n").map((line, j) => {
-                const trimmed = line.trim();
-                const isTitle =
-                  trimmed.startsWith('"') && trimmed.endsWith('"') && trimmed.length > 5 && trimmed.length < 80;
-                return isTitle ? (
-                  <p key={j} className="text-[16px] font-bold leading-[1.65] mt-5 mb-1 text-text">{trimmed.slice(1, -1)}</p>
-                ) : trimmed === "" ? (
-                  <br key={j} />
-                ) : (
-                  <p key={j} className="text-[15px] leading-[1.65] text-text">{line}</p>
-                );
-              })}
+              <div className="bg-bg-card border border-border/60 rounded-2xl rounded-bl-sm px-4 py-3.5 shadow-sm max-w-[92%]">
+                {msg.content.split("\n").map((line, j) => {
+                  const trimmed = line.trim();
+                  const isTitle =
+                    trimmed.startsWith('"') && trimmed.endsWith('"') && trimmed.length > 5 && trimmed.length < 80;
+                  return isTitle ? (
+                    <p key={j} className="text-[15px] font-bold leading-[1.6] mt-4 mb-1 text-orange-500 first:mt-0">{trimmed.slice(1, -1)}</p>
+                  ) : trimmed === "" ? (
+                    <div key={j} className="h-2" />
+                  ) : (
+                    <p key={j} className="text-[14.5px] leading-[1.7] text-text/90">{line}</p>
+                  );
+                })}
+              </div>
             </div>
           )
         )}
         {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-          <div className="animate-fade-in py-2">
-            <div className="flex gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-text-muted/40 animate-bounce" style={{ animationDelay: "0ms" }} />
-              <div className="w-1.5 h-1.5 rounded-full bg-text-muted/40 animate-bounce" style={{ animationDelay: "150ms" }} />
-              <div className="w-1.5 h-1.5 rounded-full bg-text-muted/40 animate-bounce" style={{ animationDelay: "300ms" }} />
+          <div className="animate-fade-in py-2 pl-1">
+            <div className="flex gap-1">
+              <div className="w-2 h-2 rounded-full bg-orange-400/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+              <div className="w-2 h-2 rounded-full bg-orange-400/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+              <div className="w-2 h-2 rounded-full bg-orange-400/60 animate-bounce" style={{ animationDelay: "300ms" }} />
             </div>
           </div>
         )}
@@ -371,53 +374,53 @@ export default function ChatCoach({ onBack, fromPhoto, imageData, checkinMode }:
 
       {/* Paywall */}
       {limitReached ? (
-        <div className="px-5 py-6 shrink-0 border-t border-border text-center animate-fade-in">
-          <Lock size={20} strokeWidth={1.5} className="mx-auto text-text-muted mb-2" />
-          <p className="font-display font-bold text-[16px] mb-1">Free trial used up</p>
+        <div className="px-5 py-6 shrink-0 bg-bg-card border-t border-border text-center animate-fade-in">
+          <Lock size={18} strokeWidth={1.5} className="mx-auto text-text-muted mb-2" />
+          <p className="font-display font-bold text-[16px] mb-1">You&apos;re out of free messages</p>
           <p className="text-text-muted text-[13px] mb-4">
-            Upgrade to keep your AI coach in your pocket.
+            Go Pro for unlimited access to your AI wingman.
           </p>
           <button
             onClick={() => router.push("/pricing")}
-            className="w-full bg-[#1a1a1a] text-white py-3 rounded-xl font-medium text-[14px] press"
+            className="w-full bg-[#1a1a1a] text-white py-3.5 rounded-2xl font-semibold text-[15px] press"
           >
-            Unlock Wingmate
+            Unlock Wingmate Pro
           </button>
         </div>
       ) : (
-        <>
+        <div className="shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
           {/* Free usage counter */}
           {messagesRemaining !== null && messagesRemaining >= 0 && (
-            <div className="text-center py-1.5 text-[11px] text-text-muted border-t border-border">
-              {messagesRemaining} free {messagesRemaining === 1 ? "message" : "messages"} remaining
+            <div className="text-center py-1.5 text-[11px] text-text-muted">
+              {messagesRemaining} free {messagesRemaining === 1 ? "message" : "messages"} left
             </div>
           )}
           {/* Input */}
-          <div className={`px-4 py-3 shrink-0 ${sessionsRemaining === null ? "border-t border-border" : ""}`}>
+          <div className="px-4 py-2">
             <form
               onSubmit={handleSubmit}
-              className="flex items-end gap-2 bg-bg-input rounded-full pl-5 pr-2 py-2"
+              className="flex items-end gap-2 bg-bg-card border border-border rounded-2xl pl-4 pr-2 py-2 shadow-sm"
             >
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={handleTextareaInput}
                 onKeyDown={handleKeyDown}
-                placeholder="Message..."
+                placeholder="What's on your mind..."
                 rows={1}
-                className="flex-1 bg-transparent text-text text-[15px] placeholder-text-muted focus:outline-none resize-none leading-normal py-1"
+                className="flex-1 bg-transparent text-text text-[15px] placeholder-text-muted/60 focus:outline-none resize-none leading-normal py-1"
                 disabled={isLoading}
               />
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="bg-[#1a1a1a] disabled:opacity-20 text-white p-2 rounded-full press shrink-0 transition-opacity"
+                className="bg-[#1a1a1a] disabled:opacity-15 text-white p-2.5 rounded-xl press shrink-0 transition-opacity"
               >
-                <ArrowUp size={15} strokeWidth={2.5} />
+                <ArrowUp size={16} strokeWidth={2.5} />
               </button>
             </form>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
