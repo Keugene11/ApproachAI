@@ -200,6 +200,33 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
     setSubmitting(false);
   };
 
+  const quickUpdateToday = async (approaches: number, successes: number) => {
+    const today = new Date().toISOString().split("T")[0];
+    // Optimistic update
+    setData((prev) => prev ? { ...prev, approachesCount: approaches, successesCount: successes } : prev);
+    try {
+      const res = await fetch("/api/checkin", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: today, approaches, successes }),
+      });
+      const result = await res.json();
+      setData((prev) =>
+        prev ? {
+          ...prev,
+          approachesCount: approaches,
+          successesCount: successes,
+          totalApproaches: result.totalApproaches,
+          totalSuccesses: result.totalSuccesses,
+          totalFailures: result.totalFailures,
+          totalDidntApproach: result.totalDidntApproach,
+          successRate: result.successRate,
+          history: result.history || prev.history,
+        } : prev
+      );
+    } catch {}
+  };
+
   const startEditingDay = (date: string, approaches: number, successes: number) => {
     setEditDayApproaches(approaches);
     setEditDaySuccesses(successes);
@@ -614,70 +641,40 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
             </div>
           )}
 
-          {/* Today's count — always visible, tappable to edit */}
+          {/* Today's count — always visible inline counters */}
           {!editingTotals && (
-            <>
-              {editingDay === new Date().toISOString().split("T")[0] ? (
-                <div className="mt-3 pt-3 border-t border-border animate-fade-in">
-                  <div className="mb-3">
-                    <p className="text-[12px] text-text-muted mb-1.5 text-center">Today&apos;s approaches</p>
-                    <div className="flex items-center justify-center gap-4">
-                      <button
-                        onClick={() => setEditDayApproaches(Math.max(0, editDayApproaches - 1))}
-                        className="w-9 h-9 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[16px] font-bold press"
-                      >−</button>
-                      <span className="font-display text-[28px] font-extrabold leading-none w-10 text-center">{editDayApproaches}</span>
-                      <button
-                        onClick={() => setEditDayApproaches(editDayApproaches + 1)}
-                        className="w-9 h-9 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[16px] font-bold press"
-                      >+</button>
-                    </div>
-                  </div>
-                  <div className="mb-4">
-                    <p className="text-[12px] text-text-muted mb-1.5 text-center">Went well</p>
-                    <div className="flex items-center justify-center gap-4">
-                      <button
-                        onClick={() => setEditDaySuccesses(Math.max(0, editDaySuccesses - 1))}
-                        className="w-9 h-9 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[16px] font-bold press"
-                      >−</button>
-                      <span className="font-display text-[28px] font-extrabold leading-none w-10 text-center">{editDaySuccesses}</span>
-                      <button
-                        onClick={() => setEditDaySuccesses(Math.min(editDayApproaches, editDaySuccesses + 1))}
-                        className="w-9 h-9 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[16px] font-bold press"
-                      >+</button>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
+            <div className="mt-3 pt-3 border-t border-border">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-[12px] text-text-muted mb-1">Approached today</p>
+                  <div className="flex items-center gap-3">
                     <button
-                      onClick={() => setEditingDay(null)}
-                      className="flex-1 py-2.5 rounded-xl bg-bg-card-hover border border-border text-[13px] font-medium press"
-                    >Cancel</button>
+                      onClick={() => quickUpdateToday(Math.max(0, data.approachesCount - 1), Math.min(data.successesCount, Math.max(0, data.approachesCount - 1)))}
+                      className="w-8 h-8 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[15px] font-bold press"
+                    >−</button>
+                    <span className="font-display text-[24px] font-extrabold w-8 text-center">{data.approachesCount}</span>
                     <button
-                      onClick={saveDay}
-                      disabled={submitting}
-                      className="flex-1 py-2.5 rounded-xl bg-[#1a1a1a] text-white text-[13px] font-medium press disabled:opacity-60"
-                    >{submitting ? "..." : "Save"}</button>
+                      onClick={() => quickUpdateToday(data.approachesCount + 1, data.successesCount)}
+                      className="w-8 h-8 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[15px] font-bold press"
+                    >+</button>
                   </div>
                 </div>
-              ) : (
-                <button
-                  onClick={() => startEditingDay(
-                    new Date().toISOString().split("T")[0],
-                    data.approachesCount,
-                    data.successesCount
-                  )}
-                  className="w-full mt-3 pt-3 border-t border-border flex items-center justify-between press"
-                >
-                  <span className="text-[13px] font-medium">Today</span>
-                  <span className="text-[13px] text-text-muted">
-                    {data.approachesCount > 0
-                      ? `${data.approachesCount} approached · ${data.successesCount} went well`
-                      : "Tap to add"}
-                    <Pencil size={12} strokeWidth={1.5} className="inline ml-1.5 text-text-muted/50" />
-                  </span>
-                </button>
-              )}
-            </>
+                <div className="flex-1">
+                  <p className="text-[12px] text-text-muted mb-1 text-right">Went well</p>
+                  <div className="flex items-center gap-3 justify-end">
+                    <button
+                      onClick={() => quickUpdateToday(data.approachesCount, Math.max(0, data.successesCount - 1))}
+                      className="w-8 h-8 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[15px] font-bold press"
+                    >−</button>
+                    <span className="font-display text-[24px] font-extrabold w-8 text-center">{data.successesCount}</span>
+                    <button
+                      onClick={() => quickUpdateToday(data.approachesCount, Math.min(data.approachesCount, data.successesCount + 1))}
+                      className="w-8 h-8 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[15px] font-bold press"
+                    >+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
