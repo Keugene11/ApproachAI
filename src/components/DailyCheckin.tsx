@@ -320,13 +320,15 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
                   <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 ${flame.bgColor}`}>
                     <Flame size={flame.size} strokeWidth={1.5} className={flame.color} />
                   </div>
-                  <h2 className="font-display text-[18px] font-bold mb-1">Log today&apos;s approaches</h2>
-                  <p className="text-text-muted text-[14px]">Did you approach anyone today?</p>
+                  <h2 className="font-display text-[20px] font-bold mb-1">How&apos;d today go?</h2>
+                  <p className="text-text-muted text-[14px] leading-relaxed max-w-[260px] mx-auto">
+                    Log your numbers every day to track your progress and keep your streak alive.
+                  </p>
                 </div>
                 <div className="flex gap-2 mb-4">
                   <button onClick={() => handleCheckin(true)} disabled={submitting}
                     className="flex-1 py-3.5 rounded-xl bg-[#1a1a1a] text-white text-[15px] font-medium press">
-                    Yes — log stats
+                    I approached
                   </button>
                   <button onClick={() => handleCheckin(false)} disabled={submitting}
                     className="flex-1 py-3.5 rounded-xl bg-bg-card-hover border border-border text-[15px] font-medium press">

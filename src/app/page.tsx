@@ -241,7 +241,7 @@ export default function Home() {
               {greeting}
             </h1>
             <p className="text-text-muted text-[15px] leading-relaxed">
-              Log your approaches every day to track your progress
+              Enter your daily stats below
             </p>
           </div>
 
