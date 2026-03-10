@@ -613,6 +613,72 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
               </div>
             </div>
           )}
+
+          {/* Today's count — always visible, tappable to edit */}
+          {!editingTotals && (
+            <>
+              {editingDay === new Date().toISOString().split("T")[0] ? (
+                <div className="mt-3 pt-3 border-t border-border animate-fade-in">
+                  <div className="mb-3">
+                    <p className="text-[12px] text-text-muted mb-1.5 text-center">Today&apos;s approaches</p>
+                    <div className="flex items-center justify-center gap-4">
+                      <button
+                        onClick={() => setEditDayApproaches(Math.max(0, editDayApproaches - 1))}
+                        className="w-9 h-9 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[16px] font-bold press"
+                      >−</button>
+                      <span className="font-display text-[28px] font-extrabold leading-none w-10 text-center">{editDayApproaches}</span>
+                      <button
+                        onClick={() => setEditDayApproaches(editDayApproaches + 1)}
+                        className="w-9 h-9 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[16px] font-bold press"
+                      >+</button>
+                    </div>
+                  </div>
+                  <div className="mb-4">
+                    <p className="text-[12px] text-text-muted mb-1.5 text-center">Went well</p>
+                    <div className="flex items-center justify-center gap-4">
+                      <button
+                        onClick={() => setEditDaySuccesses(Math.max(0, editDaySuccesses - 1))}
+                        className="w-9 h-9 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[16px] font-bold press"
+                      >−</button>
+                      <span className="font-display text-[28px] font-extrabold leading-none w-10 text-center">{editDaySuccesses}</span>
+                      <button
+                        onClick={() => setEditDaySuccesses(Math.min(editDayApproaches, editDaySuccesses + 1))}
+                        className="w-9 h-9 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[16px] font-bold press"
+                      >+</button>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setEditingDay(null)}
+                      className="flex-1 py-2.5 rounded-xl bg-bg-card-hover border border-border text-[13px] font-medium press"
+                    >Cancel</button>
+                    <button
+                      onClick={saveDay}
+                      disabled={submitting}
+                      className="flex-1 py-2.5 rounded-xl bg-[#1a1a1a] text-white text-[13px] font-medium press disabled:opacity-60"
+                    >{submitting ? "..." : "Save"}</button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => startEditingDay(
+                    new Date().toISOString().split("T")[0],
+                    data.approachesCount,
+                    data.successesCount
+                  )}
+                  className="w-full mt-3 pt-3 border-t border-border flex items-center justify-between press"
+                >
+                  <span className="text-[13px] font-medium">Today</span>
+                  <span className="text-[13px] text-text-muted">
+                    {data.approachesCount > 0
+                      ? `${data.approachesCount} approached · ${data.successesCount} went well`
+                      : "Tap to add"}
+                    <Pencil size={12} strokeWidth={1.5} className="inline ml-1.5 text-text-muted/50" />
+                  </span>
+                </button>
+              )}
+            </>
+          )}
         </div>
 
         {/* Quick stats row */}
