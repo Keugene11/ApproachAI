@@ -79,6 +79,13 @@ export async function POST(req: Request) {
   try {
     const { messages, mode } = await req.json();
 
+    if (!messages || !Array.isArray(messages)) {
+      return new Response(
+        `data: ${JSON.stringify({ content: "Error: No messages provided." })}\n\ndata: [DONE]\n\n`,
+        { headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" } }
+      );
+    }
+
     const systemPrompt =
       mode === "photo-approach"
         ? SYSTEM_PROMPT + PHOTO_APPROACH_ADDITION

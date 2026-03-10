@@ -134,10 +134,10 @@ export default function Home() {
             {/* Actions */}
             <div className="space-y-3 stagger">
               {/* Primary — Take photo */}
-              <label className="flex items-center gap-4 w-full bg-white text-black rounded-2xl px-5 py-4.5 cursor-pointer press">
+              <label className="flex items-center gap-4 w-full bg-[#1a1a1a] text-white rounded-2xl px-5 py-4.5 cursor-pointer press">
                 <Camera size={22} strokeWidth={1.5} className="shrink-0" />
                 <p className="font-medium text-[16px]">Take a photo</p>
-                <ChevronRight size={16} className="ml-auto text-black/30 shrink-0" />
+                <ChevronRight size={16} className="ml-auto text-white/30 shrink-0" />
                 <input
                   type="file"
                   accept="image/*"
