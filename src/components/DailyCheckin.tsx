@@ -289,45 +289,38 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
     };
 
     return (
-      <div className="bg-bg-card border border-border rounded-2xl px-5 py-5">
-        <h3 className="font-display text-[16px] font-bold mb-0.5">Update today&apos;s stats</h3>
-        <p className="text-text-muted text-[13px] mb-4">Adjust your numbers as the day goes on</p>
-        <div className="space-y-4">
-          <div>
-            <p className="text-[13px] text-text-muted mb-2">Girls you saw</p>
-            <div className="flex items-center gap-4">
-              <button onClick={() => { initIfNeeded(); setTodayOpportunities(Math.max(0, dispOpp - 1)); if (dispAppr > dispOpp - 1) setTodayApproaches(Math.max(0, dispOpp - 1)); }}
-                className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press">−</button>
-              <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">{dispOpp}</span>
-              <button onClick={() => { initIfNeeded(); setTodayOpportunities(dispOpp + 1); }}
-                className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press">+</button>
-            </div>
-          </div>
-          <div>
-            <p className="text-[13px] text-text-muted mb-2">Girls you approached</p>
-            <div className="flex items-center gap-4">
-              <button onClick={() => { initIfNeeded(); setTodayApproaches(Math.max(0, dispAppr - 1)); if (dispSucc > dispAppr - 1) setTodaySuccesses(Math.max(0, dispAppr - 1)); }}
-                className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press">−</button>
-              <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">{dispAppr}</span>
-              <button onClick={() => { initIfNeeded(); setTodayApproaches(Math.min(dispOpp, dispAppr + 1)); }}
-                className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press">+</button>
-            </div>
-          </div>
-          <div>
-            <p className="text-[13px] text-text-muted mb-2">Went well</p>
-            <div className="flex items-center gap-4">
-              <button onClick={() => { initIfNeeded(); setTodaySuccesses(Math.max(0, dispSucc - 1)); }}
-                className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press">−</button>
-              <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">{dispSucc}</span>
-              <button onClick={() => { initIfNeeded(); setTodaySuccesses(Math.min(dispAppr, dispSucc + 1)); }}
-                className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press">+</button>
-            </div>
-          </div>
+      <div className="grid grid-cols-3 gap-3">
+        {/* Seen */}
+        <div className="bg-purple-50 border border-purple-200 rounded-2xl px-3 py-4 flex flex-col items-center">
+          <span className="text-[11px] font-bold text-purple-500 uppercase tracking-wider mb-3">Seen</span>
+          <button onClick={() => { initIfNeeded(); setTodayOpportunities(dispOpp + 1); }}
+            className="w-full h-11 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 text-[22px] font-bold press active:bg-purple-200 mb-2">+</button>
+          <span className="font-display text-[40px] font-extrabold leading-none text-purple-600 my-1">{dispOpp}</span>
+          <button onClick={() => { initIfNeeded(); setTodayOpportunities(Math.max(0, dispOpp - 1)); if (dispAppr > dispOpp - 1) setTodayApproaches(Math.max(0, dispOpp - 1)); }}
+            className="w-full h-11 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 text-[22px] font-bold press active:bg-purple-200 mt-2">−</button>
+        </div>
+        {/* Approached */}
+        <div className="bg-blue-50 border border-blue-200 rounded-2xl px-3 py-4 flex flex-col items-center">
+          <span className="text-[11px] font-bold text-blue-500 uppercase tracking-wider mb-3">Approached</span>
+          <button onClick={() => { initIfNeeded(); setTodayApproaches(Math.min(dispOpp, dispAppr + 1)); }}
+            className="w-full h-11 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 text-[22px] font-bold press active:bg-blue-200 mb-2">+</button>
+          <span className="font-display text-[40px] font-extrabold leading-none text-blue-600 my-1">{dispAppr}</span>
+          <button onClick={() => { initIfNeeded(); setTodayApproaches(Math.max(0, dispAppr - 1)); if (dispSucc > dispAppr - 1) setTodaySuccesses(Math.max(0, dispAppr - 1)); }}
+            className="w-full h-11 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 text-[22px] font-bold press active:bg-blue-200 mt-2">−</button>
+        </div>
+        {/* Went well */}
+        <div className="bg-green-50 border border-green-200 rounded-2xl px-3 py-4 flex flex-col items-center">
+          <span className="text-[11px] font-bold text-green-500 uppercase tracking-wider mb-3">Went well</span>
+          <button onClick={() => { initIfNeeded(); setTodaySuccesses(Math.min(dispAppr, dispSucc + 1)); }}
+            className="w-full h-11 rounded-xl bg-green-100 flex items-center justify-center text-green-600 text-[22px] font-bold press active:bg-green-200 mb-2">+</button>
+          <span className="font-display text-[40px] font-extrabold leading-none text-green-600 my-1">{dispSucc}</span>
+          <button onClick={() => { initIfNeeded(); setTodaySuccesses(Math.max(0, dispSucc - 1)); }}
+            className="w-full h-11 rounded-xl bg-green-100 flex items-center justify-center text-green-600 text-[22px] font-bold press active:bg-green-200 mt-2">−</button>
         </div>
         {isDirty && (
-          <div className="flex gap-2 mt-4 animate-fade-in">
+          <div className="col-span-3 flex gap-2 animate-fade-in">
             <button onClick={() => { setTodayOpportunities(null); setTodayApproaches(null); setTodaySuccesses(null); }}
-              className="flex-1 py-3 rounded-xl bg-bg-card-hover border border-border text-[14px] font-medium press">Cancel</button>
+              className="flex-1 py-3 rounded-xl bg-bg-card border border-border text-[14px] font-medium press">Cancel</button>
             <button onClick={saveToday} disabled={savingToday}
               className="flex-1 py-3 rounded-xl bg-[#1a1a1a] text-white text-[14px] font-semibold press disabled:opacity-60">
               {savingToday ? "..." : "Save"}</button>
