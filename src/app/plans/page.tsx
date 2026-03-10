@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Check, Minus, CreditCard, ChevronDown, Zap } from "lucide-react";
+import { ArrowLeft, Check, Minus, CreditCard, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 
@@ -99,70 +99,6 @@ export default function PlansPage() {
 
   const price = billing === "yearly" ? 10 : 15;
 
-  // ─── Active subscriber ───
-  if (isActive) {
-    return (
-      <main className="min-h-screen max-w-lg mx-auto px-6 pt-6 pb-24 animate-fade-in">
-        <div className="flex items-center gap-3 mb-10">
-          <button onClick={() => router.back()} className="p-1 -ml-1 press">
-            <ArrowLeft size={20} strokeWidth={1.5} />
-          </button>
-          <h1 className="font-display text-[20px] font-bold tracking-tight">Your Plan</h1>
-        </div>
-
-        <div className="bg-[#1a1a1a] text-white rounded-2xl px-6 py-6 mb-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap size={16} strokeWidth={2} className="text-yellow-400" />
-            <span className="text-[12px] font-bold tracking-widest uppercase text-white/50">
-              Wingmate Pro
-            </span>
-          </div>
-          <div className="flex items-baseline gap-1">
-            <span className="font-display text-[36px] font-extrabold leading-none">
-              ${isYearly ? "10" : "15"}
-            </span>
-            <span className="text-white/40 text-[15px]">/mo</span>
-          </div>
-          {isYearly && <p className="text-white/30 text-[12px] mt-1">$120 billed annually</p>}
-          <div className="mt-4 pt-4 border-t border-white/10">
-            <p className="text-white/50 text-[13px]">
-              {subscription?.cancel_at_period_end
-                ? `Cancels ${formatDate(subscription.current_period_end)}`
-                : `Renews ${formatDate(subscription!.current_period_end)}`}
-            </p>
-          </div>
-        </div>
-
-        <button
-          onClick={handleManageBilling}
-          disabled={loadingPortal}
-          className="flex items-center gap-3.5 w-full bg-bg-card border border-border rounded-2xl px-5 py-4 text-left press disabled:opacity-60 mb-8"
-        >
-          <CreditCard size={18} strokeWidth={1.5} className="text-text-muted shrink-0" />
-          <div className="flex-1">
-            <p className="font-medium text-[15px]">
-              {loadingPortal ? "Redirecting..." : "Manage billing"}
-            </p>
-            <p className="text-text-muted text-[12px] mt-0.5">Change plan, update payment, or cancel</p>
-          </div>
-        </button>
-
-        <h2 className="font-display text-[18px] font-bold tracking-tight mb-4">Your features</h2>
-        <div className="space-y-3">
-          {["Unlimited AI sessions", "Photo analysis", "Custom openers", "Text coaching", "Profile reviews", "Approach plans", "Check-ins & streaks", "Community feed"].map((f) => (
-            <div key={f} className="flex items-center gap-3">
-              <Check size={16} strokeWidth={2.5} className="text-[#1a1a1a] shrink-0" />
-              <span className="text-[14px]">{f}</span>
-            </div>
-          ))}
-        </div>
-
-        <BottomNav />
-      </main>
-    );
-  }
-
-  // ─── Not subscribed ───
   return (
     <main className="min-h-screen max-w-lg mx-auto px-6 pb-24 animate-fade-in">
       {/* Nav */}
@@ -172,56 +108,92 @@ export default function PlansPage() {
         </button>
       </div>
 
+      {/* Active subscriber banner */}
+      {isActive && (
+        <div className="bg-bg-card border border-border rounded-2xl p-5 mb-10">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <span className="text-[14px] font-semibold">Wingmate Pro</span>
+            </div>
+            <span className="text-[12px] text-text-muted font-medium">
+              {isYearly ? "$10/mo · Yearly" : "$15/mo · Monthly"}
+            </span>
+          </div>
+          <p className="text-text-muted text-[13px] mb-4">
+            {subscription?.cancel_at_period_end
+              ? `Your plan cancels ${formatDate(subscription.current_period_end)}`
+              : `Renews ${formatDate(subscription!.current_period_end)}`}
+          </p>
+          <button
+            onClick={handleManageBilling}
+            disabled={loadingPortal}
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-bg-input text-[14px] font-semibold press disabled:opacity-60"
+          >
+            <CreditCard size={16} strokeWidth={1.5} className="text-text-muted" />
+            {loadingPortal ? "Redirecting..." : "Manage billing"}
+          </button>
+        </div>
+      )}
+
       {/* Hero */}
       <div className="text-center mb-12">
         <h1 className="font-display text-[36px] font-extrabold tracking-tight leading-[1.1] mb-4">
-          Start for free.
+          {isActive ? "Your plan" : "Start for free."}
         </h1>
         <p className="text-text-muted text-[16px] leading-relaxed max-w-[380px] mx-auto">
-          Build confidence with daily check-ins and approach tracking. Upgrade when you want unlimited AI coaching.
+          {isActive
+            ? "You have unlimited access to all Pro features."
+            : "Build confidence with daily check-ins and approach tracking. Upgrade when you want unlimited AI coaching."}
         </p>
       </div>
 
-      {/* Billing toggle */}
-      <div className="flex items-center justify-center mb-10">
-        <div className="bg-bg-card border border-border rounded-full p-1 flex">
-          <button
-            onClick={() => setBilling("monthly")}
-            className={`px-6 py-2.5 rounded-full text-[14px] font-semibold transition-colors ${
-              billing === "monthly" ? "bg-[#1a1a1a] text-white" : "text-text-muted"
-            }`}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setBilling("yearly")}
-            className={`px-6 py-2.5 rounded-full text-[14px] font-semibold transition-colors relative ${
-              billing === "yearly" ? "bg-[#1a1a1a] text-white" : "text-text-muted"
-            }`}
-          >
-            Annually
-            <span className={`absolute -top-2.5 -right-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-              billing === "yearly" ? "bg-green-500 text-white" : "bg-green-100 text-green-700"
-            }`}>
-              -33%
-            </span>
-          </button>
+      {/* Billing toggle — hide for active subscribers */}
+      {!isActive && (
+        <div className="flex items-center justify-center mb-10">
+          <div className="bg-bg-card border border-border rounded-full p-1 flex">
+            <button
+              onClick={() => setBilling("monthly")}
+              className={`px-6 py-2.5 rounded-full text-[14px] font-semibold transition-colors ${
+                billing === "monthly" ? "bg-[#1a1a1a] text-white" : "text-text-muted"
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBilling("yearly")}
+              className={`px-6 py-2.5 rounded-full text-[14px] font-semibold transition-colors relative ${
+                billing === "yearly" ? "bg-[#1a1a1a] text-white" : "text-text-muted"
+              }`}
+            >
+              Annually
+              <span className={`absolute -top-2.5 -right-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                billing === "yearly" ? "bg-green-500 text-white" : "bg-green-100 text-green-700"
+              }`}>
+                -33%
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Pricing cards — stacked full width */}
       <div className="space-y-4 mb-16">
         {/* Starter */}
-        <div className="bg-bg-card border border-border rounded-2xl p-6">
-          <div className="flex items-start justify-between mb-6">
+        <div className={`bg-bg-card rounded-2xl p-6 ${
+          !isActive ? "border-2 border-[#1a1a1a]" : "border border-border"
+        } relative`}>
+          {!isActive && (
+            <span className="absolute -top-3 left-6 bg-[#1a1a1a] text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+              Current plan
+            </span>
+          )}
+          <div className={`flex items-start justify-between ${!isActive ? "mt-1" : ""} mb-6`}>
             <div>
               <h3 className="font-display text-[18px] font-bold mb-1">Starter</h3>
               <p className="text-text-muted text-[14px]">All the essentials to get started</p>
             </div>
             <span className="font-display text-[28px] font-extrabold">Free</span>
-          </div>
-          <div className="w-full bg-bg-input text-text py-3 rounded-xl font-semibold text-[14px] text-center mb-6">
-            Current plan
           </div>
           <div className="space-y-3">
             {["3 AI coaching sessions per day", "Daily check-ins & streaks", "Approach tracking & stats", "Community feed"].map((f) => (
@@ -234,35 +206,45 @@ export default function PlansPage() {
         </div>
 
         {/* Pro */}
-        <div className="bg-bg-card border-2 border-[#1a1a1a] rounded-2xl p-6 relative">
-          <span className="absolute -top-3 left-6 bg-[#1a1a1a] text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-            Most popular
-          </span>
-          <div className="flex items-start justify-between mb-2 mt-1">
+        <div className={`bg-bg-card rounded-2xl p-6 relative ${
+          isActive ? "border-2 border-[#1a1a1a]" : "border border-border"
+        }`}>
+          {isActive && (
+            <span className="absolute -top-3 left-6 bg-[#1a1a1a] text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+              Current plan
+            </span>
+          )}
+          <div className={`flex items-start justify-between ${isActive ? "mt-1" : ""} mb-2`}>
             <div>
               <h3 className="font-display text-[18px] font-bold mb-1">Pro</h3>
               <p className="text-text-muted text-[14px]">Unlimited AI coaching & analysis</p>
             </div>
             <div className="text-right">
               <div className="flex items-baseline gap-1.5">
-                {billing === "yearly" && (
+                {!isActive && billing === "yearly" && (
                   <span className="text-text-muted text-[18px] font-bold line-through">$15</span>
                 )}
-                <span className="font-display text-[28px] font-extrabold">${price}</span>
+                <span className="font-display text-[28px] font-extrabold">
+                  {isActive ? `$${isYearly ? "10" : "15"}` : `$${price}`}
+                </span>
                 <span className="text-text-muted text-[14px] font-medium">/mo</span>
               </div>
             </div>
           </div>
           <p className="text-text-muted text-[12px] mb-6">
-            {billing === "yearly" ? "$120 billed annually" : "Cancel anytime"}
+            {isActive
+              ? isYearly ? "$120 billed annually" : "Billed monthly"
+              : billing === "yearly" ? "$120 billed annually" : "Cancel anytime"}
           </p>
-          <button
-            onClick={() => handleCheckout(billing)}
-            disabled={!!loading}
-            className="w-full bg-[#1a1a1a] text-white py-3 rounded-xl font-semibold text-[14px] press disabled:opacity-60 mb-6"
-          >
-            {loading ? "Redirecting..." : "Subscribe"}
-          </button>
+          {!isActive && (
+            <button
+              onClick={() => handleCheckout(billing)}
+              disabled={!!loading}
+              className="w-full bg-[#1a1a1a] text-white py-3 rounded-xl font-semibold text-[14px] press disabled:opacity-60 mb-6"
+            >
+              {loading ? "Redirecting..." : "Subscribe"}
+            </button>
+          )}
           <p className="text-[12px] font-semibold text-text-muted uppercase tracking-wide mb-3">
             Everything in Starter, plus
           </p>
@@ -327,22 +309,24 @@ export default function PlansPage() {
         </div>
       </div>
 
-      {/* Bottom CTA */}
-      <div className="text-center mb-16">
-        <h2 className="font-display text-[24px] font-bold tracking-tight mb-3">
-          Your AI wingman, always ready.
-        </h2>
-        <p className="text-text-muted text-[15px] leading-relaxed mb-8 max-w-[320px] mx-auto">
-          Try Wingmate Pro on your next approach.
-        </p>
-        <button
-          onClick={() => handleCheckout(billing)}
-          disabled={!!loading}
-          className="bg-[#1a1a1a] text-white py-3.5 px-12 rounded-2xl font-semibold text-[15px] press disabled:opacity-60"
-        >
-          {loading ? "Redirecting..." : "Get Wingmate Pro"}
-        </button>
-      </div>
+      {/* Bottom CTA — only for non-subscribers */}
+      {!isActive && (
+        <div className="text-center mb-16">
+          <h2 className="font-display text-[24px] font-bold tracking-tight mb-3">
+            Your AI wingman, always ready.
+          </h2>
+          <p className="text-text-muted text-[15px] leading-relaxed mb-8 max-w-[320px] mx-auto">
+            Try Wingmate Pro on your next approach.
+          </p>
+          <button
+            onClick={() => handleCheckout(billing)}
+            disabled={!!loading}
+            className="bg-[#1a1a1a] text-white py-3.5 px-12 rounded-2xl font-semibold text-[15px] press disabled:opacity-60"
+          >
+            {loading ? "Redirecting..." : "Get Wingmate Pro"}
+          </button>
+        </div>
+      )}
 
       {/* FAQ */}
       <div className="mb-16">
