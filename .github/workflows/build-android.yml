@@ -38,7 +38,15 @@ jobs:
       - name: Copy icon into Android resources
         run: |
           mkdir -p app/src/main/res/mipmap-xxxhdpi
+          mkdir -p app/src/main/res/mipmap-xxhdpi
+          mkdir -p app/src/main/res/mipmap-xhdpi
+          mkdir -p app/src/main/res/mipmap-hdpi
+          mkdir -p app/src/main/res/mipmap-mdpi
           cp ../public/icons/icon-512.png app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          cp ../public/icons/icon-192.png app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp ../public/icons/icon-192.png app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp ../public/icons/icon-192.png app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp ../public/icons/icon-192.png app/src/main/res/mipmap-mdpi/ic_launcher.png
 
       - name: Build release AAB and APK
         env:
@@ -72,10 +80,20 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-      - name: Set up Ruby
-        if: env.HAS_PLAY_KEY == 'true'
+      - name: Check Play Store key availability
+        id: play-key-check
+        run: |
+          if [ -n "$PLAY_KEY" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping Play Store upload — GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret not set"
+          fi
         env:
-          HAS_PLAY_KEY: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON != '' }}
+          PLAY_KEY: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+
+      - name: Set up Ruby
+        if: steps.play-key-check.outputs.available == 'true'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
@@ -83,12 +101,17 @@ jobs:
           working-directory: android-twa
 
       - name: Publish to Google Play via Fastlane
-        if: env.HAS_PLAY_KEY == 'true'
+        if: steps.play-key-check.outputs.available == 'true'
         env:
-          HAS_PLAY_KEY: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON != '' }}
           ANDROID_PACKAGE_ID: ${{ vars.ANDROID_PACKAGE_ID }}
         run: |
           echo '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}' > play-store-key.json
           export GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_FILE="$(pwd)/play-store-key.json"
           bundle exec fastlane internal
+          rm -f play-store-key.json
+
+      - name: Clean up secrets
+        if: always()
+        run: |
+          rm -f /tmp/keystore.jks
           rm -f play-store-key.json
