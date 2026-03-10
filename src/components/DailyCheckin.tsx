@@ -287,45 +287,45 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
     };
 
     return (
-      <div className="bg-[#1a1a1a] text-white rounded-2xl px-5 py-5">
+      <div className="bg-bg-card border border-border rounded-2xl px-5 py-5">
         <div className="space-y-4">
           <div>
-            <p className="text-[13px] text-white/50 mb-2">Girls you saw</p>
+            <p className="text-[13px] text-text-muted mb-2">Girls you saw</p>
             <div className="flex items-center gap-4">
               <button onClick={() => { initIfNeeded(); setTodayOpportunities(Math.max(0, dispOpp - 1)); if (dispAppr > dispOpp - 1) setTodayApproaches(Math.max(0, dispOpp - 1)); }}
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">−</button>
+                className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press">−</button>
               <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">{dispOpp}</span>
               <button onClick={() => { initIfNeeded(); setTodayOpportunities(dispOpp + 1); }}
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">+</button>
+                className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press">+</button>
             </div>
           </div>
           <div>
-            <p className="text-[13px] text-white/50 mb-2">Girls you approached</p>
+            <p className="text-[13px] text-text-muted mb-2">Girls you approached</p>
             <div className="flex items-center gap-4">
               <button onClick={() => { initIfNeeded(); setTodayApproaches(Math.max(0, dispAppr - 1)); if (dispSucc > dispAppr - 1) setTodaySuccesses(Math.max(0, dispAppr - 1)); }}
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">−</button>
+                className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press">−</button>
               <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">{dispAppr}</span>
               <button onClick={() => { initIfNeeded(); setTodayApproaches(Math.min(dispOpp, dispAppr + 1)); }}
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">+</button>
+                className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press">+</button>
             </div>
           </div>
           <div>
-            <p className="text-[13px] text-white/50 mb-2">Went well</p>
+            <p className="text-[13px] text-text-muted mb-2">Went well</p>
             <div className="flex items-center gap-4">
               <button onClick={() => { initIfNeeded(); setTodaySuccesses(Math.max(0, dispSucc - 1)); }}
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">−</button>
+                className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press">−</button>
               <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">{dispSucc}</span>
               <button onClick={() => { initIfNeeded(); setTodaySuccesses(Math.min(dispAppr, dispSucc + 1)); }}
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">+</button>
+                className="w-10 h-10 rounded-full bg-bg-card-hover border border-border flex items-center justify-center text-[18px] font-bold press">+</button>
             </div>
           </div>
         </div>
         {isDirty && (
           <div className="flex gap-2 mt-4 animate-fade-in">
             <button onClick={() => { setTodayOpportunities(null); setTodayApproaches(null); setTodaySuccesses(null); }}
-              className="flex-1 py-3 rounded-xl bg-white/10 text-white/70 text-[14px] font-medium press">Cancel</button>
+              className="flex-1 py-3 rounded-xl bg-bg-card-hover border border-border text-[14px] font-medium press">Cancel</button>
             <button onClick={saveToday} disabled={savingToday}
-              className="flex-1 py-3 rounded-xl bg-white text-[#1a1a1a] text-[14px] font-semibold press disabled:opacity-60">
+              className="flex-1 py-3 rounded-xl bg-[#1a1a1a] text-white text-[14px] font-semibold press disabled:opacity-60">
               {savingToday ? "..." : "Save"}</button>
           </div>
         )}
