@@ -288,6 +288,8 @@ export default function DailyCheckin({ onTalkAboutIt, onCheckedIn }: { onTalkAbo
 
     return (
       <div className="bg-bg-card border border-border rounded-2xl px-5 py-5">
+        <h3 className="font-display text-[16px] font-bold mb-0.5">Update today&apos;s stats</h3>
+        <p className="text-text-muted text-[13px] mb-4">Adjust your numbers as the day goes on</p>
         <div className="space-y-4">
           <div>
             <p className="text-[13px] text-text-muted mb-2">Girls you saw</p>
