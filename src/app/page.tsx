@@ -606,7 +606,7 @@ export default function Home() {
           </div>
 
           {/* Motivational sell */}
-          {!isPro && (
+          {(
             <div className="mt-10 space-y-6">
               <div className="rounded-2xl bg-[#1a1a1a] text-white px-6 py-7">
                 <h3 className="font-display text-[20px] font-bold leading-snug mb-4">
