@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Flame, Lock } from "lucide-react";
+import { Plus, Flame, Lock, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
@@ -225,22 +225,40 @@ export default function Home() {
 
       {/* ===== WINGMAN TAB: CHAT ===== */}
       {activeTab === "coach" && (state === "chat" || state === "tabs") && (
-        <ChatCoach
-          onBack={() => {
-            setActiveConversationId(null);
-            updateState("tabs");
-          }}
-          conversationId={activeConversationId}
-          onConversationCreated={(id) => setActiveConversationId(id)}
-          onShowHistory={() => {
-            updateState("conversations");
-          }}
-          onNewChat={() => {
-            setActiveConversationId(null);
-            updateState("chat");
-          }}
-          showBottomPadding
-        />
+        isLoggedIn === false ? (
+          <div className="px-5 pt-20 pb-10 animate-fade-in flex flex-col items-center text-center">
+            <div className="w-16 h-16 rounded-full bg-bg-card border border-border flex items-center justify-center mb-4">
+              <MessageCircle size={24} strokeWidth={1.5} className="text-text-muted" />
+            </div>
+            <h2 className="font-display text-[20px] font-bold mb-2">Your AI coach</h2>
+            <p className="text-text-muted text-[14px] leading-relaxed mb-6 max-w-[260px]">
+              Get real advice for any situation. Sign in to start your first coaching session.
+            </p>
+            <button
+              onClick={() => { const s = createClient(); s.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/auth/callback` } }); }}
+              className="px-6 py-3 bg-[#1a1a1a] text-white rounded-xl font-medium text-[14px] press"
+            >
+              Sign in to chat
+            </button>
+          </div>
+        ) : (
+          <ChatCoach
+            onBack={() => {
+              setActiveConversationId(null);
+              updateState("tabs");
+            }}
+            conversationId={activeConversationId}
+            onConversationCreated={(id) => setActiveConversationId(id)}
+            onShowHistory={() => {
+              updateState("conversations");
+            }}
+            onNewChat={() => {
+              setActiveConversationId(null);
+              updateState("chat");
+            }}
+            showBottomPadding
+          />
+        )
       )}
 
       {/* ===== CHECK-IN TAB ===== */}
