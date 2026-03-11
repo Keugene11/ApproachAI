@@ -368,6 +368,13 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
           </div>
         ) : (
           <>
+            {messages.length <= 1 && !conversationId && (
+              <div className="bg-bg-card border border-border/60 rounded-2xl px-4 py-4 mb-2 animate-fade-in">
+                <p className="text-[13px] leading-relaxed text-text-muted">
+                  See someone you want to talk to but can&apos;t get yourself to walk over? Tell Wingmate what&apos;s going on — where you are, how you&apos;re feeling, what&apos;s holding you back — and it&apos;ll help you get out of your head and into the conversation.
+                </p>
+              </div>
+            )}
             {messages.map((msg, i) =>
               msg.role === "user" ? (
                 <div key={i} className="flex justify-end msg-in">
