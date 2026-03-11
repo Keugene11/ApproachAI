@@ -73,7 +73,7 @@ export default function ProfilePage() {
   const handleSignOut = async () => {
     setLoggingOut(true);
     await supabase.auth.signOut();
-    router.push("/login");
+    router.push("/");
   };
 
   const saveUsername = async () => {

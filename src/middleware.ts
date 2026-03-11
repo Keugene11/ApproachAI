@@ -31,13 +31,6 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // If logged in and on login page, redirect to home
-  if (user && pathname.startsWith("/login")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
-  }
-
   // Community pages require Pro subscription
   if (user && pathname.startsWith("/community")) {
     const { data: subscription } = await supabase

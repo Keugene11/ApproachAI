@@ -38,8 +38,8 @@ export default function DeleteAccountPage() {
         <p className="text-text-muted text-[15px] leading-relaxed mb-6">
           Your account data has been deleted. Your Google account itself is not affected.
         </p>
-        <Link href="/login" className="text-[14px] font-medium underline">
-          Return to login
+        <Link href="/" className="text-[14px] font-medium underline">
+          Return home
         </Link>
       </main>
     );

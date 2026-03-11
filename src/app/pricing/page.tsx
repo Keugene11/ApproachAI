@@ -67,7 +67,7 @@ export default function PricingPage() {
         <button onClick={() => router.back()} className="p-1 -ml-1 press">
           <ArrowLeft size={20} strokeWidth={1.5} />
         </button>
-        <Link href="/login" className="text-[14px] font-medium text-text-muted press">
+        <Link href="/" className="text-[14px] font-medium text-text-muted press">
           Sign in
         </Link>
       </div>
@@ -121,7 +121,7 @@ export default function PricingPage() {
             <span className="font-display text-[28px] font-extrabold">Free</span>
           </div>
           <Link
-            href="/login"
+            href="/"
             className="w-full bg-bg-input text-text py-3 rounded-xl font-semibold text-[14px] press text-center block mb-6"
           >
             Get started
@@ -290,7 +290,7 @@ export default function PricingPage() {
         <p>Secure payment via Stripe &middot; Cancel anytime</p>
         <div className="flex items-center justify-center gap-4 mt-3">
           <Link href="/privacy" className="underline">Privacy Policy</Link>
-          <Link href="/login" className="underline">Sign in</Link>
+          <Link href="/" className="underline">Sign in</Link>
         </div>
       </div>
     </main>
