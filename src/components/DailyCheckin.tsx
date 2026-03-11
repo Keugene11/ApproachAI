@@ -196,6 +196,7 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
 
   if (!data) {
     if (!isLoggedIn) {
+      const triggerSignIn = () => { const s = createClient(); s.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/auth/callback` } }); };
       const todayDate = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
       const emptyLast7 = Array.from({ length: 7 }, (_, i) => {
         const d = new Date();
@@ -212,8 +213,8 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
             </p>
           </div>
 
-          {/* Check-in card (disabled) */}
-          <div className="rounded-2xl px-5 py-6 bg-[#1a1a1a] text-white relative overflow-hidden">
+          {/* Check-in card */}
+          <div className="rounded-2xl px-5 py-6 bg-[#1a1a1a] text-white">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="font-display text-[18px] font-bold">Enter today&apos;s stats</h2>
@@ -224,37 +225,43 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
               </div>
             </div>
 
-            <div className="space-y-4 mb-5 opacity-70 pointer-events-none">
+            <div className="space-y-4 mb-5">
               <div>
                 <p className="text-[13px] text-white/50 mb-2">Girls you saw</p>
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold">−</div>
+                  <button onClick={triggerSignIn} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">−</button>
                   <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">0</span>
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold">+</div>
+                  <button onClick={triggerSignIn} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">+</button>
                 </div>
               </div>
               <div>
                 <p className="text-[13px] text-white/50 mb-2">Girls you approached</p>
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold">−</div>
+                  <button onClick={triggerSignIn} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">−</button>
                   <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">0</span>
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold">+</div>
+                  <button onClick={triggerSignIn} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">+</button>
                 </div>
               </div>
               <div>
                 <p className="text-[13px] text-white/50 mb-2">Went well</p>
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold">−</div>
+                  <button onClick={triggerSignIn} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">−</button>
                   <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">0</span>
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold">+</div>
+                  <button onClick={triggerSignIn} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">+</button>
                 </div>
               </div>
             </div>
 
-            <button onClick={() => { const s = createClient(); s.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/auth/callback` } }); }}
-              className="block w-full py-3.5 rounded-xl bg-white text-[#1a1a1a] text-[14px] font-semibold text-center press">
-              Sign in to start tracking
-            </button>
+            <div className="flex gap-2">
+              <button onClick={triggerSignIn}
+                className="flex-1 py-3.5 rounded-xl bg-white/10 text-white/70 text-[14px] font-medium press">
+                No approaches today
+              </button>
+              <button onClick={triggerSignIn}
+                className="flex-1 py-3.5 rounded-xl bg-white text-[#1a1a1a] text-[14px] font-semibold press">
+                Save
+              </button>
+            </div>
           </div>
 
           {/* All-time stats (zeroed, disabled) */}
