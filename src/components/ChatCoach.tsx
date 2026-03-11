@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ArrowLeft, ArrowUp, Lock, List, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase-browser";
 
 interface Message {
   role: "user" | "assistant";
@@ -17,9 +18,10 @@ interface ChatCoachProps {
   onShowHistory?: () => void;
   onNewChat?: () => void;
   showBottomPadding?: boolean;
+  isLoggedIn?: boolean;
 }
 
-export default function ChatCoach({ onBack, checkinMode, conversationId, onConversationCreated, onShowHistory, onNewChat, showBottomPadding }: ChatCoachProps) {
+export default function ChatCoach({ onBack, checkinMode, conversationId, onConversationCreated, onShowHistory, onNewChat, showBottomPadding, isLoggedIn = true }: ChatCoachProps) {
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -213,6 +215,31 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
       };
       setMessages([initialMsg]);
       setInitialized(true);
+
+      // Check for pending message saved before OAuth redirect
+      if (isLoggedIn) {
+        try {
+          const pending = sessionStorage.getItem("wingmate-pending-message");
+          if (pending) {
+            sessionStorage.removeItem("wingmate-pending-message");
+            const userMsg: Message = { role: "user", content: pending };
+            const allMsgs = [initialMsg, userMsg];
+            setMessages(allMsgs);
+
+            // Count session + message usage
+            if (!isSubscribed.current) {
+              sessionCounted.current = true;
+              fetch("/api/usage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "session" }) }).catch(() => {});
+              fetch("/api/usage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "message" }) }).catch(() => {});
+            }
+
+            ensureConversation().then((id) => {
+              if (id) saveMessages(id, allMsgs);
+              streamResponse(allMsgs, id);
+            });
+          }
+        } catch {}
+      }
     }
   }, [initialized, conversationId, checkinMode, streamResponse, ensureConversation, saveMessages]);
 
@@ -230,6 +257,20 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
 
   const sendMessage = async (content: string) => {
     if (!content.trim() || isLoading || limitReached) return;
+
+    // If not logged in, save message and redirect to Google OAuth
+    if (!isLoggedIn) {
+      try {
+        sessionStorage.setItem("wingmate-pending-message", content.trim());
+      } catch {}
+      const supabase = createClient();
+      supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+      return;
+    }
+
     const userMessage: Message = { role: "user", content: content.trim() };
     const updated = [...messages, userMessage];
     setMessages(updated);
