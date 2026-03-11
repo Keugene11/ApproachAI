@@ -156,7 +156,11 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
             <h2 className="font-display text-[20px] font-bold tracking-tight leading-snug mb-2">{post.title}</h2>
             <p className="text-[15px] leading-relaxed whitespace-pre-wrap mb-3">{post.body}</p>
             <p className="text-[12px] text-text-muted">
-              {post.author_name} · {timeAgo(post.created_at)}
+              <Link href={`/community/user/${post.user_id}`} className="hover:underline">
+                {post.author_name}
+              </Link>
+              {" · "}
+              {timeAgo(post.created_at)}
             </p>
           </div>
         </div>
@@ -177,7 +181,9 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
           {comments.map((comment) => (
             <div key={comment.id} className="group">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[13px] font-medium">{comment.author_name}</span>
+                <Link href={`/community/user/${comment.user_id}`} className="text-[13px] font-medium hover:underline">
+                  {comment.author_name}
+                </Link>
                 <span className="text-[12px] text-text-muted">{timeAgo(comment.created_at)}</span>
                 {comment.user_id === userId && (
                   <button

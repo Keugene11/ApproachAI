@@ -27,6 +27,7 @@ export default function PostCard({
   score: initialScore,
   commentCount,
   createdAt,
+  userId,
   currentUserId,
   currentVote: initialVote,
 }: PostCardProps) {
@@ -78,7 +79,13 @@ export default function PostCard({
           <h3 className="font-semibold text-[15px] leading-snug mb-1 line-clamp-2">{title}</h3>
           <p className="text-text-muted text-[13px] leading-relaxed line-clamp-2 mb-2">{body}</p>
           <div className="flex items-center gap-3 text-[12px] text-text-muted">
-            <span>{authorName}</span>
+            <Link
+              href={`/community/user/${userId}`}
+              onClick={(e) => e.stopPropagation()}
+              className="hover:underline"
+            >
+              {authorName}
+            </Link>
             <span>·</span>
             <span>{timeAgo(createdAt)}</span>
             <span className="ml-auto flex items-center gap-1">
