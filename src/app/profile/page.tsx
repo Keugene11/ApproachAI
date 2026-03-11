@@ -314,6 +314,9 @@ export default function ProfilePage() {
       </div>
 
       <div className="mt-8 text-center space-x-3">
+        <Link href="/terms" className="text-[12px] text-text-muted underline">
+          Terms of Service
+        </Link>
         <Link href="/privacy" className="text-[12px] text-text-muted underline">
           Privacy Policy
         </Link>
