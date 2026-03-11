@@ -6,22 +6,19 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 const COMPARISON = [
-  { feature: "AI coaching sessions", free: "1 session, 1 msg", pro: "Unlimited" },
+  { feature: "AI coaching messages", free: "2 messages", pro: "Unlimited" },
   { feature: "Photo situation analysis", free: false, pro: true },
-  { feature: "Personalized openers", free: false, pro: true },
-  { feature: "Text & DM coaching", free: false, pro: true },
-  { feature: "Dating profile reviews", free: false, pro: true },
-  { feature: "Custom approach plans", free: false, pro: true },
-  { feature: "Community feed", free: false, pro: true },
-  { feature: "Daily check-ins", free: true, pro: true },
-  { feature: "Streaks & stats", free: true, pro: true },
-  { feature: "Approach tracking", free: true, pro: true },
+  { feature: "Daily check-ins & streaks", free: "View only", pro: true },
+  { feature: "Approach tracking & stats", free: "View only", pro: true },
+  { feature: "Community posts & comments", free: false, pro: true },
+  { feature: "Community search", free: false, pro: true },
+  { feature: "User post histories", free: false, pro: true },
 ];
 
 const FAQ = [
   {
     q: "Can I try it for free?",
-    a: "Yes. Daily check-ins, approach tracking, and stats are free forever. You get 1 AI coaching session with 1 message to try it out. Upgrade for unlimited coaching and community access.",
+    a: "Yes. You can see the tracker and stats, and get 2 free AI coaching messages to try it out. Upgrade for unlimited coaching, full tracker access, and community.",
   },
   {
     q: "How is this different from ChatGPT?",
@@ -127,7 +124,7 @@ export default function PricingPage() {
             Get started
           </Link>
           <div className="space-y-3">
-            {["1 AI coaching session, 1 message", "Daily check-ins & streaks", "Approach tracking & stats", "Community feed"].map((f) => (
+            {["2 free AI coaching messages", "View check-ins & stats", "Photo situation analysis (1 try)"].map((f) => (
               <div key={f} className="flex items-center gap-3">
                 <Check size={16} strokeWidth={2.5} className="text-text-muted shrink-0" />
                 <span className="text-[14px]">{f}</span>
@@ -170,7 +167,7 @@ export default function PricingPage() {
             Everything in Starter, plus
           </p>
           <div className="space-y-3">
-            {["Unlimited AI coaching sessions", "Photo situation analysis", "Personalized openers for any moment", "Text & DM coaching", "Dating profile reviews"].map((f) => (
+            {["Unlimited AI coaching", "Photo situation analysis", "Daily check-ins & streaks", "Approach tracking & stats", "Community posts & comments"].map((f) => (
               <div key={f} className="flex items-center gap-3">
                 <Check size={16} strokeWidth={2.5} className="text-[#1a1a1a] shrink-0" />
                 <span className="text-[14px]">{f}</span>

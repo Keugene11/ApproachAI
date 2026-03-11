@@ -15,7 +15,7 @@ type Subscription = {
 const FAQ = [
   {
     q: "Can I try it for free?",
-    a: "You're already using it! Daily check-ins, approach tracking, and stats are free forever. You get 1 AI coaching session with 1 message to try it out. Upgrade for unlimited coaching and community access.",
+    a: "You're already using it! You can see the tracker and stats, and get 2 free AI coaching messages. Upgrade for unlimited coaching, full tracker access, and community.",
   },
   {
     q: "How is this different from ChatGPT?",
@@ -160,7 +160,7 @@ export default function PlansPage() {
             </button>
           )}
           <div className="space-y-3">
-            {["Unlimited AI coaching sessions", "Photo situation analysis", "Personalized openers for any moment", "Text & DM coaching", "Dating profile reviews"].map((f) => (
+            {["Unlimited AI coaching", "Photo situation analysis", "Daily check-ins & streaks", "Approach tracking & stats", "Community posts & comments"].map((f) => (
               <div key={f} className="flex items-center gap-3">
                 <Check size={16} strokeWidth={2.5} className="text-text-muted shrink-0" />
                 <span className="text-[14px]">{f}</span>
@@ -198,7 +198,7 @@ export default function PlansPage() {
             </button>
           )}
           <div className="space-y-3">
-            {["Unlimited AI coaching sessions", "Photo situation analysis", "Personalized openers for any moment", "Text & DM coaching", "Dating profile reviews"].map((f) => (
+            {["Unlimited AI coaching", "Photo situation analysis", "Daily check-ins & streaks", "Approach tracking & stats", "Community posts & comments"].map((f) => (
               <div key={f} className="flex items-center gap-3">
                 <Check size={16} strokeWidth={2.5} className="text-[#1a1a1a] shrink-0" />
                 <span className="text-[14px]">{f}</span>
