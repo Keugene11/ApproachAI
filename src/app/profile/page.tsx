@@ -37,10 +37,16 @@ export default function ProfilePage() {
   // Stats
   const [streak, setStreak] = useState(0);
   const [totalCheckins, setTotalCheckins] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) setEmail(user.email || "");
+      if (user) {
+        setEmail(user.email || "");
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+      }
     });
 
     fetch("/api/profile")
@@ -131,6 +137,35 @@ export default function ProfilePage() {
     new Date(dateStr).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
   const avatarSrc = profile?.avatar_url || undefined;
+
+  if (isLoggedIn === false) {
+    return (
+      <main className="min-h-screen max-w-md mx-auto px-5 pt-6 pb-24 animate-fade-in">
+        <div className="flex items-center gap-3 mb-8">
+          <button onClick={() => router.push("/")} className="p-1 -ml-1 press">
+            <ArrowLeft size={20} strokeWidth={1.5} />
+          </button>
+          <h1 className="font-display text-[20px] font-bold tracking-tight">Profile</h1>
+        </div>
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-20 h-20 rounded-full bg-bg-input flex items-center justify-center mb-6">
+            <span className="text-[28px] font-bold text-text-muted">?</span>
+          </div>
+          <h2 className="font-display text-[20px] font-bold mb-2">Sign in to view your profile</h2>
+          <p className="text-text-muted text-[14px] leading-relaxed mb-6 max-w-[260px]">
+            Track your streaks, manage your subscription, and customize your profile.
+          </p>
+          <button
+            onClick={() => supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/auth/callback` } })}
+            className="px-6 py-3 bg-[#1a1a1a] text-white rounded-xl font-medium text-[14px] press"
+          >
+            Sign in with Google
+          </button>
+        </div>
+        <BottomNav />
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen max-w-md mx-auto px-5 pt-6 pb-24 animate-fade-in">
