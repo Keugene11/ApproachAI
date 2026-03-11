@@ -342,7 +342,7 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
           </button>
         )}
         <div className="flex-1 text-center">
-          <p className="font-display text-[15px] font-bold">Wingman</p>
+          <p className="font-display text-[15px] font-bold">Wingmate</p>
           {isLoading && (
             <p className="text-[11px] text-orange-500 font-medium animate-fade-in">thinking...</p>
           )}
@@ -414,7 +414,7 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
           <Lock size={18} strokeWidth={1.5} className="mx-auto text-text-muted mb-2" />
           <p className="font-display font-bold text-[16px] mb-1">You&apos;re out of free messages</p>
           <p className="text-text-muted text-[13px] mb-4">
-            Go Pro for unlimited access to your AI wingman.
+            Go Pro for unlimited access to your AI wingmate.
           </p>
           <button
             onClick={() => router.push("/pricing")}

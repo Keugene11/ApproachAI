@@ -224,7 +224,7 @@ export default function Home() {
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
     if (tab === "coach") {
-      // If already on wingman tab viewing history, stay there; otherwise show chat
+      // If already on wingmate tab viewing history, stay there; otherwise show chat
       if (activeTab !== "coach") {
         setActiveConversationId(null);
         updateState("chat");
@@ -646,7 +646,7 @@ export default function Home() {
                   Wingmate makes it happen.
                 </h3>
                 <p className="text-white/70 text-[15px] leading-relaxed mb-4">
-                  Your AI wingman tells you exactly what to say. The tracker keeps you accountable. The community has guys on the same path cheering you on.
+                  Your AI wingmate tells you exactly what to say. The tracker keeps you accountable. The community has guys on the same path cheering you on.
                 </p>
                 <p className="text-white text-[15px] leading-relaxed font-semibold">
                   One approach that goes right will change how you see yourself. Wingmate is how you get there.

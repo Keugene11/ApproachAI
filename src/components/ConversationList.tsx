@@ -78,7 +78,7 @@ export default function ConversationList({
             </div>
             <h2 className="font-display text-[18px] font-bold mb-2">No conversations yet</h2>
             <p className="text-text-muted text-[14px] leading-relaxed mb-6 max-w-[260px]">
-              Start a chat with your AI wingman to get hyped up for your next approach.
+              Start a chat with your AI wingmate to get hyped up for your next approach.
             </p>
             <button
               onClick={onNewChat}

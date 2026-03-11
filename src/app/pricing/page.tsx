@@ -232,7 +232,7 @@ export default function PricingPage() {
       {/* Bottom CTA */}
       <div className="text-center mb-16">
         <h2 className="font-display text-[24px] font-bold tracking-tight mb-3">
-          Your AI wingman, always ready.
+          Your AI wingmate, always ready.
         </h2>
         <p className="text-text-muted text-[15px] leading-relaxed mb-8 max-w-[320px] mx-auto">
           Try Wingmate on your next approach today.
