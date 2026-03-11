@@ -606,6 +606,19 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Motivational nudge */}
+          {!isPro && (
+            <div className="mt-10 rounded-2xl bg-[#1a1a1a] text-white px-6 py-7 text-center">
+              <p className="text-[26px] mb-4">🤔</p>
+              <h3 className="font-display text-[18px] font-bold leading-snug mb-3">
+                Think about it
+              </h3>
+              <p className="text-white/70 text-[15px] leading-relaxed max-w-[300px] mx-auto">
+                That girl you saw today — imagine walking up, saying exactly the right thing, and getting her number. That one moment is worth more than $15. Wingmate gets you there.
+              </p>
+            </div>
+          )}
+
           {/* FAQ */}
           <div className="mt-10">
             <h2 className="font-display text-[22px] font-bold tracking-tight mb-6">
