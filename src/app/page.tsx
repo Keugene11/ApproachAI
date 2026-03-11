@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Plus, Flame, Lock, MessageCircle } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Plus, Flame, Lock, MessageCircle, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
@@ -56,6 +56,10 @@ export default function Home() {
   const [communityLoading, setCommunityLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const [communityLoaded, setCommunityLoaded] = useState(false);
+  const [communitySearch, setCommunitySearch] = useState("");
+  const [communitySearchOpen, setCommunitySearchOpen] = useState(false);
+  const communityDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const communitySearchRef = useRef<HTMLInputElement>(null);
 
   const supabase = createClient();
 
@@ -103,16 +107,22 @@ export default function Home() {
   }, []);
 
   // Load community posts when tab switches to community
-  const fetchPosts = useCallback(async (mode: "new" | "top", offset = 0) => {
+  const fetchPosts = useCallback(async (mode: "new" | "top", offset = 0, query = "") => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
     const order = mode === "top" ? "score" : "created_at";
-    const { data } = await supabase
+    let q = supabase
       .from("posts")
       .select("*")
       .order(order, { ascending: false })
       .range(offset, offset + PAGE_SIZE - 1);
+
+    if (query) {
+      q = q.or(`title.ilike.%${query}%,body.ilike.%${query}%,author_name.ilike.%${query}%`);
+    }
+
+    const { data } = await q;
 
     const postList = data || [];
 
@@ -152,7 +162,23 @@ export default function Home() {
   const handleSortChange = (mode: "new" | "top") => {
     setSort(mode);
     setCommunityLoading(true);
-    fetchPosts(mode);
+    fetchPosts(mode, 0, communitySearch);
+  };
+
+  const handleCommunitySearch = (value: string) => {
+    setCommunitySearch(value);
+    if (communityDebounceRef.current) clearTimeout(communityDebounceRef.current);
+    communityDebounceRef.current = setTimeout(() => {
+      setCommunityLoading(true);
+      fetchPosts(sort, 0, value);
+    }, 300);
+  };
+
+  const clearCommunitySearch = () => {
+    setCommunitySearch("");
+    setCommunitySearchOpen(false);
+    setCommunityLoading(true);
+    fetchPosts(sort, 0, "");
   };
 
   const updateState = useCallback(
@@ -347,7 +373,13 @@ export default function Home() {
           )}
 
           {isPro === true && (<div>
-          <div className="flex items-center justify-end mb-4 -mt-2">
+          <div className="flex items-center justify-end mb-4 -mt-2 gap-2">
+            <button
+              onClick={() => { setCommunitySearchOpen(!communitySearchOpen); setTimeout(() => communitySearchRef.current?.focus(), 50); }}
+              className="w-9 h-9 rounded-full flex items-center justify-center press text-text-muted"
+            >
+              <Search size={16} strokeWidth={2} />
+            </button>
             <Link
               href="/community/new"
               className="h-9 px-3.5 rounded-full bg-[#1a1a1a] text-white flex items-center gap-1.5 press text-[13px] font-medium"
@@ -356,6 +388,26 @@ export default function Home() {
               Post
             </Link>
           </div>
+
+          {/* Search bar */}
+          {communitySearchOpen && (
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex-1 relative">
+                <Search size={14} strokeWidth={2} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted/50" />
+                <input
+                  ref={communitySearchRef}
+                  type="text"
+                  placeholder="Search posts..."
+                  value={communitySearch}
+                  onChange={(e) => handleCommunitySearch(e.target.value)}
+                  className="w-full bg-bg-card border border-border rounded-full pl-9 pr-4 py-2.5 text-[14px] placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors"
+                />
+              </div>
+              <button onClick={clearCommunitySearch} className="p-2 press text-text-muted">
+                <X size={16} strokeWidth={2} />
+              </button>
+            </div>
+          )}
 
           {/* Sort toggle */}
           <div className="flex gap-1 mb-5 bg-bg-card border border-border rounded-full p-1 w-fit">
@@ -377,14 +429,18 @@ export default function Home() {
             <div className="text-center text-text-muted text-[14px] py-20">Loading...</div>
           ) : posts.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-text-muted text-[15px] mb-4">No posts yet.</p>
-              <Link
-                href="/community/new"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1a1a1a] text-white text-[14px] font-medium press"
-              >
-                <Plus size={14} strokeWidth={2} />
-                Be the first to share
-              </Link>
+              <p className="text-text-muted text-[15px] mb-4">
+                {communitySearch ? "No posts found." : "No posts yet."}
+              </p>
+              {!communitySearch && (
+                <Link
+                  href="/community/new"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1a1a1a] text-white text-[14px] font-medium press"
+                >
+                  <Plus size={14} strokeWidth={2} />
+                  Be the first to share
+                </Link>
+              )}
             </div>
           ) : (
             <div className="space-y-3 stagger">
@@ -406,7 +462,7 @@ export default function Home() {
 
               {hasMore && (
                 <button
-                  onClick={() => fetchPosts(sort, posts.length)}
+                  onClick={() => fetchPosts(sort, posts.length, communitySearch)}
                   className="w-full py-3 text-center text-[14px] text-text-muted font-medium press"
                 >
                   Load more
