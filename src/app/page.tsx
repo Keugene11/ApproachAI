@@ -20,7 +20,7 @@ function getGreeting(name?: string): string {
   if (hour >= 5 && hour < 12) return `Good morning${suffix}`;
   if (hour >= 12 && hour < 17) return `Good afternoon${suffix}`;
   if (hour >= 17 && hour < 22) return `Good evening${suffix}`;
-  return `Good night${suffix}`;
+  return `Good evening${suffix}`;
 }
 
 type AppState = "tabs" | "conversations" | "chat" | "checkin-chat";
