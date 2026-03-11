@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Eye, Target, ThumbsUp, TrendingUp, Flame, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Target, ThumbsUp, TrendingUp, Flame, Calendar, X } from "lucide-react";
 import UpgradeModal from "@/components/UpgradeModal";
 
 interface CheckinEntry {
@@ -34,6 +34,11 @@ export default function StatsView({ isPro = true }: { isPro?: boolean }) {
     return { year: now.getFullYear(), month: now.getMonth() };
   });
   const [mode, setMode] = useState<ViewMode>("month");
+  const [editingDate, setEditingDate] = useState<string | null>(null);
+  const [editOpp, setEditOpp] = useState(0);
+  const [editAppr, setEditAppr] = useState(0);
+  const [editSucc, setEditSucc] = useState(0);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetch("/api/stats")
@@ -163,6 +168,33 @@ export default function StatsView({ isPro = true }: { isPro?: boolean }) {
 
   const isCurrentMonth = viewMonth.year === new Date().getFullYear() && viewMonth.month === new Date().getMonth();
 
+  const openDayEditor = (date: string, entry: CheckinEntry | null) => {
+    setEditingDate(date);
+    setEditOpp(entry?.opportunities ?? 0);
+    setEditAppr(entry?.approaches ?? 0);
+    setEditSucc(entry?.successes ?? 0);
+  };
+
+  const saveDayEdit = async () => {
+    if (!editingDate) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/checkin", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: editingDate, opportunities: editOpp, approaches: editAppr, successes: editSucc }),
+      });
+      if (res.ok) {
+        // Refresh stats
+        const statsRes = await fetch("/api/stats");
+        const d = await statsRes.json();
+        setCheckins(d.checkins || []);
+      }
+    } catch {}
+    setSaving(false);
+    setEditingDate(null);
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -230,12 +262,21 @@ export default function StatsView({ isPro = true }: { isPro?: boolean }) {
 
               const approachCount = cell.entry?.approaches ?? 0;
 
+              const isEditing = editingDate === cell.date;
+
               return (
-                <div key={cell.date} className="flex flex-col items-center justify-center aspect-square relative">
+                <button
+                  key={cell.date}
+                  onClick={() => !cell.isFuture && guardPro(() => openDayEditor(cell.date!, cell.entry))}
+                  disabled={cell.isFuture}
+                  className="flex flex-col items-center justify-center aspect-square relative press disabled:pointer-events-none"
+                >
                   <span className="text-[9px] text-text-muted leading-none mb-0.5">{cell.day}</span>
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-bold transition-all ${
-                      cell.isToday
+                      isEditing
+                        ? "ring-2 ring-blue-500 bg-blue-50 text-blue-600"
+                        : cell.isToday
                         ? approached
                           ? "bg-green-500 text-white ring-2 ring-green-300"
                           : didntApproach
@@ -252,7 +293,7 @@ export default function StatsView({ isPro = true }: { isPro?: boolean }) {
                   >
                     {hasEntry ? approachCount : ""}
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -271,6 +312,54 @@ export default function StatsView({ isPro = true }: { isPro?: boolean }) {
               <span className="text-[11px] text-text-muted">No entry</span>
             </div>
           </div>
+
+          {/* Day editor */}
+          {editingDate && (
+            <div className="mt-4 pt-4 border-t border-border animate-fade-in">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-[14px] font-semibold">
+                  {new Date(editingDate + "T00:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                </h3>
+                <button onClick={() => setEditingDate(null)} className="p-1 press text-text-muted">
+                  <X size={16} strokeWidth={2} />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  { label: "Seen", value: editOpp, set: (v: number) => { setEditOpp(v); if (editAppr > v) setEditAppr(v); if (editSucc > Math.min(editAppr, v)) setEditSucc(Math.min(editAppr, v)); }, color: "purple" },
+                  { label: "Approached", value: editAppr, set: (v: number) => { setEditAppr(v); if (editSucc > v) setEditSucc(v); }, max: editOpp, color: "blue" },
+                  { label: "Went well", value: editSucc, set: setEditSucc, max: editAppr, color: "green" },
+                ].map(({ label, value, set, max, color }) => (
+                  <div key={label} className="flex items-center justify-between">
+                    <span className={`text-[13px] font-medium text-${color}-600`}>{label}</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => set(Math.max(0, value - 1))}
+                        className="w-8 h-8 rounded-full bg-bg-card-hover flex items-center justify-center text-[16px] font-bold press"
+                      >−</button>
+                      <span className="font-display text-[20px] font-bold w-8 text-center">{value}</span>
+                      <button
+                        onClick={() => set(Math.min(max ?? 9999, value + 1))}
+                        className="w-8 h-8 rounded-full bg-bg-card-hover flex items-center justify-center text-[16px] font-bold press"
+                      >+</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-2 mt-4">
+                <button onClick={() => setEditingDate(null)}
+                  className="flex-1 py-2.5 rounded-xl bg-bg-card-hover border border-border text-[13px] font-medium press">
+                  Cancel
+                </button>
+                <button onClick={saveDayEdit} disabled={saving}
+                  className="flex-1 py-2.5 rounded-xl bg-[#1a1a1a] text-white text-[13px] font-semibold press disabled:opacity-60">
+                  {saving ? "Saving..." : "Save"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
