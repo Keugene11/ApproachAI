@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase-server";
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 
 const FREE_SESSION_LIMIT = 1;
-const FREE_MESSAGE_LIMIT = 5;
+const FREE_MESSAGE_LIMIT = 1;
 
 function getAdminClient() {
   return createSupabaseAdmin(

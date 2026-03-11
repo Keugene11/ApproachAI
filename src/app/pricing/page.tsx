@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 const COMPARISON = [
-  { feature: "AI coaching sessions", free: "1 session, 5 msgs", pro: "Unlimited" },
+  { feature: "AI coaching sessions", free: "1 session, 1 msg", pro: "Unlimited" },
   { feature: "Photo situation analysis", free: false, pro: true },
   { feature: "Personalized openers", free: false, pro: true },
   { feature: "Text & DM coaching", free: false, pro: true },
@@ -21,7 +21,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: "Can I try it for free?",
-    a: "Yes. Daily check-ins, approach tracking, and stats are free forever. You get 1 AI coaching session with 5 messages to try it out. Upgrade for unlimited coaching and community access.",
+    a: "Yes. Daily check-ins, approach tracking, and stats are free forever. You get 1 AI coaching session with 1 message to try it out. Upgrade for unlimited coaching and community access.",
   },
   {
     q: "How is this different from ChatGPT?",
@@ -127,7 +127,7 @@ export default function PricingPage() {
             Get started
           </Link>
           <div className="space-y-3">
-            {["3 AI coaching sessions per day", "Daily check-ins & streaks", "Approach tracking & stats", "Community feed"].map((f) => (
+            {["1 AI coaching session, 1 message", "Daily check-ins & streaks", "Approach tracking & stats", "Community feed"].map((f) => (
               <div key={f} className="flex items-center gap-3">
                 <Check size={16} strokeWidth={2.5} className="text-text-muted shrink-0" />
                 <span className="text-[14px]">{f}</span>
