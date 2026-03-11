@@ -217,7 +217,7 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
               </div>
             </div>
 
-            <div className="space-y-4 mb-5 opacity-40 pointer-events-none">
+            <div className="space-y-4 mb-5 opacity-70 pointer-events-none">
               <div>
                 <p className="text-[13px] text-white/50 mb-2">Girls you saw</p>
                 <div className="flex items-center gap-4">
