@@ -14,13 +14,20 @@ import PostCard from "@/components/PostCard";
 import StatsView from "@/components/StatsView";
 
 function getGreeting(name?: string): string {
-  const hour = new Date().getHours();
-  const suffix = name ? `, ${name}` : "";
-
-  if (hour >= 5 && hour < 12) return `Good morning${suffix}`;
-  if (hour >= 12 && hour < 17) return `Good afternoon${suffix}`;
-  if (hour >= 17 && hour < 22) return `Good evening${suffix}`;
-  return `Good evening${suffix}`;
+  const first = name || "king";
+  const lines = [
+    `Go talk to her, ${first}.`,
+    `No excuses today, ${first}.`,
+    `She's waiting, ${first}.`,
+    `Make a move, ${first}.`,
+    `Go get her number, ${first}.`,
+    `Approach someone new, ${first}.`,
+    `Be bold today, ${first}.`,
+  ];
+  // Pick one based on day of year so it's consistent within the same day
+  const now = new Date();
+  const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
+  return lines[dayOfYear % lines.length];
 }
 
 type AppState = "tabs" | "conversations" | "chat" | "checkin-chat";
