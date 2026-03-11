@@ -152,7 +152,7 @@ export default function Privacy() {
           <h2 className="text-text font-semibold text-[17px] mb-2">Contact</h2>
           <p>
             If you have questions or concerns about this privacy policy or your data, please
-            contact us through the app or at the email address associated with this service.
+            contact us at <a href="mailto:wingmatesupport@gmail.com" className="underline">wingmatesupport@gmail.com</a>.
           </p>
         </section>
       </div>
