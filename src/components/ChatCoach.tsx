@@ -277,20 +277,17 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
     setInput("");
     if (inputRef.current) inputRef.current.style.height = "auto";
 
+    let hitLimit = false;
     if (!isSubscribed.current) {
       // Count session on first message (not on mount)
       if (!sessionCounted.current) {
         sessionCounted.current = true;
         try {
-          const sRes = await fetch("/api/usage", {
+          await fetch("/api/usage", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ type: "session" }),
           });
-          const sData = await sRes.json();
-          if (sData.sessionsRemaining !== undefined) setSessionsRemaining(sData.sessionsRemaining);
-          if (sData.messagesRemaining !== undefined) setMessagesRemaining(sData.messagesRemaining);
-          if (sData.limitReached) { setLimitReached(true); return; }
         } catch {}
       }
 
@@ -302,10 +299,7 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
         });
         const data = await res.json();
         if (data.messagesRemaining !== undefined) setMessagesRemaining(data.messagesRemaining);
-        if (data.limitReached) {
-          setLimitReached(true);
-          return;
-        }
+        if (data.limitReached) hitLimit = true;
       } catch {}
     }
 
@@ -316,6 +310,9 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
       saveMessages(convoId, messages);
     }
     await streamResponse(updated, convoId);
+
+    // Block further messages after the response has been shown
+    if (hitLimit) setLimitReached(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
