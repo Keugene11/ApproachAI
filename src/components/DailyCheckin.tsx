@@ -609,14 +609,6 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
           </div>
         )}
 
-        {/* Talk about it */}
-        {data.checkedInToday && !showNoteField && (
-          <button onClick={() => onTalkAboutIt(data.talked!)}
-            className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-bg-card-hover text-[14px] font-medium press">
-            <MessageCircle size={16} strokeWidth={1.5} />
-            {data.talked ? "Tell me how it went" : "Let's talk about what's holding you back"}
-          </button>
-        )}
       </div>
       )}
 
