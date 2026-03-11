@@ -201,9 +201,23 @@ export async function POST(req: Request) {
   const { talked, note, opportunitiesCount, approachesCount, successesCount, clientDate } = await req.json();
   const today = clientDate || new Date().toISOString().split("T")[0];
 
-  const opps = Math.max(0, opportunitiesCount ?? 0);
-  const appr = Math.max(0, approachesCount ?? (talked ? 1 : 0));
-  const succ = Math.max(0, successesCount ?? 0);
+  // Validate date format
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(today) || isNaN(new Date(today + "T00:00:00").getTime())) {
+    return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+  }
+
+  // Reject future dates
+  const todayDate = new Date(today + "T00:00:00");
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  if (todayDate.getTime() > now.getTime() + 86400000) {
+    return NextResponse.json({ error: "Cannot check in for future dates" }, { status: 400 });
+  }
+
+  // Clamp counts: non-negative, approaches <= opportunities, successes <= approaches
+  const opps = Math.min(9999, Math.max(0, opportunitiesCount ?? 0));
+  const appr = Math.min(opps, Math.max(0, approachesCount ?? (talked ? 1 : 0)));
+  const succ = Math.min(appr, Math.max(0, successesCount ?? 0));
 
   // Check if this is a new check-in or update
   const { data: existing } = await supabase
@@ -344,9 +358,14 @@ export async function PATCH(req: Request) {
   // Mode 1: edit a specific day's stats
   if (body.date !== undefined) {
     const { date, opportunities, approaches, successes } = body;
-    const opps = Math.max(0, opportunities ?? 0);
-    const appr = Math.max(0, Math.min(opps, approaches ?? 0));
-    const succ = Math.max(0, Math.min(appr, successes ?? 0));
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(new Date(date + "T00:00:00").getTime())) {
+      return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+    }
+
+    const opps = Math.min(9999, Math.max(0, opportunities ?? 0));
+    const appr = Math.min(opps, Math.max(0, approaches ?? 0));
+    const succ = Math.min(appr, Math.max(0, successes ?? 0));
 
     const { data: existing } = await supabase
       .from("checkins").select("id").eq("user_id", user.id).eq("checked_in_at", date).single();

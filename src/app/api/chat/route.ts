@@ -135,10 +135,13 @@ export async function POST(req: Request) {
     const { messages, mode } = await req.json();
 
     if (!messages || !Array.isArray(messages)) {
-      return new Response(
-        `data: ${JSON.stringify({ content: "Error: No messages provided." })}\n\ndata: [DONE]\n\n`,
-        { headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" } }
-      );
+      return Response.json({ error: "No messages provided" }, { status: 400 });
+    }
+
+    // Limit message size to prevent abuse
+    const totalLength = messages.reduce((sum: number, m: { content?: string }) => sum + (m.content?.length || 0), 0);
+    if (totalLength > 50000) {
+      return Response.json({ error: "Message too long" }, { status: 400 });
     }
 
     let systemPrompt = SYSTEM_PROMPT;
