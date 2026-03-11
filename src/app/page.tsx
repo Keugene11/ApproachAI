@@ -613,8 +613,11 @@ export default function Home() {
               <h3 className="font-display text-[18px] font-bold leading-snug mb-3">
                 Think about it
               </h3>
+              <p className="text-white/70 text-[15px] leading-relaxed max-w-[300px] mx-auto mb-4">
+                Cold approaching your crush and overcoming your nerves to actually talk to her is one of the most fulfilling experiences of your life — something you&apos;ll remember forever.
+              </p>
               <p className="text-white/70 text-[15px] leading-relaxed max-w-[300px] mx-auto">
-                That girl you saw today — imagine walking up, saying exactly the right thing, and getting her number. That one moment is worth more than $15. Wingmate gets you there.
+                That one moment is worth way more than $15. Wingmate gets you there.
               </p>
             </div>
           )}
