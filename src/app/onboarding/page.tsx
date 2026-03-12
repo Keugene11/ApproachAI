@@ -32,7 +32,23 @@ const GOALS = [
   },
 ];
 
-function DelayedButton({ onClick, label, delay = 3000 }: { onClick: () => void; label: string; delay?: number }) {
+const STEPS = ["remember", "regret", "aicoach", "community", "username", "goals", "pitch", "motivation"] as const;
+type Step = (typeof STEPS)[number];
+
+function ProgressBar({ step }: { step: Step }) {
+  const idx = STEPS.indexOf(step);
+  const pct = ((idx + 1) / STEPS.length) * 100;
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-border/50">
+      <div
+        className="h-full bg-[#1a1a1a] transition-all duration-500 ease-out"
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  );
+}
+
+function DelayedButton({ onClick, label, delay = 2500 }: { onClick: () => void; label: string; delay?: number }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), delay);
@@ -57,7 +73,7 @@ export default function OnboardingPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [customGoal, setCustomGoal] = useState("");
   const [saving, setSaving] = useState(false);
-  const [step, setStep] = useState<"username" | "goals" | "remember" | "regret" | "aicoach" | "community" | "pitch" | "motivation">("username");
+  const [step, setStep] = useState<Step>("remember");
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [stepKey, setStepKey] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -69,7 +85,7 @@ export default function OnboardingPage() {
     });
   }, []);
 
-  const goToStep = (s: typeof step) => {
+  const goToStep = (s: Step) => {
     setStep(s);
     setStepKey((k) => k + 1);
   };
@@ -90,7 +106,6 @@ export default function OnboardingPage() {
     setSaving(true);
     const goalData: Record<string, string> = { goal: Array.from(selected).join(","), custom_goal: customGoal.trim() || "" };
     if (username.trim()) goalData.username = username.trim();
-    // Store in sessionStorage so goals persist through sign-in
     try { sessionStorage.setItem("wingmate-onboarding-goals", JSON.stringify(goalData)); } catch {}
     if (isLoggedIn) {
       try {
@@ -102,7 +117,7 @@ export default function OnboardingPage() {
       } catch {}
     }
     setSaving(false);
-    goToStep("remember");
+    goToStep("pitch");
   };
 
   const selectedGoalLabels = Array.from(selected)
@@ -110,9 +125,97 @@ export default function OnboardingPage() {
     .filter(Boolean) as string[];
   if (customGoal.trim()) selectedGoalLabels.push(customGoal.trim());
 
+  if (step === "remember") {
+    return (
+      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
+        <ProgressBar step={step} />
+        <div className="text-center mb-12">
+          <p className="text-[48px] mb-6 onb-emoji">💭</p>
+          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4 onb-title">
+            Remember that girl you couldn&apos;t stop thinking about?
+          </h1>
+          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto onb-body">
+            Your heart raced every time you saw her. You imagined what it&apos;d be like to talk to her, make her laugh, get to know her. But you never walked up — because the fear was louder than the desire.
+          </p>
+          <p className="text-text text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 font-medium onb-body-2">
+            That ends now.
+          </p>
+        </div>
+
+        <DelayedButton onClick={() => goToStep("regret")} label="Next" />
+      </main>
+    );
+  }
+
+  if (step === "regret") {
+    return (
+      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
+        <ProgressBar step={step} />
+        <div className="text-center mb-12">
+          <p className="text-[48px] mb-6 onb-emoji">😔</p>
+          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4 onb-title">
+            Then someone else walked up to her instead.
+          </h1>
+          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto onb-body">
+            Some other guy had the courage you didn&apos;t. He walked over, made her smile, and you just stood there — watching your chance disappear. You knew you could&apos;ve been that guy.
+          </p>
+          <p className="text-text text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 font-medium onb-body-2">
+            Never again.
+          </p>
+        </div>
+
+        <DelayedButton onClick={() => goToStep("aicoach")} label="Next" />
+      </main>
+    );
+  }
+
+  if (step === "aicoach") {
+    return (
+      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
+        <ProgressBar step={step} />
+        <div className="text-center mb-12">
+          <div className="w-16 h-16 rounded-2xl bg-[#1a1a1a] flex items-center justify-center mx-auto mb-6 onb-emoji">
+            <MessageCircle size={28} strokeWidth={1.5} className="text-white" />
+          </div>
+          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4 onb-title">
+            A coach in your pocket for the exact moment you need it.
+          </h1>
+          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto onb-body">
+            You see a cute girl. Your heart&apos;s pounding. You&apos;re frozen. That&apos;s when you open Wingmate.
+          </p>
+          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 onb-body-2">
+            Tell it where you are, what she looks like, what&apos;s holding you back. It gives you the exact words to say, kills your excuses, and fires you up to go — right now.
+          </p>
+        </div>
+
+        <DelayedButton onClick={() => goToStep("community")} label="Next" />
+      </main>
+    );
+  }
+
+  if (step === "community") {
+    return (
+      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
+        <ProgressBar step={step} />
+        <div className="text-center mb-12">
+          <p className="text-[48px] mb-6 onb-emoji">🤝</p>
+          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4 onb-title">
+            You&apos;re not doing this alone.
+          </h1>
+          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto onb-body">
+            Most guys don&apos;t have friends who get this. Wingmate has a community of guys on the same path — sharing wins, tips, and real experiences. It&apos;s like having a group of wingmen who actually push you forward.
+          </p>
+        </div>
+
+        <DelayedButton onClick={() => goToStep("username")} label="Next" />
+      </main>
+    );
+  }
+
   if (step === "username") {
     return (
-      <main className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12 animate-fade-in">
+      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12 animate-fade-in">
+        <ProgressBar step={step} />
         <div className="mb-10">
           <p className="font-display text-[15px] font-bold tracking-tight text-text-muted/40 mb-6">
             Wingmate
@@ -121,7 +224,7 @@ export default function OnboardingPage() {
             What should we call you?
           </h1>
           <p className="text-text-muted text-[15px] leading-relaxed">
-            Pick a name for your profile. This is what other people in the community will see.
+            Pick a name for your profile. This is what the community will see.
           </p>
         </div>
 
@@ -145,96 +248,9 @@ export default function OnboardingPage() {
     );
   }
 
-  if (step === "remember") {
-    return (
-      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
-        <div className="text-center mb-12">
-          <p className="text-[48px] mb-6 onb-emoji">💭</p>
-          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4 onb-title">
-            Remember that crush you had?
-          </h1>
-          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto onb-body">
-            She was so beautiful. Your heart would pound every time you saw her. Or that stunning girl at the airport, or in one of your classes. You imagined what it&apos;d be like to talk to them, make memories together, get to know them. But you never had the guts to walk up — because you were too scared.
-          </p>
-          <p className="text-text text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 font-medium onb-body-2">
-            That ends now.
-          </p>
-        </div>
-
-        <DelayedButton onClick={() => goToStep("regret")} label="Next" />
-      </main>
-    );
-  }
-
-  if (step === "regret") {
-    return (
-      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
-        <div className="text-center mb-12">
-          <p className="text-[48px] mb-6 onb-emoji">😔</p>
-          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4 onb-title">
-            Remember when someone else approached her instead?
-          </h1>
-          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto onb-body">
-            Some guy with more balls walked up to your crush, and you just stood there watching. You felt like a complete loser — no confidence, no guts. You lost your opportunity and you knew it.
-          </p>
-          <p className="text-text text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 font-medium onb-body-2">
-            Never again.
-          </p>
-        </div>
-
-        <DelayedButton onClick={() => goToStep("aicoach")} label="Next" />
-      </main>
-    );
-  }
-
-  if (step === "aicoach") {
-    return (
-      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
-        <div className="text-center mb-12">
-          <div className="w-16 h-16 rounded-2xl bg-[#1a1a1a] flex items-center justify-center mx-auto mb-6 onb-emoji">
-            <MessageCircle size={28} strokeWidth={1.5} className="text-white" />
-          </div>
-          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4 onb-title">
-            Your AI coach for the moment it matters.
-          </h1>
-          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto onb-body">
-            Let&apos;s say you&apos;re at a party and you see a cute girl across the room. Your heart starts racing. You want to go talk to her but you can&apos;t move. You&apos;re overthinking everything.
-          </p>
-          <p className="text-text text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 font-medium onb-body-2">
-            That&apos;s when you open Wingmate.
-          </p>
-          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 onb-goals">
-            Tell the AI chatbot where you are, what she looks like, and what&apos;s holding you back. It&apos;ll give you the exact words to say, destroy your excuses, and fire you up to go talk to her — right then and there. Not tomorrow. Now.
-          </p>
-        </div>
-
-        <DelayedButton onClick={() => goToStep("community")} label="Next" />
-      </main>
-    );
-  }
-
-  if (step === "community") {
-    return (
-      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
-        <div className="text-center mb-12">
-          <p className="text-[48px] mb-6 onb-emoji">🤝</p>
-          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4 onb-title">
-            Tired of having no one who gets it?
-          </h1>
-          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto onb-body">
-            Most guys don&apos;t have friends who are into cold approaching and meeting women. Wingmate has a community of guys just like you — sharing their experiences, thoughts, tips, and wins. You&apos;re not in this alone.
-          </p>
-        </div>
-
-        <DelayedButton onClick={() => goToStep("pitch")} label="Next" />
-      </main>
-    );
-  }
-
   if (step === "pitch") {
     const handleCheckout = async (plan: "monthly" | "yearly") => {
       if (!isLoggedIn) {
-        // Store plan intent so we can redirect after sign-in
         try { sessionStorage.setItem("wingmate-checkout-plan", plan); } catch {}
         const supabase = createClient();
         supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/auth/callback` } });
@@ -258,51 +274,23 @@ export default function OnboardingPage() {
 
     return (
       <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
+        <ProgressBar step={step} />
         <div className="text-center mb-8">
           <p className="text-[48px] mb-6 onb-emoji">🔥</p>
           <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4 onb-title">
-            Imagine if you never missed another opportunity.
+            What if you never missed another opportunity?
           </h1>
           <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto onb-body">
-            Remember the good moments you&apos;ve had with girls. Now imagine having the confidence and cold approach skills so that whenever you see a stunning girl in public, you react instantly and approach her before overthinking it. Imagine how different your life would be if you just went for it every single time.
-          </p>
-          <p className="text-text text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 font-medium onb-body-2">
-            All of that is definitely worth $15/mo.
+            Imagine having the confidence to approach any girl, anywhere — before the overthinking kicks in. Imagine how different your life looks six months from now.
           </p>
         </div>
 
         {/* Plan cards */}
         <div className="space-y-3 mb-4 onb-goals">
-          {/* Monthly */}
-          <div className="bg-bg-card border border-border rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-display text-[16px] font-bold">Pro Monthly</h3>
-              <div className="flex items-baseline gap-1">
-                <span className="font-display text-[22px] font-extrabold">$15</span>
-                <span className="text-text-muted text-[13px]">/mo</span>
-              </div>
-            </div>
-            <div className="space-y-2 mb-4">
-              {["AI coach for in-the-moment help", "Daily check-ins & streak tracker", "Community of cold approachers"].map((f) => (
-                <div key={f} className="flex items-center gap-2">
-                  <Check size={14} strokeWidth={2.5} className="text-text-muted shrink-0" />
-                  <span className="text-[13px]">{f}</span>
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={() => handleCheckout("monthly")}
-              disabled={!!checkoutLoading}
-              className="w-full bg-bg-input text-text py-2.5 rounded-xl font-semibold text-[14px] press disabled:opacity-60"
-            >
-              {checkoutLoading === "monthly" ? "Redirecting..." : "Subscribe monthly"}
-            </button>
-          </div>
-
-          {/* Yearly */}
+          {/* Yearly — best value, shown first */}
           <div className="bg-bg-card border-2 border-[#1a1a1a] rounded-2xl p-5 relative">
             <span className="absolute -top-2.5 left-5 bg-green-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
-              Save 33%
+              Best value
             </span>
             <div className="flex items-center justify-between mb-3 mt-1">
               <h3 className="font-display text-[16px] font-bold">Pro Yearly</h3>
@@ -325,7 +313,25 @@ export default function OnboardingPage() {
               disabled={!!checkoutLoading}
               className="w-full bg-[#1a1a1a] text-white py-2.5 rounded-xl font-semibold text-[14px] press disabled:opacity-60"
             >
-              {checkoutLoading === "yearly" ? "Redirecting..." : "Subscribe yearly"}
+              {checkoutLoading === "yearly" ? "Redirecting..." : "Get started — $10/mo"}
+            </button>
+          </div>
+
+          {/* Monthly */}
+          <div className="bg-bg-card border border-border rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-display text-[16px] font-bold">Pro Monthly</h3>
+              <div className="flex items-baseline gap-1">
+                <span className="font-display text-[22px] font-extrabold">$15</span>
+                <span className="text-text-muted text-[13px]">/mo</span>
+              </div>
+            </div>
+            <button
+              onClick={() => handleCheckout("monthly")}
+              disabled={!!checkoutLoading}
+              className="w-full bg-bg-input text-text py-2.5 rounded-xl font-semibold text-[14px] press disabled:opacity-60"
+            >
+              {checkoutLoading === "monthly" ? "Redirecting..." : "Subscribe monthly"}
             </button>
           </div>
         </div>
@@ -334,7 +340,7 @@ export default function OnboardingPage() {
           onClick={() => goToStep("motivation")}
           className="text-text-muted text-[14px] font-medium py-3 press onb-body-2"
         >
-          Skip for now
+          Maybe later
         </button>
       </main>
     );
@@ -343,10 +349,11 @@ export default function OnboardingPage() {
   if (step === "motivation") {
     return (
       <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
+        <ProgressBar step={step} />
         <div className="text-center mb-12">
           <p className="text-[48px] mb-6 onb-emoji">🫵</p>
           <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4 onb-title">
-            Next time you see a girl and get nervous, remember why you&apos;re here.
+            Next time you see her and get nervous — remember why you&apos;re here.
           </h1>
 
           {selectedGoalLabels.length > 0 && (
@@ -363,7 +370,7 @@ export default function OnboardingPage() {
           )}
 
           <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto onb-body">
-            Take a breath. And go talk to her. That&apos;s how everything changes.
+            Take a breath. Walk over. Say something. That&apos;s how everything changes.
           </p>
         </div>
 
@@ -385,8 +392,10 @@ export default function OnboardingPage() {
     );
   }
 
+  // goals step (default)
   return (
     <main className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12 animate-fade-in">
+      <ProgressBar step={step} />
       <div className="mb-10">
         <p className="font-display text-[15px] font-bold tracking-tight text-text-muted/40 mb-6">
           Wingmate
