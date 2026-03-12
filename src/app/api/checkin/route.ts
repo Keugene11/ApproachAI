@@ -82,7 +82,7 @@ function computeConsecutiveApproaches(checkins: { talked: boolean }[]): number {
 async function getFullStats(supabase: any, userId: string, clientToday?: string) {
   const { data: allCheckins } = await supabase
     .from("checkins")
-    .select("checked_in_at, talked, note, opportunities_count, approaches_count, successes_count")
+    .select("checked_in_at, talked, opportunities_count, approaches_count, successes_count")
     .eq("user_id", userId)
     .order("checked_in_at", { ascending: false });
 
@@ -93,7 +93,6 @@ async function getFullStats(supabase: any, userId: string, clientToday?: string)
   const totalCheckins = checkins.length;
   const totalTalked = checkins.filter((c: any) => c.talked).length;
   const approachRate = totalCheckins > 0 ? Math.round((totalTalked / totalCheckins) * 100) : 0;
-  const notesWritten = checkins.filter((c: any) => c.note).length;
   const consecutiveApproaches = computeConsecutiveApproaches(checkins);
 
   // Approach outcome stats
@@ -127,7 +126,6 @@ async function getFullStats(supabase: any, userId: string, clientToday?: string)
   const history = checkins.slice(0, 14).map((c: any) => ({
     date: c.checked_in_at,
     talked: c.talked,
-    note: c.note,
     opportunities: c.opportunities_count || 0,
     approaches: c.approaches_count || 0,
     successes: c.successes_count || 0,
@@ -135,7 +133,7 @@ async function getFullStats(supabase: any, userId: string, clientToday?: string)
 
   return {
     checkins, dates, streak, bestStreak, totalCheckins, totalTalked,
-    approachRate, notesWritten, consecutiveApproaches, last7,
+    approachRate, consecutiveApproaches, last7,
     last7AllCheckedIn, weekendApproaches, history,
     totalOpportunities, totalApproaches, totalSuccesses, totalFailures,
     totalDidntApproach, successRate, approachConversionRate,
@@ -272,7 +270,6 @@ export async function POST(req: Request) {
   if (isNew) {
     xpEarned += XP_REWARDS.checkin;
     if (talked) xpEarned += XP_REWARDS.approach;
-    if (note) xpEarned += XP_REWARDS.note;
     xpEarned += XP_REWARDS.streakBonus(stats.streak);
 
     // Award streak freeze every 7 days
@@ -297,7 +294,6 @@ export async function POST(req: Request) {
     totalTalked: stats.totalTalked,
     currentStreak: stats.streak,
     bestStreak: stats.bestStreak,
-    notesWritten: stats.notesWritten,
     daysSinceLastCheckin: stats.dates.length > 1
       ? Math.floor((new Date(stats.dates[0] + "T00:00:00").getTime() - new Date(stats.dates[1] + "T00:00:00").getTime()) / 86400000)
       : 0,

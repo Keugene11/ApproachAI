@@ -279,7 +279,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ===== WINGMAN TAB: CONVERSATIONS ===== */}
+      {/* ===== WINGMATE TAB: CONVERSATIONS ===== */}
       {activeTab === "coach" && state === "conversations" && (
         <ConversationList
           onBack={() => updateState("tabs")}
@@ -294,7 +294,7 @@ export default function Home() {
         />
       )}
 
-      {/* ===== WINGMAN TAB: CHAT ===== */}
+      {/* ===== WINGMATE TAB: CHAT ===== */}
       {activeTab === "coach" && (state === "chat" || state === "tabs") && (
         <ChatCoach
           onBack={() => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Flame, MessageCircle, Trophy, Calendar, Shield, Eye, Target, ThumbsUp, UserX, Pencil } from "lucide-react";
+import { Flame, MessageCircle, Trophy, Calendar, Shield, Eye, Target, ThumbsUp, UserX } from "lucide-react";
 import { getFlameLevel } from "@/lib/gamification";
 import { createClient } from "@/lib/supabase-browser";
 import UpgradeModal from "@/components/UpgradeModal";
@@ -9,7 +9,6 @@ import UpgradeModal from "@/components/UpgradeModal";
 interface CheckinData {
   checkedInToday: boolean;
   talked: boolean | null;
-  note: string | null;
   opportunitiesCount: number;
   approachesCount: number;
   successesCount: number;
@@ -26,7 +25,7 @@ interface CheckinData {
   successRate: number;
   approachConversionRate: number;
   last7: { date: string; talked: boolean | null; approaches: number }[];
-  history: { date: string; talked: boolean; note: string | null; opportunities: number; approaches: number; successes: number }[];
+  history: { date: string; talked: boolean; opportunities: number; approaches: number; successes: number }[];
   streakFreezes: number;
 }
 
@@ -138,7 +137,6 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
         opportunitiesCount: editOpportunities,
         approachesCount: editApproaches,
         successesCount: editSuccesses,
-        note: data?.note,
         clientDate: getLocalDate(),
       }),
     });

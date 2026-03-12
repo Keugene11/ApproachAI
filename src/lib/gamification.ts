@@ -3,7 +3,6 @@
 export const XP_REWARDS = {
   checkin: 10,
   approach: 25, // talked = true
-  note: 5,
   streakBonus: (streak: number) => Math.min(streak * 2, 50), // up to +50 bonus per day
   badge: 50,
 };
@@ -60,7 +59,6 @@ export const BADGES: BadgeDef[] = [
   // Special
   { id: "first_step", name: "First Step", description: "Complete your first check-in", icon: "👣", category: "special" },
   { id: "comeback_kid", name: "Comeback Kid", description: "Return after 7+ days away", icon: "🔄", category: "special" },
-  { id: "note_taker", name: "Note Taker", description: "Write 10 journal notes", icon: "📝", category: "special" },
   { id: "ice_breaker", name: "Ice Breaker", description: "Talk to someone on your first day", icon: "🧊", category: "special" },
 
   // Streak
@@ -94,7 +92,6 @@ export function computeEarnedBadges(stats: {
   totalTalked: number;
   currentStreak: number;
   bestStreak: number;
-  notesWritten: number;
   daysSinceLastCheckin: number;
   isFirstCheckin: boolean;
   talkedToday: boolean;
@@ -107,7 +104,6 @@ export function computeEarnedBadges(stats: {
   // Special
   if (stats.isFirstCheckin) earned.push("first_step");
   if (stats.daysSinceLastCheckin >= 7 && !stats.isFirstCheckin) earned.push("comeback_kid");
-  if (stats.notesWritten >= 10) earned.push("note_taker");
   if (stats.isFirstCheckin && stats.talkedToday) earned.push("ice_breaker");
 
   // Streak
