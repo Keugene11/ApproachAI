@@ -32,7 +32,7 @@ const GOALS = [
   },
 ];
 
-const STEPS = ["remember", "regret", "aicoach", "community", "username", "goals", "pitch", "motivation"] as const;
+const STEPS = ["remember", "regret", "aicoach", "community", "goals", "pitch", "motivation"] as const;
 type Step = (typeof STEPS)[number];
 
 function ProgressBar({ step }: { step: Step }) {
@@ -69,7 +69,6 @@ function DelayedButton({ onClick, label, delay = 2500 }: { onClick: () => void; 
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [customGoal, setCustomGoal] = useState("");
   const [saving, setSaving] = useState(false);
@@ -105,7 +104,6 @@ export default function OnboardingPage() {
     if (!hasAnyGoal) return;
     setSaving(true);
     const goalData: Record<string, string> = { goal: Array.from(selected).join(","), custom_goal: customGoal.trim() || "" };
-    if (username.trim()) goalData.username = username.trim();
     try { sessionStorage.setItem("wingmate-onboarding-goals", JSON.stringify(goalData)); } catch {}
     if (isLoggedIn) {
       try {
@@ -207,43 +205,7 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        <DelayedButton onClick={() => goToStep("username")} label="Next" />
-      </main>
-    );
-  }
-
-  if (step === "username") {
-    return (
-      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12 animate-fade-in">
-        <ProgressBar step={step} />
-        <div className="mb-10">
-          <p className="font-display text-[15px] font-bold tracking-tight text-text-muted/40 mb-6">
-            Wingmate
-          </p>
-          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-3">
-            What should we call you?
-          </h1>
-          <p className="text-text-muted text-[15px] leading-relaxed">
-            Pick a name for your profile. This is what the community will see.
-          </p>
-        </div>
-
-        <input
-          autoFocus
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value.slice(0, 30))}
-          placeholder="Your name..."
-          className="w-full bg-bg-card border-2 border-border rounded-2xl px-5 py-4 text-[16px] font-medium placeholder:text-text-muted/50 outline-none focus:border-[#1a1a1a] transition-colors mb-10"
-        />
-
-        <button
-          onClick={() => goToStep("goals")}
-          disabled={!username.trim()}
-          className="w-full bg-[#1a1a1a] text-white py-3.5 rounded-2xl font-semibold text-[15px] press disabled:opacity-40 transition-opacity"
-        >
-          Continue
-        </button>
+        <DelayedButton onClick={() => goToStep("goals")} label="Next" />
       </main>
     );
   }
