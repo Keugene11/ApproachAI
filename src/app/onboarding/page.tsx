@@ -233,6 +233,13 @@ export default function OnboardingPage() {
 
   if (step === "pitch") {
     const handleCheckout = async (plan: "monthly" | "yearly") => {
+      if (!isLoggedIn) {
+        // Store plan intent so we can redirect after sign-in
+        try { sessionStorage.setItem("wingmate-checkout-plan", plan); } catch {}
+        const supabase = createClient();
+        supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/auth/callback` } });
+        return;
+      }
       setCheckoutLoading(plan);
       try {
         const res = await fetch("/api/stripe/checkout", {

@@ -125,6 +125,21 @@ function HomeInner() {
             }
           })
           .catch(() => {});
+        // If there's a pending checkout plan from onboarding, redirect to checkout
+        try {
+          const pendingPlan = sessionStorage.getItem("wingmate-checkout-plan");
+          if (pendingPlan) {
+            sessionStorage.removeItem("wingmate-checkout-plan");
+            fetch("/api/stripe/checkout", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ plan: pendingPlan }),
+            })
+              .then((r) => r.json())
+              .then((d) => { if (d.url) window.location.href = d.url; })
+              .catch(() => {});
+          }
+        } catch {}
         // If there's a pending message from pre-auth, switch to coach tab
         try {
           if (sessionStorage.getItem("wingmate-pending-message")) {
@@ -374,7 +389,7 @@ function HomeInner() {
             }}
             onCheckedIn={() => setCheckedInToday(true)}
             isLoggedIn
-            isPro={isPro !== false}
+            isPro={isPro === true}
           />
 
         </div>
@@ -391,7 +406,7 @@ function HomeInner() {
               Your approach history at a glance
             </p>
           </div>
-          <StatsView isPro={isPro !== false} />
+          <StatsView isPro={isPro === true} />
         </div>
       )}
 
