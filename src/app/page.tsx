@@ -277,8 +277,18 @@ function HomeInner() {
     </main>
   );
 
-  // Public landing page for unauthenticated visitors
-  if (isLoggedIn === false) return <LandingPage />;
+  // Auto sign-in for unauthenticated visitors
+  if (isLoggedIn === false) {
+    supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-text border-t-transparent rounded-full animate-spin" />
+      </main>
+    );
+  }
 
   // Full-screen: checkin-chat (no tab bar — temporary coaching flow)
   if (state === "checkin-chat") {
