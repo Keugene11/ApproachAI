@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Heart, Sparkles, Flame, PartyPopper, Pencil, Check } from "lucide-react";
+import { createClient } from "@/lib/supabase-browser";
 
 const GOALS = [
   {
@@ -58,6 +59,14 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<"goals" | "remember" | "regret" | "community" | "pitch" | "motivation">("goals");
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [stepKey, setStepKey] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user);
+    });
+  }, []);
 
   const goToStep = (s: typeof step) => {
     setStep(s);
@@ -78,19 +87,20 @@ export default function OnboardingPage() {
   const handleContinue = async () => {
     if (!hasAnyGoal) return;
     setSaving(true);
-    try {
-      const body: Record<string, string> = { goal: Array.from(selected).join(",") };
-      if (customGoal.trim()) body.custom_goal = customGoal.trim();
-      await fetch("/api/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      setSaving(false);
-      goToStep("remember");
-    } catch {
-      setSaving(false);
+    const goalData = { goal: Array.from(selected).join(","), custom_goal: customGoal.trim() || "" };
+    // Store in sessionStorage so goals persist through sign-in
+    try { sessionStorage.setItem("wingmate-onboarding-goals", JSON.stringify(goalData)); } catch {}
+    if (isLoggedIn) {
+      try {
+        await fetch("/api/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(goalData),
+        });
+      } catch {}
     }
+    setSaving(false);
+    goToStep("remember");
   };
 
   const selectedGoalLabels = Array.from(selected)
@@ -285,7 +295,20 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        <DelayedButton onClick={() => router.replace("/")} label="Let's go" />
+        <DelayedButton
+          onClick={() => {
+            if (isLoggedIn) {
+              router.replace("/");
+            } else {
+              const supabase = createClient();
+              supabase.auth.signInWithOAuth({
+                provider: "google",
+                options: { redirectTo: `${window.location.origin}/auth/callback` },
+              });
+            }
+          }}
+          label={isLoggedIn ? "Let's go" : "Sign in with Google"}
+        />
       </main>
     );
   }

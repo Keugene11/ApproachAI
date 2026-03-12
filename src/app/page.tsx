@@ -103,11 +103,24 @@ function HomeInner() {
       if (data.user) {
         setUserId(data.user.id);
         setIsLoggedIn(true);
-        // Check if onboarding is needed
+        // Check if onboarding is needed, and save pending goals from pre-auth onboarding
         fetch("/api/profile")
           .then((r) => r.json())
-          .then((d) => {
+          .then(async (d) => {
             if (d.profile && !d.profile.goal) {
+              try {
+                const pending = sessionStorage.getItem("wingmate-onboarding-goals");
+                if (pending) {
+                  const goalData = JSON.parse(pending);
+                  await fetch("/api/profile", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(goalData),
+                  });
+                  sessionStorage.removeItem("wingmate-onboarding-goals");
+                  return; // goals saved, no need for onboarding
+                }
+              } catch {}
               router.replace("/onboarding");
             }
           })
@@ -277,12 +290,9 @@ function HomeInner() {
     </main>
   );
 
-  // Auto sign-in for unauthenticated visitors
+  // Send unauthenticated visitors to onboarding
   if (isLoggedIn === false) {
-    supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
+    router.replace("/onboarding");
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-text border-t-transparent rounded-full animate-spin" />
