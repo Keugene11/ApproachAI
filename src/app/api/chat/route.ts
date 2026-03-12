@@ -135,24 +135,23 @@ export async function POST(req: Request) {
       systemPrompt += CHECKIN_DIDNT_TALK_PROMPT;
     }
 
-    const apiMessages = [
-      { role: "system", content: systemPrompt },
-      ...messages.map((m: { role: string; content: string }) => ({
-        role: m.role,
-        content: m.content,
-      })),
-    ];
+    const apiMessages = messages.map((m: { role: string; content: string }) => ({
+      role: m.role,
+      content: m.content,
+    }));
 
     const response = await fetch(
-      "https://api.dedaluslabs.ai/v1/chat/completions",
+      "https://api.anthropic.com/v1/messages",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.DEDALUS_API_KEY}`,
+          "x-api-key": process.env.ANTHROPIC_API_KEY!,
+          "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "anthropic/claude-sonnet-4-20250514",
+          model: "claude-sonnet-4-20250514",
+          system: systemPrompt,
           messages: apiMessages,
           max_tokens: 3000,
           stream: true,
@@ -205,12 +204,10 @@ export async function POST(req: Request) {
 
               try {
                 const parsed = JSON.parse(data);
-                const content =
-                  parsed.choices?.[0]?.delta?.content;
-                if (content) {
+                if (parsed.type === "content_block_delta" && parsed.delta?.text) {
                   controller.enqueue(
                     encoder.encode(
-                      `data: ${JSON.stringify({ content })}\n\n`
+                      `data: ${JSON.stringify({ content: parsed.delta.text })}\n\n`
                     )
                   );
                 }
