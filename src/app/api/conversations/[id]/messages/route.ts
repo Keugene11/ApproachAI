@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
-import { SupabaseClient } from "@supabase/supabase-js";
 
 async function generateTitle(
-  messages: { role: string; content: string }[],
-  conversationId: string,
-  supabase: SupabaseClient
-) {
+  messages: { role: string; content: string }[]
+): Promise<string | null> {
   try {
     const snippet = messages
       .slice(0, 4)
@@ -28,17 +25,12 @@ async function generateTitle(
       }),
     });
 
-    if (!res.ok) return;
+    if (!res.ok) return null;
     const data = await res.json();
     const title = data.content?.[0]?.text?.trim();
-    if (title) {
-      await supabase
-        .from("conversations")
-        .update({ preview: title.slice(0, 100) })
-        .eq("id", conversationId);
-    }
+    return title ? title.slice(0, 100) : null;
   } catch {
-    // Silently fail — the fallback preview is already set
+    return null;
   }
 }
 
@@ -109,13 +101,13 @@ export async function POST(
   const firstUserMsg = messages.find((m: { role: string }) => m.role === "user");
 
   if (!convo.preview && firstUserMsg) {
-    // Set a temporary preview immediately, then generate AI summary in background
-    updates.preview = firstUserMsg.content.slice(0, 100);
-
-    // Generate AI title summary in the background (don't await)
+    // Try to generate AI title, fall back to first message
     const allMsgs = messages.filter((m: { role: string; content: string }) => m.content);
     if (allMsgs.length >= 2) {
-      generateTitle(allMsgs, id, supabase);
+      const title = await generateTitle(allMsgs);
+      updates.preview = title || firstUserMsg.content.slice(0, 100);
+    } else {
+      updates.preview = firstUserMsg.content.slice(0, 100);
     }
   }
 

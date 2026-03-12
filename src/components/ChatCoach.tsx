@@ -239,14 +239,18 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
 
   useEffect(() => {
     if (!userScrolledUp.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      const el = scrollContainerRef.current;
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+      }
     }
   }, [messages]);
 
   const handleScroll = () => {
     const el = scrollContainerRef.current;
     if (!el) return;
-    userScrolledUp.current = el.scrollHeight - el.scrollTop - el.clientHeight > 50;
+    // User is "scrolled up" if they're more than 100px from the bottom
+    userScrolledUp.current = el.scrollHeight - el.scrollTop - el.clientHeight > 100;
   };
 
   const sendMessage = async (content: string) => {
