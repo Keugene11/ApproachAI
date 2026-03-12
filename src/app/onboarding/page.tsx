@@ -33,17 +33,26 @@ const GOALS = [
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
 
+  const toggleGoal = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const handleContinue = async () => {
-    if (!selected) return;
+    if (selected.size === 0) return;
     setSaving(true);
     try {
       await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goal: selected }),
+        body: JSON.stringify({ goal: Array.from(selected).join(",") }),
       });
       router.replace("/");
     } catch {
@@ -61,7 +70,7 @@ export default function OnboardingPage() {
           What&apos;s your goal?
         </h1>
         <p className="text-text-muted text-[15px] leading-relaxed">
-          This helps your AI coach give you the right advice.
+          Pick all that apply. This helps your AI coach give you the right advice.
         </p>
       </div>
 
@@ -69,29 +78,29 @@ export default function OnboardingPage() {
         {GOALS.map((goal) => (
           <button
             key={goal.id}
-            onClick={() => setSelected(goal.id)}
+            onClick={() => toggleGoal(goal.id)}
             className={`w-full flex items-center gap-4 rounded-2xl px-5 py-4 text-left press transition-colors ${
-              selected === goal.id
+              selected.has(goal.id)
                 ? "bg-[#1a1a1a] text-white border-2 border-[#1a1a1a]"
                 : "bg-bg-card border-2 border-border"
             }`}
           >
             <div
               className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                selected === goal.id ? "bg-white/15" : "bg-bg-input"
+                selected.has(goal.id) ? "bg-white/15" : "bg-bg-input"
               }`}
             >
               <goal.icon
                 size={20}
                 strokeWidth={1.5}
-                className={selected === goal.id ? "text-white" : "text-text"}
+                className={selected.has(goal.id) ? "text-white" : "text-text"}
               />
             </div>
             <div>
               <p className="font-display text-[15px] font-bold">{goal.label}</p>
               <p
                 className={`text-[13px] leading-relaxed mt-0.5 ${
-                  selected === goal.id ? "text-white/60" : "text-text-muted"
+                  selected.has(goal.id) ? "text-white/60" : "text-text-muted"
                 }`}
               >
                 {goal.description}
@@ -103,7 +112,7 @@ export default function OnboardingPage() {
 
       <button
         onClick={handleContinue}
-        disabled={!selected || saving}
+        disabled={selected.size === 0 || saving}
         className="w-full bg-[#1a1a1a] text-white py-3.5 rounded-2xl font-semibold text-[15px] press disabled:opacity-40 transition-opacity"
       >
         {saving ? "Saving..." : "Continue"}

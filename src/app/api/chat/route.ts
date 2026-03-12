@@ -148,8 +148,11 @@ export async function POST(req: Request) {
     };
 
     let systemPrompt = SYSTEM_PROMPT;
-    if (profile?.goal && goalDescriptions[profile.goal]) {
-      systemPrompt += `\n\nIMPORTANT CONTEXT: This user's goal is to ${goalDescriptions[profile.goal]}. Tailor ALL your advice, openers, and game plans specifically toward this goal. Your coaching should reflect what they're actually going for.`;
+    if (profile?.goal) {
+      const goals = profile.goal.split(",").map((g: string) => goalDescriptions[g]).filter(Boolean);
+      if (goals.length > 0) {
+        systemPrompt += `\n\nIMPORTANT CONTEXT: This user's goals are to ${goals.join(" and ")}. Tailor ALL your advice, openers, and game plans specifically toward these goals. Your coaching should reflect what they're actually going for.`;
+      }
     }
     if (mode === "checkin-talked") {
       systemPrompt += CHECKIN_TALKED_PROMPT;
