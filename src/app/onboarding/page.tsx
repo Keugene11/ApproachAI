@@ -55,7 +55,7 @@ export default function OnboardingPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [customGoal, setCustomGoal] = useState("");
   const [saving, setSaving] = useState(false);
-  const [step, setStep] = useState<"goals" | "remember" | "community" | "motivation">("goals");
+  const [step, setStep] = useState<"goals" | "remember" | "regret" | "community" | "motivation">("goals");
   const [stepKey, setStepKey] = useState(0);
 
   const goToStep = (s: typeof step) => {
@@ -110,6 +110,27 @@ export default function OnboardingPage() {
           </p>
           <p className="text-text text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 font-medium onb-body-2">
             That ends now.
+          </p>
+        </div>
+
+        <DelayedButton onClick={() => goToStep("regret")} label="Next" />
+      </main>
+    );
+  }
+
+  if (step === "regret") {
+    return (
+      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
+        <div className="text-center mb-12">
+          <p className="text-[48px] mb-6 onb-emoji">😔</p>
+          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4 onb-title">
+            Remember when someone else approached her instead?
+          </h1>
+          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto onb-body">
+            Some guy with more balls walked up to your crush, and you just stood there watching. You felt like a complete loser — no confidence, no guts. You lost your opportunity and you knew it.
+          </p>
+          <p className="text-text text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 font-medium onb-body-2">
+            Never again.
           </p>
         </div>
 
