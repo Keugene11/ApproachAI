@@ -36,7 +36,7 @@ export default function OnboardingPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [customGoal, setCustomGoal] = useState("");
   const [saving, setSaving] = useState(false);
-  const [step, setStep] = useState<"goals" | "motivation">("goals");
+  const [step, setStep] = useState<"goals" | "community" | "motivation">("goals");
 
   const toggleGoal = (id: string) => {
     setSelected((prev) => {
@@ -61,11 +61,34 @@ export default function OnboardingPage() {
         body: JSON.stringify(body),
       });
       setSaving(false);
-      setStep("motivation");
+      setStep("community");
     } catch {
       setSaving(false);
     }
   };
+
+  if (step === "community") {
+    return (
+      <main className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12 animate-fade-in">
+        <div className="text-center mb-12">
+          <p className="text-[48px] mb-6">🤝</p>
+          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4">
+            Tired of having no one who gets it?
+          </h1>
+          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto">
+            Most guys don&apos;t have friends who are into cold approaching and meeting women. Wingmate has a community of guys just like you — sharing their experiences, thoughts, tips, and wins. You&apos;re not in this alone.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setStep("motivation")}
+          className="w-full bg-[#1a1a1a] text-white py-3.5 rounded-2xl font-semibold text-[15px] press"
+        >
+          Next
+        </button>
+      </main>
+    );
+  }
 
   if (step === "motivation") {
     return (
