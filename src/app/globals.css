@@ -77,3 +77,44 @@ body {
 .streak-pop {
   animation: streak-pop 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+/* Onboarding animations */
+@keyframes onb-slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes onb-fade-scale {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes onb-btn-appear {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.onb-emoji {
+  animation: onb-fade-scale 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.onb-title {
+  animation: onb-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+.onb-body {
+  animation: onb-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+.onb-body-2 {
+  animation: onb-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+}
+
+.onb-goals {
+  animation: onb-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+}
+
+.onb-btn {
+  opacity: 0;
+  animation: onb-btn-appear 0.5s cubic-bezier(0.16, 1, 0.3, 1) 3s both;
+}
