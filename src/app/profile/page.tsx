@@ -453,9 +453,15 @@ export default function ProfilePage() {
         <Link href="/privacy" className="text-[12px] text-text-muted underline">
           Privacy Policy
         </Link>
-        <a href="https://mail.google.com/mail/?view=cm&to=wingmatesupport@gmail.com&su=Wingmate%20Support" target="_blank" rel="noopener noreferrer" className="text-[12px] text-text-muted underline">
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText("wingmatesupport@gmail.com");
+            alert("Support email copied!\n\nwingmatesupport@gmail.com");
+          }}
+          className="text-[12px] text-text-muted underline"
+        >
           Support
-        </a>
+        </button>
       </div>
 
       <BottomNav />
