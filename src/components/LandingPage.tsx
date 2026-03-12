@@ -140,11 +140,12 @@ export default function LandingPage() {
       {/* Footer */}
       <div className="text-center text-[13px] text-text-muted border-t border-border pt-6">
         <p className="mb-3">Wingmate &middot; AI-powered confidence coaching</p>
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-4 mb-4">
           <Link href="/privacy" className="underline">Privacy Policy</Link>
           <Link href="/terms" className="underline">Terms of Service</Link>
           <Link href="/pricing" className="underline">Pricing</Link>
         </div>
+        <p className="text-text-muted/50 text-[12px]">A Keugene Lee production</p>
       </div>
     </main>
   );
