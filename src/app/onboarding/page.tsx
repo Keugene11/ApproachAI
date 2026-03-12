@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Heart, Sparkles, Flame, PartyPopper, Pencil, Check } from "lucide-react";
+import { Heart, Sparkles, Flame, PartyPopper, Pencil, Check, MessageCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 
 const GOALS = [
@@ -53,10 +53,11 @@ function DelayedButton({ onClick, label, delay = 3000 }: { onClick: () => void; 
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const [username, setUsername] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [customGoal, setCustomGoal] = useState("");
   const [saving, setSaving] = useState(false);
-  const [step, setStep] = useState<"goals" | "remember" | "regret" | "community" | "pitch" | "motivation">("goals");
+  const [step, setStep] = useState<"username" | "goals" | "remember" | "regret" | "aicoach" | "community" | "pitch" | "motivation">("username");
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [stepKey, setStepKey] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -87,7 +88,8 @@ export default function OnboardingPage() {
   const handleContinue = async () => {
     if (!hasAnyGoal) return;
     setSaving(true);
-    const goalData = { goal: Array.from(selected).join(","), custom_goal: customGoal.trim() || "" };
+    const goalData: Record<string, string> = { goal: Array.from(selected).join(","), custom_goal: customGoal.trim() || "" };
+    if (username.trim()) goalData.username = username.trim();
     // Store in sessionStorage so goals persist through sign-in
     try { sessionStorage.setItem("wingmate-onboarding-goals", JSON.stringify(goalData)); } catch {}
     if (isLoggedIn) {
@@ -107,6 +109,41 @@ export default function OnboardingPage() {
     .map((id) => GOALS.find((g) => g.id === id)?.label)
     .filter(Boolean) as string[];
   if (customGoal.trim()) selectedGoalLabels.push(customGoal.trim());
+
+  if (step === "username") {
+    return (
+      <main className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12 animate-fade-in">
+        <div className="mb-10">
+          <p className="font-display text-[15px] font-bold tracking-tight text-text-muted/40 mb-6">
+            Wingmate
+          </p>
+          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-3">
+            What should we call you?
+          </h1>
+          <p className="text-text-muted text-[15px] leading-relaxed">
+            Pick a name for your profile. This is what other people in the community will see.
+          </p>
+        </div>
+
+        <input
+          autoFocus
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value.slice(0, 30))}
+          placeholder="Your name..."
+          className="w-full bg-bg-card border-2 border-border rounded-2xl px-5 py-4 text-[16px] font-medium placeholder:text-text-muted/50 outline-none focus:border-[#1a1a1a] transition-colors mb-10"
+        />
+
+        <button
+          onClick={() => goToStep("goals")}
+          disabled={!username.trim()}
+          className="w-full bg-[#1a1a1a] text-white py-3.5 rounded-2xl font-semibold text-[15px] press disabled:opacity-40 transition-opacity"
+        >
+          Continue
+        </button>
+      </main>
+    );
+  }
 
   if (step === "remember") {
     return (
@@ -142,6 +179,32 @@ export default function OnboardingPage() {
           </p>
           <p className="text-text text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 font-medium onb-body-2">
             Never again.
+          </p>
+        </div>
+
+        <DelayedButton onClick={() => goToStep("aicoach")} label="Next" />
+      </main>
+    );
+  }
+
+  if (step === "aicoach") {
+    return (
+      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
+        <div className="text-center mb-12">
+          <div className="w-16 h-16 rounded-2xl bg-[#1a1a1a] flex items-center justify-center mx-auto mb-6 onb-emoji">
+            <MessageCircle size={28} strokeWidth={1.5} className="text-white" />
+          </div>
+          <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.15] mb-4 onb-title">
+            Your AI coach for the moment it matters.
+          </h1>
+          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto onb-body">
+            Let&apos;s say you&apos;re at a party and you see a cute girl across the room. Your heart starts racing. You want to go talk to her but you can&apos;t move. You&apos;re overthinking everything.
+          </p>
+          <p className="text-text text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 font-medium onb-body-2">
+            That&apos;s when you open Wingmate.
+          </p>
+          <p className="text-text-muted text-[16px] leading-relaxed max-w-[340px] mx-auto mt-4 onb-goals">
+            Tell the AI chatbot where you are, what she looks like, and what&apos;s holding you back. It&apos;ll give you the exact words to say, destroy your excuses, and fire you up to go talk to her — right then and there. Not tomorrow. Now.
           </p>
         </div>
 
