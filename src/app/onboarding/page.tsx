@@ -248,10 +248,12 @@ export default function OnboardingPage() {
           body: JSON.stringify({ plan }),
         });
         const data = await res.json();
-        if (data.url) window.location.href = data.url;
-      } catch {
-        setCheckoutLoading(null);
-      }
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+      } catch {}
+      setCheckoutLoading(null);
     };
 
     return (

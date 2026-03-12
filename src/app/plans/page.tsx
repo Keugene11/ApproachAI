@@ -45,8 +45,11 @@ export default function PlansPage() {
       .catch(() => setLoaded(true));
   }, []);
 
+  const [error, setError] = useState<string | null>(null);
+
   const handleCheckout = async (plan: "monthly" | "yearly") => {
     setLoading(plan);
+    setError(null);
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -54,10 +57,15 @@ export default function PlansPage() {
         body: JSON.stringify({ plan }),
       });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setError(data.error || "Something went wrong. Please try again.");
     } catch {
-      setLoading(null);
+      setError("Network error — check your connection.");
     }
+    setLoading(null);
   };
 
   const handleManageBilling = async () => {
@@ -103,6 +111,13 @@ export default function PlansPage() {
             : "Build confidence with daily check-ins and approach tracking. Upgrade when you want unlimited AI coaching."}
         </p>
       </div>
+
+      {/* Error banner */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-center mb-6">
+          <p className="text-[14px] font-medium text-red-700">{error}</p>
+        </div>
+      )}
 
       {/* Pricing cards */}
       <div className="space-y-4 mb-16">
