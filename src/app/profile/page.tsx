@@ -453,7 +453,7 @@ export default function ProfilePage() {
         <Link href="/privacy" className="text-[12px] text-text-muted underline">
           Privacy Policy
         </Link>
-        <a href="mailto:wingmatesupport@gmail.com" className="text-[12px] text-text-muted underline">
+        <a href="https://mail.google.com/mail/?view=cm&to=wingmatesupport@gmail.com&su=Wingmate%20Support" target="_blank" rel="noopener noreferrer" className="text-[12px] text-text-muted underline">
           Support
         </a>
       </div>
