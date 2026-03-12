@@ -191,7 +191,7 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
       return (
         <div className="space-y-4">
           <div className="mb-2 animate-slide-up">
-            {greeting && <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.2] mb-1">{greeting}</h1>}
+            {greeting && <h1 className="text-[28px] font-bold tracking-tight leading-[1.2] mb-1">{greeting}</h1>}
             <p className="text-text-muted text-[13px] font-medium uppercase tracking-wide mb-1">{todayDate}</p>
             <p className="text-text-muted text-[14px] leading-relaxed">
               Track how many girls you saw, approached, and how many went well. Build the habit — check in every day.
@@ -452,7 +452,7 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
     <div className="space-y-4">
       {/* Page header — different message depending on state */}
       <div className="mb-2 animate-slide-up">
-        {greeting && <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.2] mb-1">{greeting}</h1>}
+        {greeting && <h1 className="text-[28px] font-bold tracking-tight leading-[1.2] mb-1">{greeting}</h1>}
         <p className="text-text-muted text-[13px] font-medium uppercase tracking-wide mb-1">{todayDate}</p>
         {!data.checkedInToday ? (
           <p className="text-text-muted text-[14px] leading-relaxed">
