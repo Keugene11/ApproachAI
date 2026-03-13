@@ -6,6 +6,9 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
 
+  console.log("[auth/callback] code:", code ? "present" : "missing", "next:", next);
+  console.log("[auth/callback] cookies:", request.cookies.getAll().map(c => c.name).join(", "));
+
   const redirectUrl = new URL(next, request.url);
 
   if (code) {
@@ -28,6 +31,8 @@ export async function GET(request: NextRequest) {
     );
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+    console.log("[auth/callback] exchange result:", error ? `ERROR: ${error.message}` : "SUCCESS");
+
     if (!error) {
       return response;
     }
