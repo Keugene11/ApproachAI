@@ -31,6 +31,8 @@ export async function signInWithGoogle() {
 
     if (error) return { error };
     if (data?.url) {
+      // Flag so any page can detect it's inside an auth popup
+      localStorage.setItem("auth-pending-popup", "1");
       window.open(data.url, "_blank", "popup,width=500,height=600");
     }
     return { error: null };

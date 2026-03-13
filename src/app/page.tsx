@@ -171,16 +171,15 @@ function HomeInner() {
 
   }, []);
 
-  // Listen for auth completion from popup (standalone PWA OAuth flow)
+  // Fallback: if this page loaded inside the auth popup (next param was lost),
+  // signal the PWA and close instead of showing the full app in the popup.
   useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "auth-complete") {
-        window.location.reload();
-      }
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+    if (window.opener && localStorage.getItem("auth-pending-popup")) {
+      localStorage.removeItem("auth-pending-popup");
+      localStorage.setItem("auth-complete", Date.now().toString());
+      window.close();
+    }
+  }, [isLoggedIn]);
 
   // Load community posts when tab switches to community
   const fetchPosts = useCallback(async (mode: "new" | "top", offset = 0, query = "") => {

@@ -4,7 +4,8 @@ import { useEffect } from "react";
 
 export default function AuthComplete() {
   useEffect(() => {
-    // Signal the PWA window that auth finished
+    // Clean up and signal the PWA window that auth finished
+    localStorage.removeItem("auth-pending-popup");
     localStorage.setItem("auth-complete", Date.now().toString());
     window.close();
   }, []);
