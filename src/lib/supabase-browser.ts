@@ -3,19 +3,12 @@ import { createBrowserClient } from "@supabase/ssr";
 export function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        flowType: "implicit",
-      },
-    }
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 }
 
 /**
- * Triggers Google OAuth sign-in using the implicit flow.
- * Tokens come back in the URL hash fragment and are picked up
- * automatically by the Supabase client on page load.
+ * Triggers Google OAuth sign-in via standard PKCE flow.
  */
 export async function signInWithGoogle() {
   const supabase = createClient();
