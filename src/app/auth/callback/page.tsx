@@ -1,26 +1,41 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 
 /**
  * Auth callback page for the implicit OAuth flow.
- * Supabase redirects here with tokens in the URL hash fragment.
- * The Supabase client picks them up automatically, then we redirect home.
+ * Supabase redirects here with tokens in the URL hash fragment (#access_token=...).
+ * The Supabase client detects and processes them automatically.
+ * We wait for a SIGNED_IN event, then navigate home.
  */
 export default function AuthCallbackPage() {
-  const router = useRouter();
-
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
-        router.replace("/");
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event) => {
+        // Only redirect once the session is actually established from the hash tokens
+        if (event === "SIGNED_IN") {
+          subscription.unsubscribe();
+          // Use window.location to ensure a full page load with the new session
+          window.location.href = "/";
+        }
       }
-    });
-  }, [router]);
+    );
+
+    // Fallback: if no SIGNED_IN event within 8s (e.g. no hash tokens),
+    // redirect home anyway — getUser() on the home page will handle it
+    const timeout = setTimeout(() => {
+      subscription.unsubscribe();
+      window.location.href = "/";
+    }, 8000);
+
+    return () => {
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <main className="min-h-screen flex items-center justify-center">
