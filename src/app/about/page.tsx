@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import LandingPage from "@/components/LandingPage";
 
 export default function AboutPage() {
-  return <LandingPage />;
+  return (
+    <Suspense fallback={null}>
+      <LandingPage />
+    </Suspense>
+  );
 }

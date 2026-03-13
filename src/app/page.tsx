@@ -95,19 +95,6 @@ function HomeInner() {
     }
     setHydrated(true);
 
-    // Handle implicit OAuth flow: tokens arrive in the URL hash fragment.
-    // Only listen when we detect a hash with access_token (from OAuth redirect).
-    const hasAuthHash = window.location.hash.includes("access_token");
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event) => {
-        if (hasAuthHash && event === "SIGNED_IN") {
-          // Clean the hash and reload to pick up session cleanly
-          window.history.replaceState(null, "", window.location.pathname);
-          window.location.reload();
-        }
-      }
-    );
-
     supabase.auth.getUser().then(({ data }) => {
       const meta = data.user?.user_metadata;
       const full = meta?.full_name || meta?.name || "";
@@ -182,7 +169,6 @@ function HomeInner() {
       .then((d) => setIsPro(d.subscribed === true))
       .catch(() => setIsPro(false));
 
-    return () => { subscription.unsubscribe(); };
   }, []);
 
   // Load community posts when tab switches to community

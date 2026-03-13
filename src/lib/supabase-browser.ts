@@ -19,16 +19,12 @@ export function createClient() {
  */
 export async function signInWithGoogle() {
   const supabase = createClient();
-  const { data, error } = await supabase.auth.signInWithOAuth({
+  const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: window.location.origin,
-      skipBrowserRedirect: true,
+      redirectTo: `${window.location.origin}/auth/callback`,
       queryParams: { prompt: "select_account" },
     },
   });
-  if (data?.url) {
-    window.location.href = data.url;
-  }
   return { error };
 }
