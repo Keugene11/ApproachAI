@@ -32,15 +32,6 @@ function getGreeting(name?: string): string {
 
 type AppState = "tabs" | "conversations" | "chat" | "checkin-chat";
 
-function getSessionState(): { state: AppState; fromPhoto: boolean; tab: Tab } {
-  if (typeof window === "undefined") return { state: "tabs", fromPhoto: false, tab: "coach" };
-  try {
-    const saved = sessionStorage.getItem("wingmate-state");
-    if (saved) return JSON.parse(saved);
-  } catch {}
-  return { state: "tabs", fromPhoto: false, tab: "coach" };
-}
-
 const PAGE_SIZE = 20;
 
 export default function Home() {
@@ -81,15 +72,10 @@ function HomeInner() {
 
   useEffect(() => {
     const tabParam = searchParams.get("tab") as Tab | null;
-    const saved = getSessionState();
     if (tabParam && ["checkin", "coach", "stats", "community", "plans"].includes(tabParam)) {
       setActiveTab(tabParam);
-      setState("tabs");
-    } else {
-      if (saved.state === "chat" || saved.state === "conversations") {
-        setState(saved.state);
-      }
-      if (saved.tab) setActiveTab(saved.tab);
+      if (tabParam === "coach") setState("chat");
+      else setState("tabs");
     }
     setHydrated(true);
 
@@ -270,24 +256,13 @@ function HomeInner() {
   const updateState = useCallback(
     (newState: AppState) => {
       setState(newState);
-      try {
-        sessionStorage.setItem(
-          "wingmate-state",
-          JSON.stringify({
-            state: newState,
-            fromPhoto: false,
-            tab: activeTab,
-          })
-        );
-      } catch {}
     },
-    [activeTab]
+    []
   );
 
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
     if (tab === "coach") {
-      // If already on wingmate tab viewing history, stay there; otherwise show chat
       if (activeTab !== "coach") {
         setActiveConversationId(null);
         updateState("chat");
@@ -295,12 +270,6 @@ function HomeInner() {
     } else {
       updateState("tabs");
     }
-    try {
-      sessionStorage.setItem(
-        "wingmate-state",
-        JSON.stringify({ state: tab === "coach" ? "chat" : "tabs", fromPhoto: false, tab })
-      );
-    } catch {}
   };
 
   const reset = () => {
