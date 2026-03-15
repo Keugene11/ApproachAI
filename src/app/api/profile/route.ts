@@ -78,6 +78,11 @@ export async function PATCH(req: Request) {
     updates.custom_goal = body.custom_goal.trim().slice(0, 100);
   }
 
+  if (body.weekly_approach_goal !== undefined) {
+    const goal = Math.min(999, Math.max(0, Math.round(Number(body.weekly_approach_goal) || 0)));
+    (updates as Record<string, unknown>).weekly_approach_goal = goal;
+  }
+
   const { data, error } = await supabase
     .from("profiles")
     .update(updates)

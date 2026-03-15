@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Flame, Trophy, Calendar, Shield, Eye, Target, ThumbsUp, UserX } from "lucide-react";
+import { Flame, Trophy, Calendar, Shield, Eye, Target, ThumbsUp, UserX, Crosshair, Pencil } from "lucide-react";
 import { createClient, signInWithGoogle } from "@/lib/supabase-browser";
 import UpgradeModal from "@/components/UpgradeModal";
 
@@ -26,6 +26,8 @@ interface CheckinData {
   last7: { date: string; talked: boolean | null; approaches: number }[];
   history: { date: string; talked: boolean; opportunities: number; approaches: number; successes: number }[];
   streakFreezes: number;
+  weeklyApproaches: number;
+  weeklyApproachGoal: number;
 }
 
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -46,6 +48,9 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
   const [flowSuccesses, setFlowSuccesses] = useState(0);
 
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalInput, setGoalInput] = useState(0);
+  const [savingGoal, setSavingGoal] = useState(false);
 
   const getLocalDate = () => {
     const now = new Date();
@@ -105,6 +110,20 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
       setSaveError("Network error — check your connection");
     }
     setSubmitting(false);
+  };
+
+  const saveWeeklyGoal = async (goal: number) => {
+    setSavingGoal(true);
+    try {
+      await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ weekly_approach_goal: goal }),
+      });
+      await refreshData();
+    } catch {}
+    setSavingGoal(false);
+    setEditingGoal(false);
   };
 
   if (!data) {
@@ -401,6 +420,87 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
                 {submitting ? "..." : "Save"}
               </button>
             </div>
+      </div>
+
+      {/* Weekly approach goal */}
+      <div className="bg-bg-card border border-border rounded-2xl px-5 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-[13px] font-semibold text-text-muted uppercase tracking-wide">Weekly goal</h3>
+          {!editingGoal && data.weeklyApproachGoal > 0 && (
+            <button
+              onClick={() => guardPro(() => { setGoalInput(data.weeklyApproachGoal); setEditingGoal(true); })}
+              className="text-text-muted press p-1"
+            >
+              <Pencil size={13} strokeWidth={2} />
+            </button>
+          )}
+        </div>
+
+        {editingGoal ? (
+          <div className="animate-fade-in">
+            <p className="text-[13px] text-text-muted mb-3">How many approaches this week?</p>
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <button
+                onClick={() => setGoalInput(Math.max(1, goalInput - 1))}
+                className="w-10 h-10 rounded-full bg-bg-card-hover flex items-center justify-center text-[18px] font-bold press"
+              >−</button>
+              <span className="font-display text-[36px] font-extrabold leading-none w-14 text-center">{goalInput}</span>
+              <button
+                onClick={() => setGoalInput(Math.min(99, goalInput + 1))}
+                className="w-10 h-10 rounded-full bg-bg-card-hover flex items-center justify-center text-[18px] font-bold press"
+              >+</button>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setEditingGoal(false)}
+                className="flex-1 py-2.5 rounded-xl bg-bg-card-hover border border-border text-[13px] font-medium press"
+              >Cancel</button>
+              <button
+                onClick={() => saveWeeklyGoal(goalInput)}
+                disabled={savingGoal}
+                className="flex-1 py-2.5 rounded-xl bg-[#1a1a1a] text-white text-[13px] font-semibold press disabled:opacity-60"
+              >{savingGoal ? "..." : "Set goal"}</button>
+            </div>
+          </div>
+        ) : data.weeklyApproachGoal > 0 ? (
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <Crosshair size={18} strokeWidth={1.5} className={data.weeklyApproaches >= data.weeklyApproachGoal ? "text-green-500" : "text-blue-500"} />
+              <div className="flex-1">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-display text-[24px] font-extrabold">{data.weeklyApproaches}</span>
+                  <span className="text-text-muted text-[14px] font-medium">/ {data.weeklyApproachGoal}</span>
+                </div>
+                <p className="text-[12px] text-text-muted">approaches this week</p>
+              </div>
+              {data.weeklyApproaches >= data.weeklyApproachGoal && (
+                <span className="text-[12px] font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">Done!</span>
+              )}
+            </div>
+            {/* Progress bar */}
+            <div className="h-2.5 bg-bg-card-hover rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  data.weeklyApproaches >= data.weeklyApproachGoal ? "bg-green-500" : "bg-blue-500"
+                }`}
+                style={{ width: `${Math.min(100, (data.weeklyApproaches / data.weeklyApproachGoal) * 100)}%` }}
+              />
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => guardPro(() => { setGoalInput(5); setEditingGoal(true); })}
+            className="w-full flex items-center gap-3 py-2 press"
+          >
+            <div className="w-10 h-10 rounded-full bg-bg-card-hover flex items-center justify-center shrink-0">
+              <Crosshair size={18} strokeWidth={1.5} className="text-text-muted" />
+            </div>
+            <div className="text-left">
+              <p className="text-[14px] font-medium">Set a weekly goal</p>
+              <p className="text-[12px] text-text-muted">How many approaches do you want to make?</p>
+            </div>
+          </button>
+        )}
       </div>
 
       {/* All-time approach stats */}

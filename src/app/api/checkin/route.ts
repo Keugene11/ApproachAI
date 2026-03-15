@@ -154,9 +154,9 @@ export async function GET(req: Request) {
 
   const stats = await getFullStats(supabase, user.id, today);
 
-  // Get profile for XP and freezes
+  // Get profile for XP, freezes, and weekly goal
   const { data: profile } = await supabase
-    .from("profiles").select("xp, streak_freezes").eq("id", user.id).single();
+    .from("profiles").select("xp, streak_freezes, weekly_approach_goal").eq("id", user.id).single();
 
   // Get earned badges
   const { data: earnedBadges } = await supabase
@@ -183,6 +183,8 @@ export async function GET(req: Request) {
     approachConversionRate: stats.approachConversionRate,
     last7: stats.last7,
     history: stats.history,
+    weeklyApproaches: stats.last7.reduce((sum: number, d: { approaches: number }) => sum + d.approaches, 0),
+    weeklyApproachGoal: profile?.weekly_approach_goal ?? 0,
     xp: profile?.xp ?? 0,
     streakFreezes: profile?.streak_freezes ?? 0,
     badges: (earnedBadges || []).map((b: any) => b.badge_id),
