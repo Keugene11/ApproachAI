@@ -420,17 +420,25 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <button onClick={() => guardPro(() => submitCheckin(false, 0, 0, 0))} disabled={submitting}
-                className="flex-1 py-3.5 rounded-xl bg-white/10 text-white/70 text-[14px] font-medium press">
-                No approaches today
-              </button>
-              <button onClick={() => guardPro(() => submitCheckin(true, flowOpportunities, flowApproaches, flowSuccesses))}
-                disabled={submitting}
-                className="flex-1 py-3.5 rounded-xl bg-white text-[#1a1a1a] text-[14px] font-semibold press disabled:opacity-60">
-                {submitting ? "..." : "Save"}
-              </button>
-            </div>
+            {data.checkedInToday && flowOpportunities === 0 && flowApproaches === 0 && flowSuccesses === 0 ? (
+              <div className="flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white/10 text-white/60 text-[14px] font-medium">
+                <span className="text-green-400">✓</span> Checked in — no approaches today
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                {!data.checkedInToday && (
+                  <button onClick={() => guardPro(() => submitCheckin(false, 0, 0, 0))} disabled={submitting}
+                    className="flex-1 py-3.5 rounded-xl bg-white/10 text-white/70 text-[14px] font-medium press disabled:opacity-60">
+                    {submitting ? "..." : "No approaches today"}
+                  </button>
+                )}
+                <button onClick={() => guardPro(() => submitCheckin(true, flowOpportunities, flowApproaches, flowSuccesses))}
+                  disabled={submitting}
+                  className="flex-1 py-3.5 rounded-xl bg-white text-[#1a1a1a] text-[14px] font-semibold press disabled:opacity-60">
+                  {submitting ? "..." : data.checkedInToday ? "Update" : "Save"}
+                </button>
+              </div>
+            )}
       </div>
 
       {/* Weekly approach goal */}
