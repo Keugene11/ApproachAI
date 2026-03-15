@@ -12,7 +12,6 @@ import DailyCheckin from "@/components/DailyCheckin";
 import BottomNav, { type Tab } from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
 import StatsView from "@/components/StatsView";
-import LandingPage from "@/components/LandingPage";
 
 function getGreeting(name?: string): string {
   const first = name || "king";
@@ -150,11 +149,12 @@ function HomeInner() {
       } else {
         setIsLoggedIn(false);
         setGreeting(getGreeting());
-        setActiveTab("checkin");
+        setActiveTab("stats");
       }
     }).catch(() => {
       setIsLoggedIn(false);
       setGreeting(getGreeting());
+      setActiveTab("stats");
     });
 
     const now = new Date();
@@ -319,10 +319,8 @@ function HomeInner() {
     </main>
   );
 
-  // Show landing page for unauthenticated visitors
-  if (isLoggedIn === false) {
-    return <LandingPage />;
-  }
+  // Unauthenticated visitors see the normal tabs (starting on checkin/stats)
+  // No landing page gate — they can browse freely
 
   // Full-screen: checkin-chat (no tab bar — temporary coaching flow)
   if (state === "checkin-chat") {
