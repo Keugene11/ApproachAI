@@ -47,7 +47,6 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
 
   const [saveError, setSaveError] = useState<string | null>(null);
 
-
   const getLocalDate = () => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -107,8 +106,6 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
     }
     setSubmitting(false);
   };
-
-
 
   if (!data) {
     if (!isLoggedIn) {

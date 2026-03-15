@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
-import { Plus, Flame, Lock, MessageCircle, Search, X, Check } from "lucide-react";
+import { Plus, Lock, Search, X, Check } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
@@ -60,7 +60,6 @@ function HomeInner() {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [greeting, setGreeting] = useState("");
-  const [checkedInToday, setCheckedInToday] = useState<boolean | null>(null);
   const [isPro, setIsPro] = useState<boolean | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
@@ -157,13 +156,6 @@ function HomeInner() {
       setActiveTab("stats");
     });
 
-    const now = new Date();
-    const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    fetch(`/api/checkin?today=${localDate}`)
-      .then((res) => res.json())
-      .then((d) => { if (!d.error) setCheckedInToday(d.checkedInToday); })
-      .catch(() => {});
-
     fetch("/api/stripe/status")
       .then((res) => res.json())
       .then((d) => setIsPro(d.subscribed === true))
@@ -194,7 +186,11 @@ function HomeInner() {
       .range(offset, offset + PAGE_SIZE - 1);
 
     if (query) {
-      q = q.or(`title.ilike.%${query}%,body.ilike.%${query}%,author_name.ilike.%${query}%`);
+      // Sanitize: escape characters that could break PostgREST filter syntax
+      const safe = query.replace(/[%_(),.*\\]/g, "");
+      if (safe) {
+        q = q.or(`title.ilike.%${safe}%,body.ilike.%${safe}%,author_name.ilike.%${safe}%`);
+      }
     }
 
     const { data } = await q;
@@ -381,7 +377,7 @@ function HomeInner() {
             updateState("chat");
           }}
           showBottomPadding
-          isLoggedIn
+          isLoggedIn={isLoggedIn === true}
         />
       )}
 
@@ -394,8 +390,7 @@ function HomeInner() {
               setCheckinTalked(talked);
               updateState("checkin-chat");
             }}
-            onCheckedIn={() => setCheckedInToday(true)}
-            isLoggedIn
+            isLoggedIn={isLoggedIn === true}
             isPro={isPro === true}
           />
 
@@ -691,8 +686,7 @@ function HomeInner() {
           </div>
 
           {/* Motivational sell */}
-          {(
-            <div className="mt-10 space-y-6">
+          <div className="mt-10 space-y-6">
               <div className="rounded-2xl bg-[#1a1a1a] text-white px-6 py-7">
                 <h3 className="font-display text-[20px] font-bold leading-snug mb-4">
                   Think about how sick it would be.
@@ -719,8 +713,7 @@ function HomeInner() {
                   One approach that goes right will change how you see yourself. Wingmate is how you get there.
                 </p>
               </div>
-            </div>
-          )}
+          </div>
 
           <div className="text-center text-[13px] text-text-muted mt-8">
             <p>Secure payment via Stripe &middot; Cancel anytime</p>
