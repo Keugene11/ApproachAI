@@ -12,27 +12,11 @@ public class MainActivity extends LauncherActivity {
         try {
             super.onCreate(savedInstanceState);
         } catch (Exception e) {
-            // If TWA fails (no Chrome, etc.), open in default browser
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getDefaultUrl()));
+            // If TWA fails, open in default browser
+            Intent intent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("https://wingmate.live"));
             startActivity(intent);
             finish();
-        }
-    }
-
-    @Override
-    protected Uri getLaunchingUrl() {
-        Uri uri = getIntent().getData();
-        if (uri != null) {
-            return uri;
-        }
-        return Uri.parse(getDefaultUrl());
-    }
-
-    private String getDefaultUrl() {
-        try {
-            return getIntent().getStringExtra("android.support.customtabs.trusted.DEFAULT_URL");
-        } catch (Exception e) {
-            return "https://wingmate.live";
         }
     }
 }
