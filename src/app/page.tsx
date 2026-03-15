@@ -53,6 +53,7 @@ function HomeInner() {
   const [greeting, setGreeting] = useState("");
   const [isPro, setIsPro] = useState<boolean | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [checkoutPending, setCheckoutPending] = useState(false);
 
   // Community state
   const [posts, setPosts] = useState<any[]>([]);
@@ -142,10 +143,34 @@ function HomeInner() {
       if (!tabParam) setActiveTab("stats");
     });
 
-    fetch("/api/stripe/status")
-      .then((res) => res.json())
-      .then((d) => setIsPro(d.subscribed === true))
-      .catch(() => setIsPro(false));
+    const isPostCheckout = searchParams.get("checkout") === "success";
+    if (isPostCheckout) setCheckoutPending(true);
+
+    const checkStatus = () =>
+      fetch("/api/stripe/status")
+        .then((res) => res.json())
+        .then((d) => {
+          if (d.subscribed) {
+            setIsPro(true);
+            setCheckoutPending(false);
+            // Clean up the checkout param from URL
+            if (isPostCheckout) {
+              const url = new URL(window.location.href);
+              url.searchParams.delete("checkout");
+              window.history.replaceState({}, "", url.toString());
+            }
+          } else if (isPostCheckout) {
+            // Webhook hasn't fired yet — retry
+            return new Promise<void>((resolve) =>
+              setTimeout(() => checkStatus().then(resolve), 1500)
+            );
+          } else {
+            setIsPro(false);
+          }
+        })
+        .catch(() => setIsPro(false));
+
+    checkStatus();
 
   }, []);
 
@@ -286,6 +311,14 @@ function HomeInner() {
   if (!hydrated || isLoggedIn === null) return (
     <main className="min-h-screen flex items-center justify-center">
       <div className="w-5 h-5 border-2 border-text-muted border-t-transparent rounded-full animate-spin" />
+    </main>
+  );
+
+  if (checkoutPending) return (
+    <main className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center animate-fade-in">
+      <div className="w-6 h-6 border-2 border-text-muted border-t-transparent rounded-full animate-spin" />
+      <p className="font-display text-[18px] font-bold">Activating your Pro plan...</p>
+      <p className="text-text-muted text-[14px]">This only takes a few seconds.</p>
     </main>
   );
 
