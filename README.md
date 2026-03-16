@@ -1,6 +1,6 @@
 # Wingmate
 
-AI-powered confidence coach for approaching people. Get real-time motivational coaching, track your progress with streaks and badges, and connect with a community of people on the same journey.
+AI-powered confidence coach for approaching people. Get real-time motivational coaching, track your progress with streaks, and connect with a community of people on the same journey.
 
 ## Stack
 
@@ -16,7 +16,7 @@ AI-powered confidence coach for approaching people. Get real-time motivational c
 
 - **AI coaching** — Streaming real-time coach with a motivational, friend-like personality. Gives you an opener, read-aheads, and an exit strategy.
 - **Daily check-ins** — Log whether you approached someone today. Track opportunities, approaches, and successes.
-- **Gamification** — Streak tracking with visual tiers (ember → inferno) and approach stats.
+- **Streaks & stats** — Track your approach streaks and view stats over time.
 - **Community** — Post your wins, vote on others' posts, browse by new or top.
 - **Conversation history** — Past coaching sessions saved and reviewable.
 - **Subscription gating** — Freemium model (1 free session + 1 message), then $15/month or $10/month yearly.
@@ -51,12 +51,12 @@ src/
 │   ├── ChatCoach.tsx         # AI coaching chat interface
 │   ├── DailyCheckin.tsx      # Check-in UI
 │   ├── ConversationList.tsx  # Past sessions
-│   ├── StatsView.tsx         # Stats, streaks, badges
+│   ├── StatsView.tsx         # Stats & streaks
 │   ├── PostCard.tsx          # Community post card
 │   ├── BottomNav.tsx         # Tab navigation
 │   └── UpgradeModal.tsx      # Pro upgrade prompt
 ├── lib/
-│   ├── gamification.ts       # Levels, badges, XP config
+│   ├── gamification.ts       # Streaks & stats config
 │   ├── stripe.ts             # Stripe client + price config
 │   ├── supabase-browser.ts   # Browser Supabase client
 │   ├── supabase-server.ts    # Server Supabase client
