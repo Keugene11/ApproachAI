@@ -1,21 +1,26 @@
 # Wingmate
 
-AI-powered confidence coach for cold approaches. Snap a photo, get scene analysis, and receive real-time coaching to help you make your move.
+AI-powered confidence coach for approaching people. Get real-time motivational coaching, track your progress with streaks and badges, and connect with a community of people on the same journey.
 
 ## Stack
 
-- **Framework:** Next.js 16 (App Router) + TypeScript
-- **Styling:** Tailwind CSS v4 + Bricolage Grotesque
+- **Framework:** Next.js 16 (App Router) + TypeScript + React 19
+- **Styling:** Tailwind CSS v4 + DM Sans
 - **Auth:** Supabase Auth (Google OAuth)
-- **AI:** Claude Sonnet via Dedalus Labs API
+- **Database:** Supabase (Postgres) with RLS
+- **AI:** Claude Sonnet via Vercel AI SDK (`@ai-sdk/anthropic`)
 - **Payments:** Stripe (subscriptions)
-- **Deployment:** Vercel
+- **Deployment:** Vercel + Android TWA (Google Play)
 
 ## Features
 
-- **Photo analysis** — Take or upload a photo, annotate the scene, get AI-powered situational awareness
-- **Chat coaching** — Streaming AI coach that gives you confidence and a game plan
-- **Subscription gating** — $15/month or $10/month (billed yearly at $120)
+- **AI coaching** — Streaming real-time coach with a motivational, friend-like personality. Gives you an opener, read-aheads, and an exit strategy.
+- **Daily check-ins** — Log whether you approached someone today. Track opportunities, approaches, and successes.
+- **Gamification** — Streak tracking with visual tiers (ember → inferno) and approach stats.
+- **Community** — Post your wins, vote on others' posts, browse by new or top.
+- **Conversation history** — Past coaching sessions saved and reviewable.
+- **Subscription gating** — Freemium model (1 free session + 1 message), then $15/month or $10/month yearly.
+- **PWA + Android app** — Installable as a PWA with offline support, plus a Trusted Web Activity for the Play Store.
 
 ## Project Structure
 
@@ -23,78 +28,56 @@ AI-powered confidence coach for cold approaches. Snap a photo, get scene analysi
 src/
 ├── app/
 │   ├── api/
-│   │   ├── analyze/          # Photo scene analysis
-│   │   ├── chat/             # Streaming chat endpoint
+│   │   ├── chat/             # Streaming AI coach
+│   │   ├── checkin/          # Daily check-in CRUD
+│   │   ├── conversations/    # Conversation & message history
+│   │   ├── profile/          # User profile & goals
+│   │   ├── stats/            # Aggregated user stats
+│   │   ├── usage/            # Free tier usage tracking
 │   │   ├── stripe/           # Checkout, portal, status, setup
 │   │   └── webhooks/stripe/  # Stripe webhook handler
-│   ├── auth/callback/        # OAuth callback
-│   ├── login/                # Google OAuth login
-│   └── pricing/              # Subscription pricing page
+│   ├── auth/
+│   │   ├── callback/         # OAuth callback
+│   │   └── complete/         # Post-auth completion
+│   ├── community/            # Feed, posts, user profiles
+│   ├── onboarding/           # Multi-step onboarding flow
+│   ├── plans/                # Subscription plans
+│   ├── profile/              # User profile page
+│   ├── delete-account/       # Account deletion
+│   ├── privacy/              # Privacy policy
+│   ├── terms/                # Terms of service
+│   └── offline/              # Offline fallback
 ├── components/
-│   ├── ChatCoach.tsx         # Chat interface
-│   └── ImageAnnotator.tsx    # Photo annotation canvas
+│   ├── ChatCoach.tsx         # AI coaching chat interface
+│   ├── DailyCheckin.tsx      # Check-in UI
+│   ├── ConversationList.tsx  # Past sessions
+│   ├── StatsView.tsx         # Stats, streaks, badges
+│   ├── PostCard.tsx          # Community post card
+│   ├── BottomNav.tsx         # Tab navigation
+│   └── UpgradeModal.tsx      # Pro upgrade prompt
 ├── lib/
-│   ├── ai.ts                # AI provider config
-│   ├── stripe.ts            # Stripe client + price config
-│   ├── subscription.ts      # Subscription check helper
-│   ├── supabase-browser.ts  # Browser Supabase client
-│   └── supabase-server.ts   # Server Supabase client
-└── middleware.ts             # Auth + subscription gating
+│   ├── gamification.ts       # Levels, badges, XP config
+│   ├── stripe.ts             # Stripe client + price config
+│   ├── supabase-browser.ts   # Browser Supabase client
+│   ├── supabase-server.ts    # Server Supabase client
+│   └── utils.ts              # General utilities
+└── middleware.ts              # Auth + subscription gating
+
+android-twa/                   # Trusted Web Activity (Android)
+public/
+├── manifest.json              # PWA manifest
+├── sw.js                      # Service worker
+└── icons/                     # App icons
 ```
 
-## Setup
+## Live
 
-### 1. Install dependencies
-
-```bash
-pnpm install
-```
-
-### 2. Environment variables
-
-Copy `.env.local` and fill in:
-
-```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-DEDALUS_API_KEY=
-
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
-```
-
-### 3. Database
-
-Run `supabase-schema.sql` in your Supabase SQL editor to create the `subscriptions` table.
-
-### 4. Stripe products
-
-After adding your Stripe key, create products and prices by calling:
-
-```bash
-curl -X POST http://localhost:3000/api/stripe/setup
-```
-
-This creates a "Wingmate Pro" product with monthly ($15) and yearly ($120) prices.
-
-### 5. Stripe webhook
-
-Point your Stripe webhook to `https://yourdomain.com/api/webhooks/stripe` with events:
-- `checkout.session.completed`
-- `customer.subscription.updated`
-- `customer.subscription.deleted`
-
-### 6. Run
-
-```bash
-pnpm dev
-```
+[wingmate.live](https://wingmate.live)
 
 ## Pricing
 
 | Plan    | Price      | Billing        |
 |---------|------------|----------------|
+| Free    | $0         | 1 session + 1 message |
 | Monthly | $15/month  | Billed monthly |
 | Yearly  | $10/month  | $120/year      |
