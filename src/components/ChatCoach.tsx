@@ -422,7 +422,7 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
             Upgrade to Pro for unlimited AI coaching.
           </p>
           <button
-            onClick={() => router.push("/pricing")}
+            onClick={() => router.push("/plans")}
             className="w-full bg-[#1a1a1a] text-white py-3.5 rounded-2xl font-semibold text-[15px] press"
           >
             Unlock Wingmate Pro
