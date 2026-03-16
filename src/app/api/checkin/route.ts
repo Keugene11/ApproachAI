@@ -2,8 +2,6 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { XP_REWARDS, computeEarnedBadges } from "@/lib/gamification";
-
 // Auth client — uses anon key + user cookies to identify the user
 async function getAuthSupabase() {
   const cookieStore = await cookies();
@@ -154,13 +152,9 @@ export async function GET(req: Request) {
 
   const stats = await getFullStats(supabase, user.id, today);
 
-  // Get profile for XP, freezes, and weekly goal
+  // Get profile for freezes and weekly goal
   const { data: profile } = await supabase
-    .from("profiles").select("xp, streak_freezes, weekly_approach_goal").eq("id", user.id).single();
-
-  // Get earned badges
-  const { data: earnedBadges } = await supabase
-    .from("user_badges").select("badge_id, earned_at").eq("user_id", user.id);
+    .from("profiles").select("streak_freezes, weekly_approach_goal").eq("id", user.id).single();
 
   return NextResponse.json({
     checkedInToday: !!todayCheckin,
@@ -185,9 +179,7 @@ export async function GET(req: Request) {
     history: stats.history,
     weeklyApproaches: stats.last7.reduce((sum: number, d: { approaches: number }) => sum + d.approaches, 0),
     weeklyApproachGoal: profile?.weekly_approach_goal ?? 0,
-    xp: profile?.xp ?? 0,
     streakFreezes: profile?.streak_freezes ?? 0,
-    badges: (earnedBadges || []).map((b: any) => b.badge_id),
   });
 }
 
@@ -252,75 +244,27 @@ export async function POST(req: Request) {
 
   const stats = await getFullStats(supabase, user.id, today);
 
-  // Get profile (single query with all needed fields)
+  // Get profile for streak freezes
   let { data: profile } = await supabase
     .from("profiles")
-    .select("xp, streak_freezes")
+    .select("streak_freezes")
     .eq("id", user.id)
     .single();
 
   if (!profile) {
-    await supabase.from("profiles").upsert({ id: user.id, username: "", xp: 0, streak_freezes: 0 });
-    profile = { xp: 0, streak_freezes: 0 };
+    await supabase.from("profiles").upsert({ id: user.id, username: "", streak_freezes: 0 });
+    profile = { streak_freezes: 0 };
   }
 
-  let currentXp = profile.xp || 0;
   let currentFreezes = profile.streak_freezes || 0;
 
-  // Calculate XP earned (only for new check-ins)
-  let xpEarned = 0;
-  if (isNew) {
-    xpEarned += XP_REWARDS.checkin;
-    if (talked) xpEarned += XP_REWARDS.approach;
-    xpEarned += XP_REWARDS.streakBonus(stats.streak);
-
-    // Award streak freeze every 7 days
-    const newFreezes = stats.streak > 0 && stats.streak % 7 === 0 ? 1 : 0;
-
-    currentXp += xpEarned;
-    currentFreezes = Math.min(currentFreezes + newFreezes, 3);
-
+  // Award streak freeze every 7 days (only for new check-ins)
+  if (isNew && stats.streak > 0 && stats.streak % 7 === 0) {
+    currentFreezes = Math.min(currentFreezes + 1, 3);
     await supabase
       .from("profiles")
-      .update({ xp: currentXp, streak_freezes: currentFreezes })
+      .update({ streak_freezes: currentFreezes })
       .eq("id", user.id);
-  }
-
-  // Compute badges (runs on both new and update to catch badges from talked changes)
-  const { data: existingBadges } = await supabase
-    .from("user_badges").select("badge_id").eq("user_id", user.id);
-  const existingBadgeIds = new Set((existingBadges || []).map((b: any) => b.badge_id));
-
-  const shouldHave = computeEarnedBadges({
-    totalCheckins: stats.totalCheckins,
-    totalTalked: stats.totalTalked,
-    currentStreak: stats.streak,
-    bestStreak: stats.bestStreak,
-    daysSinceLastCheckin: stats.dates.length > 1
-      ? Math.floor((new Date(stats.dates[0] + "T00:00:00").getTime() - new Date(stats.dates[1] + "T00:00:00").getTime()) / 86400000)
-      : 0,
-    isFirstCheckin: stats.totalCheckins === 1,
-    talkedToday: talked,
-    last7AllCheckedIn: stats.last7AllCheckedIn,
-    weekendApproaches: stats.weekendApproaches,
-    consecutiveApproaches: stats.consecutiveApproaches,
-  });
-
-  const newBadges: string[] = [];
-  let badgeXp = 0;
-  for (const badgeId of shouldHave) {
-    if (!existingBadgeIds.has(badgeId)) {
-      await supabase.from("user_badges").insert({ user_id: user.id, badge_id: badgeId });
-      newBadges.push(badgeId);
-      badgeXp += XP_REWARDS.badge;
-    }
-  }
-
-  if (badgeXp > 0) {
-    xpEarned += badgeXp;
-    currentXp += badgeXp;
-
-    await supabase.from("profiles").update({ xp: currentXp }).eq("id", user.id);
   }
 
   return NextResponse.json({
@@ -337,9 +281,6 @@ export async function POST(req: Request) {
     totalDidntApproach: stats.totalDidntApproach,
     successRate: stats.successRate,
     approachConversionRate: stats.approachConversionRate,
-    xp: currentXp,
-    xpEarned,
-    newBadges,
     streakFreezes: currentFreezes,
   });
 }
