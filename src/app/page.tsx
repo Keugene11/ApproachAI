@@ -301,8 +301,7 @@ function HomeInner() {
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
     if (tab === "coach") {
-      if (activeTab !== "coach") {
-        setActiveConversationId(null);
+      if (activeTab !== "coach" && !activeConversationId) {
         updateState("chat");
       }
     } else {
