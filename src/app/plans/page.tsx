@@ -72,6 +72,13 @@ export default function PlansPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan }),
       });
+      if (res.status === 401) {
+        // Session expired or invalid — redirect to sign in
+        localStorage.setItem("pending-checkout-plan", plan);
+        signInWithGoogle().catch(() => {});
+        setTimeout(() => setLoading(null), 3000);
+        return;
+      }
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
