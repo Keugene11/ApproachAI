@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Check, CreditCard, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
-import { signInWithGoogle } from "@/lib/supabase-browser";
+import { createClient, signInWithGoogle } from "@/lib/supabase-browser";
 
 type Subscription = {
   status: string;
@@ -35,8 +35,13 @@ export default function PlansPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user);
+    });
     fetch("/api/stripe/status")
       .then((res) => res.json())
       .then((data) => {
@@ -51,18 +56,20 @@ export default function PlansPage() {
   const handleCheckout = async (plan: "monthly" | "yearly") => {
     setLoading(plan);
     setError(null);
+
+    if (!isLoggedIn) {
+      // Store intended plan and send user to login
+      localStorage.setItem("pending-checkout-plan", plan);
+      signInWithGoogle();
+      return;
+    }
+
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan }),
       });
-      if (res.status === 401) {
-        // Not logged in — store intended plan and redirect to sign in
-        localStorage.setItem("pending-checkout-plan", plan);
-        await signInWithGoogle();
-        return;
-      }
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
