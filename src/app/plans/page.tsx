@@ -60,7 +60,12 @@ export default function PlansPage() {
     if (!isLoggedIn) {
       // Store intended plan and send user to login
       localStorage.setItem("pending-checkout-plan", plan);
-      signInWithGoogle();
+      const { error: authError } = await signInWithGoogle();
+      // If signInWithGoogle returned (PWA popup mode or error), reset button
+      if (authError) {
+        setError("Could not open sign-in. Please try again.");
+      }
+      setLoading(null);
       return;
     }
 
