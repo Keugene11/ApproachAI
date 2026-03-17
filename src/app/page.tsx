@@ -189,7 +189,6 @@ function HomeInner() {
   // Load community posts when tab switches to community
   const fetchPosts = useCallback(async (mode: "new" | "top", offset = 0, query = "") => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
 
     const order = mode === "top" ? "score" : "created_at";
     let q = supabase
@@ -212,14 +211,16 @@ function HomeInner() {
 
     if (postList.length > 0) {
       const ids = postList.map((p: any) => p.id);
-      const { data: userVotes } = await supabase
-        .from("votes")
-        .select("post_id, direction")
-        .eq("user_id", user.id)
-        .in("post_id", ids);
+      let voteMap: Record<string, number> = {};
 
-      const voteMap: Record<string, number> = {};
-      userVotes?.forEach((v: any) => { voteMap[v.post_id] = v.direction; });
+      if (user) {
+        const { data: userVotes } = await supabase
+          .from("votes")
+          .select("post_id, direction")
+          .eq("user_id", user.id)
+          .in("post_id", ids);
+        userVotes?.forEach((v: any) => { voteMap[v.post_id] = v.direction; });
+      }
 
       if (offset === 0) {
         setPosts(postList);
