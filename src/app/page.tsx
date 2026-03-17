@@ -112,9 +112,11 @@ function HomeInner() {
           .catch(() => {});
         // If there's a pending checkout plan from onboarding, redirect to checkout
         try {
-          const pendingPlan = sessionStorage.getItem("wingmate-checkout-plan");
+          const pendingPlan = sessionStorage.getItem("wingmate-checkout-plan")
+            || localStorage.getItem("pending-checkout-plan");
           if (pendingPlan) {
             sessionStorage.removeItem("wingmate-checkout-plan");
+            localStorage.removeItem("pending-checkout-plan");
             fetch("/api/stripe/checkout", {
               method: "POST",
               headers: { "Content-Type": "application/json" },

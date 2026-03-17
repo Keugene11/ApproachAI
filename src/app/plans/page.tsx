@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Check, CreditCard, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
+import { signInWithGoogle } from "@/lib/supabase-browser";
 
 type Subscription = {
   status: string;
@@ -56,6 +57,12 @@ export default function PlansPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan }),
       });
+      if (res.status === 401) {
+        // Not logged in — store intended plan and redirect to sign in
+        localStorage.setItem("pending-checkout-plan", plan);
+        await signInWithGoogle();
+        return;
+      }
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
