@@ -438,7 +438,17 @@ function HomeInner() {
             <h1 className="font-display text-[28px] font-bold tracking-tight">Community</h1>
           </div>
 
-          <div>
+          {!isLoggedIn ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <p className="text-text-muted text-[15px] mb-6 text-center">Sign in to see what others are sharing and join the conversation.</p>
+              <a
+                href="/api/auth/login"
+                className="bg-[#1a1a1a] text-white px-8 py-3 rounded-xl font-semibold text-[14px] press"
+              >
+                Sign in with Google
+              </a>
+            </div>
+          ) : <div>
           <div className="flex items-center justify-end mb-4 -mt-2 gap-2">
             <button
               onClick={() => { setCommunitySearchOpen(!communitySearchOpen); setTimeout(() => communitySearchRef.current?.focus(), 50); }}
@@ -536,7 +546,7 @@ function HomeInner() {
               )}
             </div>
           )}
-          </div>
+          </div>}
         </div>
       )}
 
