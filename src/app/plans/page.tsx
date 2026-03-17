@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Check, CreditCard, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
-import { createClient, signInWithGoogle } from "@/lib/supabase-browser";
+import { createClient } from "@/lib/supabase-browser";
 
 type Subscription = {
   status: string;
@@ -35,13 +35,7 @@ export default function PlansPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setIsLoggedIn(!!user);
-    });
     fetch("/api/stripe/status")
       .then((res) => res.json())
       .then((data) => {
@@ -53,18 +47,28 @@ export default function PlansPage() {
 
   const [error, setError] = useState<string | null>(null);
 
+  const redirectToLogin = async (plan: string) => {
+    localStorage.setItem("pending-checkout-plan", plan);
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { prompt: "select_account" },
+        skipBrowserRedirect: true,
+      },
+    });
+    if (data?.url) {
+      window.location.href = data.url;
+    } else {
+      setError(error?.message || "Could not open sign-in. Please try again.");
+      setLoading(null);
+    }
+  };
+
   const handleCheckout = async (plan: "monthly" | "yearly") => {
     setLoading(plan);
     setError(null);
-
-    if (!isLoggedIn) {
-      // Store intended plan so checkout resumes after login
-      localStorage.setItem("pending-checkout-plan", plan);
-      signInWithGoogle().catch(() => {});
-      // Reset button after a timeout in case redirect doesn't happen
-      setTimeout(() => setLoading(null), 3000);
-      return;
-    }
 
     try {
       const res = await fetch("/api/stripe/checkout", {
@@ -73,10 +77,8 @@ export default function PlansPage() {
         body: JSON.stringify({ plan }),
       });
       if (res.status === 401) {
-        // Session expired or invalid — redirect to sign in
-        localStorage.setItem("pending-checkout-plan", plan);
-        signInWithGoogle().catch(() => {});
-        setTimeout(() => setLoading(null), 3000);
+        // Not logged in or session expired — redirect to sign in
+        await redirectToLogin(plan);
         return;
       }
       const data = await res.json();
