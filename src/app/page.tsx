@@ -410,6 +410,7 @@ function HomeInner() {
               updateState("checkin-chat");
             }}
             isLoggedIn={isLoggedIn === true}
+            isPro={isPro === true}
           />
 
         </div>
@@ -426,7 +427,7 @@ function HomeInner() {
               Your approach history at a glance
             </p>
           </div>
-          <StatsView />
+          <StatsView isPro={isPro === true} />
         </div>
       )}
 
@@ -559,7 +560,7 @@ function HomeInner() {
             <p className="text-text-muted text-[15px] leading-relaxed max-w-[340px] mx-auto">
               {isPro
                 ? "You have unlimited access to all Pro features."
-                : "Unlimited AI coaching, full tracker access, and community."}
+                : "Unlimited AI coaching and full approach tracker access."}
             </p>
           </div>
 
@@ -618,7 +619,7 @@ function HomeInner() {
                 </button>
               )}
               <div className="space-y-3">
-                {["Unlimited AI coaching", "Daily check-ins & streaks", "Approach tracking & stats", "Community posts & comments"].map((f) => (
+                {["Unlimited AI coaching", "Approach tracker & stats", "Daily check-ins & streaks", "Weekly goal setting"].map((f) => (
                   <div key={f} className="flex items-center gap-3">
                     <Check size={16} strokeWidth={2.5} className="text-[#1a1a1a] shrink-0" />
                     <span className="text-[14px]">{f}</span>
@@ -652,7 +653,7 @@ function HomeInner() {
                 </button>
               )}
               <div className="space-y-3">
-                {["Unlimited AI coaching", "Daily check-ins & streaks", "Approach tracking & stats", "Community posts & comments"].map((f) => (
+                {["Unlimited AI coaching", "Approach tracker & stats", "Daily check-ins & streaks", "Weekly goal setting"].map((f) => (
                   <div key={f} className="flex items-center gap-3">
                     <Check size={16} strokeWidth={2.5} className="text-text-muted shrink-0" />
                     <span className="text-[14px]">{f}</span>

@@ -15,7 +15,7 @@ type Subscription = {
 const FAQ = [
   {
     q: "Can I try it for free?",
-    a: "You're already using it! You can view check-ins and stats for free. Upgrade to Pro for unlimited AI coaching, full tracker access, and community.",
+    a: "Community is free for all users. Upgrade to Pro for unlimited AI coaching and the full approach tracker.",
   },
   {
     q: "How is this different from ChatGPT?",
@@ -112,7 +112,7 @@ export default function PlansPage() {
         <p className="text-text-muted text-[16px] leading-relaxed max-w-[380px] mx-auto">
           {isActive
             ? "You have unlimited access to all Pro features."
-            : "Build confidence with daily check-ins and approach tracking. Upgrade when you want unlimited AI coaching."}
+            : "Community is free. Upgrade for unlimited AI coaching and the full approach tracker."}
         </p>
       </div>
 
@@ -189,7 +189,7 @@ export default function PlansPage() {
             )
           )}
           <div className="space-y-3">
-            {["Unlimited AI coaching", "Daily check-ins & streaks", "Approach tracking & stats", "Community posts & comments"].map((f) => (
+            {["Unlimited AI coaching", "Approach tracker & stats", "Daily check-ins & streaks", "Weekly goal setting"].map((f) => (
               <div key={f} className="flex items-center gap-3">
                 <Check size={16} strokeWidth={2.5} className="text-text-muted shrink-0" />
                 <span className="text-[14px]">{f}</span>
@@ -237,7 +237,7 @@ export default function PlansPage() {
             )
           )}
           <div className="space-y-3">
-            {["Unlimited AI coaching", "Daily check-ins & streaks", "Approach tracking & stats", "Community posts & comments"].map((f) => (
+            {["Unlimited AI coaching", "Approach tracker & stats", "Daily check-ins & streaks", "Weekly goal setting"].map((f) => (
               <div key={f} className="flex items-center gap-3">
                 <Check size={16} strokeWidth={2.5} className="text-[#1a1a1a] shrink-0" />
                 <span className="text-[14px]">{f}</span>
