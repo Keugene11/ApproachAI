@@ -50,13 +50,13 @@ export default function OnboardingPage() {
   // Step 1: The question
   if (step === "ask") {
     return (
-      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
+      <main key={stepKey} className="min-h-screen max-w-md mx-auto px-8 flex flex-col justify-center py-16">
         <ProgressBar step={step} />
-        <div className="text-center mb-12">
-          <p className="text-[48px] mb-6 onb-emoji">🤔</p>
-          <h1 className="font-display text-[22px] font-extrabold tracking-tight leading-[1.25] onb-title">
-            Ask yourself if there&apos;s been an opportunity in the past 30 days where you had the chance to approach a smoking hot girl but you didn&apos;t because you had approach anxiety
-          </h1>
+        <div className="mb-16">
+          <p className="text-[48px] mb-8 onb-emoji">🤔</p>
+          <p className="text-[17px] leading-[1.7] text-text onb-title">
+            Ask yourself if there&apos;s been an opportunity in the past 30 days where you had the chance to approach a smoking hot girl but you didn&apos;t because you had approach anxiety.
+          </p>
         </div>
 
         <DelayedButton onClick={() => goToStep("value")} label="Next" />
@@ -66,13 +66,22 @@ export default function OnboardingPage() {
 
   // Step 2: The value proposition → sign in
   return (
-    <main key={stepKey} className="min-h-screen max-w-md mx-auto px-6 flex flex-col justify-center py-12">
+    <main key={stepKey} className="min-h-screen max-w-md mx-auto px-8 flex flex-col justify-center py-16">
       <ProgressBar step={step} />
-      <div className="text-center mb-12">
-        <p className="text-[48px] mb-6 onb-emoji">💰</p>
-        <h1 className="font-display text-[22px] font-extrabold tracking-tight leading-[1.25] onb-title">
-          Let&apos;s say you buy a Wingmate subscription for $15 a month. Since you&apos;re now financially committed to talking to more girls, you&apos;re going to talk to 1 more girl per week and 4 more girls per month. This will improve your rizz skills, create more fun memories, make more valuable connections, and maybe even have sex more often. All of this is definitely worth $15.
-        </h1>
+      <div className="mb-16">
+        <p className="text-[48px] mb-8 onb-emoji">💰</p>
+        <p className="text-[17px] leading-[1.7] text-text onb-title">
+          Let&apos;s say you buy a Wingmate subscription for $15 a month.
+        </p>
+        <p className="text-[17px] leading-[1.7] text-text mt-5 onb-body">
+          Since you&apos;re now financially committed to talking to more girls, you&apos;re going to talk to 1 more girl per week and 4 more girls per month.
+        </p>
+        <p className="text-[17px] leading-[1.7] text-text mt-5 onb-body-2">
+          This will improve your rizz skills, create more fun memories, make more valuable connections, and maybe even have sex more often.
+        </p>
+        <p className="text-[17px] leading-[1.7] text-text mt-5 font-semibold onb-body-2">
+          All of this is definitely worth $15.
+        </p>
       </div>
 
       <DelayedButton onClick={() => signInWithGoogle()} label="Sign in with Google" />
