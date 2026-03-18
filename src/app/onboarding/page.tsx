@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { signInWithGoogle } from "@/lib/supabase-browser";
 import { createClient } from "@/lib/supabase-browser";
 
@@ -80,7 +80,7 @@ export default function OnboardingPage() {
   };
 
   const handleSkip = () => {
-    window.location.href = "/";
+    signInWithGoogle();
   };
 
   // Step 1: The question
@@ -104,10 +104,13 @@ export default function OnboardingPage() {
   // Step 2: The value proposition
   if (step === "value") {
     return (
-      <main key={stepKey} className="min-h-screen max-w-md mx-auto flex flex-col justify-between px-7 pt-24 pb-12">
+      <main key={stepKey} className="min-h-screen max-w-md mx-auto flex flex-col justify-between px-7 pt-12 pb-12">
         <ProgressBar step={step} />
 
         <div>
+          <button onClick={() => goToStep("ask")} className="p-1 -ml-1 mb-8 press">
+            <ArrowLeft size={20} strokeWidth={1.5} />
+          </button>
           <p className="text-[40px] mb-10 onb-emoji">💰</p>
           <p className="text-[20px] leading-[1.6] tracking-[-0.01em] text-text font-medium onb-title">
             Let&apos;s say you buy a Wingmate subscription for $15 a month.
@@ -130,8 +133,12 @@ export default function OnboardingPage() {
 
   // Step 3: Features + plan options + skip
   return (
-    <main key={stepKey} className="min-h-screen max-w-md mx-auto flex flex-col px-7 pt-24 pb-12">
+    <main key={stepKey} className="min-h-screen max-w-md mx-auto flex flex-col px-7 pt-12 pb-12">
       <ProgressBar step={step} />
+
+      <button onClick={() => goToStep("value")} className="p-1 -ml-1 mb-8 press">
+        <ArrowLeft size={20} strokeWidth={1.5} />
+      </button>
 
       <div className="mb-10">
         <p className="text-[17px] leading-[1.65] text-text onb-title">
