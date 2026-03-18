@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Check } from "lucide-react";
+import { signInWithGoogle } from "@/lib/supabase-browser";
+import { createClient } from "@/lib/supabase-browser";
 
-const STEPS = ["ask", "value"] as const;
+const STEPS = ["ask", "value", "features"] as const;
 type Step = (typeof STEPS)[number];
 
 function ProgressBar({ step }: { step: Step }) {
@@ -45,10 +48,39 @@ function DelayedButton({ onClick, label, delay = 5000 }: { onClick: () => void; 
 export default function OnboardingPage() {
   const [step, setStep] = useState<Step>("ask");
   const [stepKey, setStepKey] = useState(0);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
   const goToStep = (s: Step) => {
     setStep(s);
     setStepKey((k) => k + 1);
+  };
+
+  const handleCheckout = async (plan: "monthly" | "yearly") => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      try { sessionStorage.setItem("wingmate-checkout-plan", plan); } catch {}
+      signInWithGoogle();
+      return;
+    }
+    setCheckoutLoading(plan);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+    } catch {}
+    setCheckoutLoading(null);
+  };
+
+  const handleSkip = () => {
+    window.location.href = "/";
   };
 
   // Step 1: The question
@@ -70,25 +102,106 @@ export default function OnboardingPage() {
   }
 
   // Step 2: The value proposition
+  if (step === "value") {
+    return (
+      <main key={stepKey} className="min-h-screen max-w-md mx-auto flex flex-col justify-between px-7 pt-24 pb-12">
+        <ProgressBar step={step} />
+
+        <div>
+          <p className="text-[40px] mb-10 onb-emoji">💰</p>
+          <p className="text-[20px] leading-[1.6] tracking-[-0.01em] text-text font-medium onb-title">
+            Let&apos;s say you buy a Wingmate subscription for $15 a month.
+          </p>
+          <p className="text-[17px] leading-[1.65] text-text-muted mt-6 onb-body">
+            Since you&apos;re now financially committed to talking to more girls, you&apos;re going to talk to 1 more girl per week and 4 more girls per month.
+          </p>
+          <p className="text-[17px] leading-[1.65] text-text-muted mt-5 onb-body-2">
+            This will improve your rizz skills, create more fun memories, make more valuable connections, and maybe even have sex more often.
+          </p>
+          <p className="text-[20px] leading-[1.6] tracking-[-0.01em] text-text font-semibold mt-8 onb-body-2">
+            All of this is definitely worth $15.
+          </p>
+        </div>
+
+        <DelayedButton onClick={() => goToStep("features")} label="Next" />
+      </main>
+    );
+  }
+
+  // Step 3: Features + plan options + skip
   return (
     <main key={stepKey} className="min-h-screen max-w-md mx-auto flex flex-col px-7 pt-24 pb-12">
       <ProgressBar step={step} />
 
-      <div>
-        <p className="text-[40px] mb-10 onb-emoji">💰</p>
-        <p className="text-[20px] leading-[1.6] tracking-[-0.01em] text-text font-medium onb-title">
-          Let&apos;s say you buy a Wingmate subscription for $15 a month.
+      <div className="mb-10">
+        <p className="text-[17px] leading-[1.65] text-text onb-title">
+          Wingmate has an AI chat bot that will inspire you to talk to a hot girl whenever you have approach anxiety.
         </p>
-        <p className="text-[17px] leading-[1.65] text-text-muted mt-6 onb-body">
-          Since you&apos;re now financially committed to talking to more girls, you&apos;re going to talk to 1 more girl per week and 4 more girls per month.
+        <p className="text-[17px] leading-[1.65] text-text mt-5 onb-body">
+          Wingmate also has a community of the most dedicated cold approachers who talk to each other and provide updates on their conquests.
         </p>
-        <p className="text-[17px] leading-[1.65] text-text-muted mt-5 onb-body-2">
-          This will improve your rizz skills, create more fun memories, make more valuable connections, and maybe even have sex more often.
-        </p>
-        <p className="text-[20px] leading-[1.6] tracking-[-0.01em] text-text font-semibold mt-8 onb-body-2">
-          All of this is definitely worth $15.
+        <p className="text-[17px] leading-[1.65] text-text mt-5 onb-body-2">
+          Wingmate also allows you to set goals on how many cold approaches you want to make per week and track exactly how many girls you approach over time.
         </p>
       </div>
+
+      {/* Plan cards */}
+      <div className="space-y-3 mb-4 onb-goals">
+        {/* Yearly */}
+        <div className="bg-bg-card border-2 border-[#1a1a1a] rounded-2xl p-5 relative">
+          <span className="absolute -top-2.5 left-5 bg-green-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">
+            Best value
+          </span>
+          <div className="flex items-center justify-between mb-3 mt-1">
+            <h3 className="font-display text-[16px] font-bold">Pro Yearly</h3>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-text-muted text-[16px] font-bold line-through">$15</span>
+              <span className="font-display text-[22px] font-extrabold">$10</span>
+              <span className="text-text-muted text-[13px]">/mo</span>
+            </div>
+          </div>
+          <div className="space-y-2 mb-4">
+            {["Unlimited AI coaching", "Approach tracker & stats", "Daily check-ins & streaks", "Community access"].map((f) => (
+              <div key={f} className="flex items-center gap-2">
+                <Check size={14} strokeWidth={2.5} className="text-[#1a1a1a] shrink-0" />
+                <span className="text-[13px]">{f}</span>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={() => handleCheckout("yearly")}
+            disabled={!!checkoutLoading}
+            className="w-full bg-[#1a1a1a] text-white py-2.5 rounded-xl font-semibold text-[14px] press disabled:opacity-60"
+          >
+            {checkoutLoading === "yearly" ? "Redirecting..." : "Get started — $10/mo"}
+          </button>
+        </div>
+
+        {/* Monthly */}
+        <div className="bg-bg-card border border-border rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-display text-[16px] font-bold">Pro Monthly</h3>
+            <div className="flex items-baseline gap-1">
+              <span className="font-display text-[22px] font-extrabold">$15</span>
+              <span className="text-text-muted text-[13px]">/mo</span>
+            </div>
+          </div>
+          <button
+            onClick={() => handleCheckout("monthly")}
+            disabled={!!checkoutLoading}
+            className="w-full bg-bg-input text-text py-2.5 rounded-xl font-semibold text-[14px] press disabled:opacity-60"
+          >
+            {checkoutLoading === "monthly" ? "Redirecting..." : "Subscribe monthly"}
+          </button>
+        </div>
+      </div>
+
+      <button
+        onClick={handleSkip}
+        className="text-text-muted text-[14px] font-medium py-3 press mt-2"
+      >
+        Skip for now
+      </button>
     </main>
   );
 }
