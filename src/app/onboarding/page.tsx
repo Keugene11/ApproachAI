@@ -19,7 +19,7 @@ function ProgressBar({ step }: { step: Step }) {
   );
 }
 
-function DelayedButton({ onClick, label, delay = 2500 }: { onClick: () => void; label: string; delay?: number }) {
+function DelayedButton({ onClick, label, delay = 5000 }: { onClick: () => void; label: string; delay?: number }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), delay);
