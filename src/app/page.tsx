@@ -264,11 +264,6 @@ function HomeInner() {
   };
 
   const handleCheckout = async (plan: "monthly" | "yearly") => {
-    if (!isLoggedIn) {
-      localStorage.setItem("pending-checkout-plan", plan);
-      window.location.href = "/api/auth/login";
-      return;
-    }
     setCheckoutLoading(plan);
     try {
       const res = await fetch("/api/stripe/checkout", {
@@ -276,11 +271,6 @@ function HomeInner() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan }),
       });
-      if (res.status === 401) {
-        localStorage.setItem("pending-checkout-plan", plan);
-        window.location.href = "/api/auth/login";
-        return;
-      }
       const data = await res.json();
       if (data.url) window.location.href = data.url;
       else setCheckoutLoading(null);
@@ -331,9 +321,6 @@ function HomeInner() {
       <p className="text-text-muted text-[14px]">This only takes a few seconds.</p>
     </main>
   );
-
-  // Unauthenticated visitors see the normal tabs (starting on checkin/stats)
-  // No landing page gate — they can browse freely
 
   // Full-screen: checkin-chat (no tab bar — temporary coaching flow)
   if (state === "checkin-chat") {
@@ -436,17 +423,7 @@ function HomeInner() {
             <h1 className="font-display text-[28px] font-bold tracking-tight">Community</h1>
           </div>
 
-          {!isLoggedIn ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <p className="text-text-muted text-[15px] mb-6 text-center">Sign in to see what others are sharing and join the conversation.</p>
-              <a
-                href="/api/auth/login"
-                className="bg-[#1a1a1a] text-white px-8 py-3 rounded-xl font-semibold text-[14px] press"
-              >
-                Sign in with Google
-              </a>
-            </div>
-          ) : !isPro ? (
+          {!isPro ? (
             <div className="flex flex-col items-center justify-center py-20">
               <p className="text-[48px] mb-4">🔒</p>
               <p className="text-text-muted text-[15px] mb-6 text-center max-w-[300px]">Community is a Pro feature. Upgrade to connect with other guys on the same path.</p>

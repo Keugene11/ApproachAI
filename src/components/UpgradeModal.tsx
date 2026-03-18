@@ -1,7 +1,7 @@
 "use client";
 
 import { X, Lock } from "lucide-react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -11,8 +11,6 @@ interface UpgradeModalProps {
 }
 
 export default function UpgradeModal({ open, onClose, title = "Pro feature", description = "Upgrade to Pro to unlock this feature and track your progress." }: UpgradeModalProps) {
-  const router = useRouter();
-
   if (!open) return null;
 
   return (
@@ -33,12 +31,13 @@ export default function UpgradeModal({ open, onClose, title = "Pro feature", des
         <h2 className="font-display text-[20px] font-bold mb-2">{title}</h2>
         <p className="text-text-muted text-[14px] leading-relaxed mb-6">{description}</p>
 
-        <button
-          onClick={() => { onClose(); router.push("/plans"); }}
-          className="w-full py-3.5 rounded-xl bg-[#1a1a1a] text-white text-[14px] font-semibold press"
+        <Link
+          href="/?tab=plans"
+          onClick={onClose}
+          className="block w-full py-3.5 rounded-xl bg-[#1a1a1a] text-white text-[14px] font-semibold press"
         >
           Upgrade to Pro
-        </button>
+        </Link>
       </div>
     </div>
   );
