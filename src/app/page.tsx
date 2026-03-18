@@ -137,12 +137,12 @@ function HomeInner() {
       } else {
         setIsLoggedIn(false);
         setGreeting(getGreeting());
-        if (!tabParam) setActiveTab("stats");
+        if (!tabParam) setActiveTab("checkin");
       }
     }).catch(() => {
       setIsLoggedIn(false);
       setGreeting(getGreeting());
-      if (!tabParam) setActiveTab("stats");
+      if (!tabParam) setActiveTab("checkin");
     });
 
     const isPostCheckout = searchParams.get("checkout") === "success";
