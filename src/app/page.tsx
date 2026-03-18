@@ -110,20 +110,27 @@ function HomeInner() {
             }
           })
           .catch(() => {});
-        // If there's a pending checkout plan from onboarding, redirect to checkout
+        // If there's a pending checkout plan from onboarding, check sub status first
         try {
           const pendingPlan = sessionStorage.getItem("wingmate-checkout-plan")
             || localStorage.getItem("pending-checkout-plan");
           if (pendingPlan) {
             sessionStorage.removeItem("wingmate-checkout-plan");
             localStorage.removeItem("pending-checkout-plan");
-            fetch("/api/stripe/checkout", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ plan: pendingPlan }),
-            })
+            // Only redirect to checkout if not already subscribed
+            fetch("/api/stripe/status")
               .then((r) => r.json())
-              .then((d) => { if (d.url) window.location.href = d.url; })
+              .then((d) => {
+                if (!d.subscribed) {
+                  return fetch("/api/stripe/checkout", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ plan: pendingPlan }),
+                  })
+                    .then((r) => r.json())
+                    .then((d) => { if (d.url) window.location.href = d.url; });
+                }
+              })
               .catch(() => {});
           }
         } catch {}
