@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signInWithGoogle } from "@/lib/supabase-browser";
 
 const STEPS = ["ask", "value"] as const;
 type Step = (typeof STEPS)[number];
@@ -70,9 +69,9 @@ export default function OnboardingPage() {
     );
   }
 
-  // Step 2: The value proposition → sign in
+  // Step 2: The value proposition
   return (
-    <main key={stepKey} className="min-h-screen max-w-md mx-auto flex flex-col justify-between px-7 pt-24 pb-12">
+    <main key={stepKey} className="min-h-screen max-w-md mx-auto flex flex-col px-7 pt-24 pb-12">
       <ProgressBar step={step} />
 
       <div>
@@ -90,8 +89,6 @@ export default function OnboardingPage() {
           All of this is definitely worth $15.
         </p>
       </div>
-
-      <DelayedButton onClick={() => signInWithGoogle()} label="Sign in with Google" />
     </main>
   );
 }
