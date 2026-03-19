@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Check } from "lucide-react";
 import { signInWithGoogle } from "@/lib/supabase-browser";
 import { createClient } from "@/lib/supabase-browser";
@@ -46,9 +47,29 @@ function DelayedButton({ onClick, label, delay = 5000 }: { onClick: () => void; 
 }
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>("ask");
   const [stepKey, setStepKey] = useState(0);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+
+  // Redirect to home if user is already logged in
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        router.replace("/");
+      }
+    });
+
+    // Listen for auth completion from PWA popup
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "auth-complete" && e.newValue) {
+        router.replace("/");
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [router]);
 
   const goToStep = (s: Step) => {
     setStep(s);
