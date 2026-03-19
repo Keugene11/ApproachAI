@@ -6,7 +6,7 @@
   --color-primary-dark: #000000;
   --color-accent: #1a1a1a;
   --color-accent-dark: #000000;
-  --color-bg: #f7f7f8;
+  --color-bg: #f5f5f7;
   --color-bg-card: #ffffff;
   --color-bg-card-hover: #f5f5f5;
   --color-bg-input: #f0f0f0;
@@ -16,9 +16,9 @@
   --color-nav: #1a1a1a;
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', system-ui, sans-serif;
   --font-display: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', system-ui, sans-serif;
-  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-  --shadow-card-hover: 0 4px 12px 0 rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.04);
-  --shadow-nav: 0 -1px 4px 0 rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 2px 8px 0 rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 6px 20px 0 rgba(0, 0, 0, 0.08), 0 2px 6px 0 rgba(0, 0, 0, 0.05);
+  --shadow-nav: 0 -2px 10px 0 rgba(0, 0, 0, 0.06);
 }
 
 body {
