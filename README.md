@@ -1,26 +1,48 @@
 # Wingmate
 
-AI-powered confidence coach for approaching people. Get real-time motivational coaching, track your progress with streaks, and connect with a community of people on the same journey.
+**AI-powered confidence coach for cold approaches.** Get motivated, get a game plan, and go talk to her.
 
-## Stack
+Wingmate combines real-time AI coaching with daily accountability tracking and a community of people on the same journey. One approach that goes right will change how you see yourself — Wingmate is how you get there.
 
-- **Framework:** Next.js 16 (App Router) + TypeScript + React 19
-- **Styling:** Tailwind CSS v4 + DM Sans
-- **Auth:** Supabase Auth (Google OAuth)
-- **Database:** Supabase (Postgres) with RLS
-- **AI:** Claude Sonnet via Vercel AI SDK (`@ai-sdk/anthropic`)
-- **Payments:** Stripe (subscriptions)
-- **Deployment:** Vercel + Android TWA (Google Play)
+[wingmate.live](https://wingmate.live)
+
+---
 
 ## Features
 
-- **AI coaching** — Streaming real-time coach with a motivational, friend-like personality. Gives you an opener, read-aheads, and an exit strategy.
-- **Daily check-ins** — Log whether you approached someone today. Track opportunities, approaches, and successes.
-- **Streaks & stats** — Track your approach streaks and view stats over time.
-- **Community** — Post your wins, vote on others' posts, browse by new or top.
-- **Conversation history** — Past coaching sessions saved and reviewable.
-- **Subscription gating** — Freemium model (1 free session + 1 message), then $15/month or $10/month yearly.
-- **PWA + Android app** — Installable as a PWA with offline support, plus a Trusted Web Activity for the Play Store.
+### AI Coaching
+Streaming real-time coach with a raw, motivational personality. Gives you a context-aware opener, a read-ahead game plan, and an exit strategy — whether you're at the gym, a cafe, or out on the street.
+
+### Daily Check-ins & Streaks
+Log whether you approached someone today. Track opportunities, approaches, and successes. Build streaks and stay accountable.
+
+### Stats & Analytics
+Calendar heatmap showing your approach activity day by day. View monthly and all-time stats including approach rate, success rate, and days active.
+
+### Community
+Post your wins, share stories, and vote on others' posts. Sort by new or top, search posts, and comment on threads.
+
+### Subscription Gating
+Freemium model — 1 free coaching session + 1 message. Pro unlocks unlimited coaching, full stats, and community access.
+
+### PWA + Android App
+Installable as a Progressive Web App with offline support, plus a Trusted Web Activity wrapper for the Google Play Store.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 16 (App Router) + TypeScript + React 19 |
+| Styling | Tailwind CSS v4 + DM Sans |
+| Auth | Supabase Auth (Google OAuth) |
+| Database | Supabase (Postgres) with RLS |
+| AI | Claude via Vercel AI SDK (`@ai-sdk/anthropic`) |
+| Payments | Stripe (subscriptions, customer portal, webhooks) |
+| Deployment | Vercel + Android TWA (Google Play) |
+
+---
 
 ## Project Structure
 
@@ -70,14 +92,55 @@ public/
 └── icons/                     # App icons
 ```
 
-## Live
+---
 
-[wingmate.live](https://wingmate.live)
+## Getting Started
+
+```bash
+# Install dependencies
+pnpm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Fill in your Supabase, Stripe, and AI keys
+
+# Run development server
+pnpm dev
+```
+
+### Environment Variables
+
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+# Stripe
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+
+# AI (Anthropic)
+ANTHROPIC_API_KEY=
+```
+
+---
 
 ## Pricing
 
-| Plan    | Price      | Billing        |
-|---------|------------|----------------|
-| Free    | $0         | 1 session + 1 message |
-| Monthly | $15/month  | Billed monthly |
-| Yearly  | $10/month  | $120/year      |
+| Plan | Price | Includes |
+|------|-------|----------|
+| Free | $0 | 1 coaching session + 1 message |
+| Monthly | $15/month | Unlimited coaching, stats, community |
+| Yearly | $10/month | $120/year — save 33% |
+
+---
+
+## Deployment
+
+Deployed on [Vercel](https://vercel.com) via GitHub integration. Push to `master` triggers a production deploy. The Android app is a Trusted Web Activity wrapping the PWA.
+
+---
+
+Built by [Keugene Lee](https://github.com/keugenelee)
