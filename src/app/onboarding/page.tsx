@@ -48,7 +48,13 @@ function DelayedButton({ onClick, label, delay = 5000 }: { onClick: () => void; 
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("ask");
+  const [step, setStep] = useState<Step>(() => {
+    try {
+      const saved = typeof window !== "undefined" && sessionStorage.getItem("wingmate-onboarding-step");
+      if (saved && STEPS.includes(saved as Step)) return saved as Step;
+    } catch {}
+    return "ask";
+  });
   const [stepKey, setStepKey] = useState(0);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
@@ -74,6 +80,7 @@ export default function OnboardingPage() {
   const goToStep = (s: Step) => {
     setStep(s);
     setStepKey((k) => k + 1);
+    try { sessionStorage.setItem("wingmate-onboarding-step", s); } catch {}
   };
 
   const handleCheckout = async (plan: "monthly" | "yearly") => {
