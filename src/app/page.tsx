@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { Plus, Search, X, Check } from "lucide-react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 
@@ -359,16 +358,6 @@ function HomeInner() {
   // Tab-based layout (tab bar always visible)
   return (
     <main className={`max-w-md mx-auto ${activeTab === "coach" ? "h-[100dvh] overflow-hidden" : "min-h-screen pb-20"}`}>
-      {/* Branding — visible on non-chat tabs */}
-      {activeTab !== "coach" && (
-        <div className="flex items-center justify-between px-5 pt-[max(0.75rem,env(safe-area-inset-top))] pb-1">
-          <p className="font-display text-[15px] font-bold tracking-tight text-text-muted/40">Wingmate</p>
-          <div className="flex gap-3">
-            <Link href="/terms" className="text-[11px] text-text-muted/40">Terms</Link>
-            <Link href="/privacy" className="text-[11px] text-text-muted/40">Privacy</Link>
-          </div>
-        </div>
-      )}
 
       {/* ===== WINGMATE TAB: CONVERSATIONS ===== */}
       {activeTab === "coach" && state === "conversations" && (
