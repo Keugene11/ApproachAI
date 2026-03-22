@@ -23,33 +23,35 @@ async function setup() {
       });
     }
 
-    // Create monthly price
+    // Upsert monthly price (transfer_lookup_key moves the key if amount changed)
     const existingMonthly = await getStripe().prices.list({
       lookup_keys: [PRICES.monthly.lookup_key],
     });
 
-    if (existingMonthly.data.length === 0) {
+    if (existingMonthly.data.length === 0 || existingMonthly.data[0].unit_amount !== PRICES.monthly.amount) {
       await getStripe().prices.create({
         product: product.id,
         unit_amount: PRICES.monthly.amount,
         currency: "usd",
         recurring: { interval: PRICES.monthly.interval },
         lookup_key: PRICES.monthly.lookup_key,
+        transfer_lookup_key: true,
       });
     }
 
-    // Create yearly price
+    // Upsert yearly price
     const existingYearly = await getStripe().prices.list({
       lookup_keys: [PRICES.yearly.lookup_key],
     });
 
-    if (existingYearly.data.length === 0) {
+    if (existingYearly.data.length === 0 || existingYearly.data[0].unit_amount !== PRICES.yearly.amount) {
       await getStripe().prices.create({
         product: product.id,
         unit_amount: PRICES.yearly.amount,
         currency: "usd",
         recurring: { interval: PRICES.yearly.interval },
         lookup_key: PRICES.yearly.lookup_key,
+        transfer_lookup_key: true,
       });
     }
 
