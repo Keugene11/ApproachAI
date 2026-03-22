@@ -45,8 +45,19 @@ export default function Home() {
 function HomeInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [state, setState] = useState<AppState>("tabs");
-  const [activeTab, setActiveTab] = useState<Tab>("checkin");
+  const [state, setState] = useState<AppState>(() => {
+    try {
+      const saved = typeof window !== "undefined" && sessionStorage.getItem("wingmate-active-tab");
+      return saved === "coach" ? "chat" : "tabs";
+    } catch { return "tabs"; }
+  });
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    try {
+      const saved = typeof window !== "undefined" && sessionStorage.getItem("wingmate-active-tab");
+      if (saved && ["checkin", "coach", "stats", "community", "plans"].includes(saved)) return saved as Tab;
+    } catch {}
+    return "checkin";
+  });
   const [checkinTalked, setCheckinTalked] = useState<boolean | null>(null);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
@@ -77,6 +88,7 @@ function HomeInner() {
       setActiveTab(tabParam);
       if (tabParam === "coach") setState("chat");
       else setState("tabs");
+      try { sessionStorage.setItem("wingmate-active-tab", tabParam); } catch {}
     }
     setHydrated(true);
 
@@ -302,6 +314,8 @@ function HomeInner() {
     } else {
       updateState("tabs");
     }
+    // Persist tab for refresh recovery
+    try { sessionStorage.setItem("wingmate-active-tab", tab); } catch {}
     // Update URL so refresh stays on this tab
     const url = new URL(window.location.href);
     if (tab === "checkin") url.searchParams.delete("tab");
