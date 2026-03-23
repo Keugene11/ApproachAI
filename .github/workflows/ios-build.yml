@@ -59,6 +59,12 @@ jobs:
           cp "$PROFILE_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/${PROFILE_UUID}.mobileprovision
           echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
 
+      - name: Set build number
+        run: |
+          BUILD_NUMBER=$(date +%Y%m%d%H%M)
+          cd ios/App
+          agvtool new-version -all $BUILD_NUMBER
+
       - name: Resolve Swift packages
         run: |
           cd ios/App
