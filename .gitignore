@@ -13,3 +13,8 @@ out
 # Fastlane / Ruby
 android-twa/vendor/
 android-twa/.bundle/
+
+# Capacitor
+ios/App/Pods/
+ios/App/App/public/
+ios/App/output/
