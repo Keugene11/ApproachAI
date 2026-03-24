@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Check, CreditCard, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
+import { signInWithGoogle } from "@/lib/supabase-browser";
 
 type Subscription = {
   status: string;
@@ -179,13 +180,12 @@ export default function PlansPage() {
                 {loading === "monthly" ? "Redirecting..." : "Subscribe monthly"}
               </button>
             ) : (
-              <a
-                href="/api/auth/login"
-                onClick={() => localStorage.setItem("pending-checkout-plan", "monthly")}
-                className="block w-full bg-bg-input text-text py-3 rounded-xl font-semibold text-[14px] press text-center mb-5"
+              <button
+                onClick={() => { localStorage.setItem("pending-checkout-plan", "monthly"); signInWithGoogle(); }}
+                className="w-full bg-bg-input text-text py-3 rounded-xl font-semibold text-[14px] press text-center mb-5"
               >
                 Subscribe monthly
-              </a>
+              </button>
             )
           )}
           <div className="space-y-3">
@@ -227,13 +227,12 @@ export default function PlansPage() {
                 {loading === "yearly" ? "Redirecting..." : "Subscribe yearly"}
               </button>
             ) : (
-              <a
-                href="/api/auth/login"
-                onClick={() => localStorage.setItem("pending-checkout-plan", "yearly")}
-                className="block w-full bg-[#1a1a1a] text-white py-3 rounded-xl font-semibold text-[14px] press text-center mb-5"
+              <button
+                onClick={() => { localStorage.setItem("pending-checkout-plan", "yearly"); signInWithGoogle(); }}
+                className="w-full bg-[#1a1a1a] text-white py-3 rounded-xl font-semibold text-[14px] press text-center mb-5"
               >
                 Subscribe yearly
-              </a>
+              </button>
             )
           )}
           <div className="space-y-3">
