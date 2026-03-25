@@ -37,7 +37,7 @@ export async function GET() {
   // If no profile yet, create one
   if (!profile) {
     const meta = user.user_metadata;
-    const username = (meta?.full_name || meta?.name || user.email?.split("@")[0] || "").split(" ")[0];
+    const username = "user_" + user.id.slice(-6);
     const { data: newProfile } = await supabase
       .from("profiles")
       .upsert({ id: user.id, username, avatar_url: meta?.avatar_url || meta?.picture || null })

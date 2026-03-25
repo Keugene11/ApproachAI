@@ -39,8 +39,13 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       setUserId(user.id);
-      const meta = user.user_metadata;
-      setUserName((meta?.full_name || meta?.name || "Anonymous").split(" ")[0]);
+      // Use profile username (never real name) for community
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .single();
+      setUserName(profile?.username || "user_" + user.id.slice(-6));
 
       const { data: postData } = await supabase
         .from("posts")

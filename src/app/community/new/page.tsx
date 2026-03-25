@@ -33,13 +33,17 @@ export default function NewPostPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const meta = user.user_metadata;
-    const fullName = meta?.full_name || meta?.name || "Anonymous";
-    const firstName = fullName.split(" ")[0];
+    // Use profile username (never real name) for community posts
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .single();
+    const displayName = profile?.username || "user_" + user.id.slice(-6);
 
     const { error } = await supabase.from("posts").insert({
       user_id: user.id,
-      author_name: firstName,
+      author_name: displayName,
       title: title.trim(),
       body: body.trim(),
     });
