@@ -10,7 +10,7 @@ interface UpgradeModalProps {
   description?: string;
 }
 
-export default function UpgradeModal({ open, onClose, title = "Pro feature", description = "Upgrade to Pro to unlock this feature and track your progress." }: UpgradeModalProps) {
+export default function UpgradeModal({ open, onClose, title = "Pro subscription required", description = "This feature requires a Pro subscription. Subscribe to unlock it and track your progress." }: UpgradeModalProps) {
   if (!open) return null;
 
   return (
@@ -36,7 +36,7 @@ export default function UpgradeModal({ open, onClose, title = "Pro feature", des
           onClick={onClose}
           className="block w-full py-3.5 rounded-xl bg-[#1a1a1a] text-white text-[14px] font-semibold press"
         >
-          Upgrade to Pro
+          View subscription plans
         </Link>
       </div>
     </div>

@@ -417,8 +417,8 @@ export default function StatsView({ isPro = true }: { isPro?: boolean }) {
       <UpgradeModal
         open={showUpgrade}
         onClose={() => setShowUpgrade(false)}
-        title="Unlock stats"
-        description="Upgrade to Pro to navigate your stats, view trends, and track your progress over time."
+        title="Pro subscription required"
+        description="Stats and progress tracking require a Pro subscription."
       />
     </div>
   );

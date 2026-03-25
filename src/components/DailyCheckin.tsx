@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Flame, Trophy, Calendar, Shield, Target, UserX, Crosshair, Pencil } from "lucide-react";
-import { createClient, signInWithGoogle } from "@/lib/supabase-browser";
+import { createClient } from "@/lib/supabase-browser";
 import UpgradeModal from "@/components/UpgradeModal";
+import SignInModal from "@/components/SignInModal";
 
 interface CheckinData {
   checkedInToday: boolean;
@@ -140,9 +141,11 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
     setEditingGoal(false);
   };
 
+  const [showSignIn, setShowSignIn] = useState(false);
+
   if (!data) {
     if (!isLoggedIn) {
-      const triggerSignIn = () => { signInWithGoogle(); };
+      const triggerSignIn = () => { setShowSignIn(true); };
       const todayDate = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
       const emptyLast7 = Array.from({ length: 7 }, (_, i) => {
         const d = new Date();
@@ -252,6 +255,7 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
               <p className="text-[11px] text-text-muted">Days skipped</p>
             </div>
           </div>
+          <SignInModal open={showSignIn} onClose={() => setShowSignIn(false)} />
         </div>
       );
     }
@@ -565,8 +569,8 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
       <UpgradeModal
         open={showUpgrade}
         onClose={() => setShowUpgrade(false)}
-        title="Unlock the tracker"
-        description="Upgrade to Pro to log check-ins, build streaks, and track your approach stats."
+        title="Pro subscription required"
+        description="Check-ins, streaks, and approach tracking require a Pro subscription."
       />
     </div>
   );

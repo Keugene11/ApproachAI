@@ -29,6 +29,9 @@ importers:
       '@capacitor/status-bar':
         specifier: ^8.0.1
         version: 8.0.1(@capacitor/core@8.2.0)
+      '@revenuecat/purchases-capacitor':
+        specifier: ^12.3.0
+        version: 12.3.0(@capacitor/core@8.2.0)
       '@supabase/ssr':
         specifier: ^0.9.0
         version: 0.9.0(@supabase/supabase-js@2.98.0)
@@ -561,6 +564,14 @@ packages:
   '@opentelemetry/api@1.9.0':
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
+
+  '@revenuecat/purchases-capacitor@12.3.0':
+    resolution: {integrity: sha512-TvtEYPMiE+9s2tT1KUl5QqgUd0H96YCrRhpXv3ZWR30ve63Apl53xHYU3mf4vOInXc3wm1oEDJKz+1thuiTTBA==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+
+  '@revenuecat/purchases-typescript-internal-esm@17.52.0':
+    resolution: {integrity: sha512-xB75VkbgJVotnbnK/OoYLyyCqLgi3Qm/7T8NUBG6e3OvxUOVkF2XQLMbNz1e/1MJjcQxVWXY4RxnA4MHl0TxcA==}
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -1803,6 +1814,13 @@ snapshots:
     optional: true
 
   '@opentelemetry/api@1.9.0': {}
+
+  '@revenuecat/purchases-capacitor@12.3.0(@capacitor/core@8.2.0)':
+    dependencies:
+      '@capacitor/core': 8.2.0
+      '@revenuecat/purchases-typescript-internal-esm': 17.52.0
+
+  '@revenuecat/purchases-typescript-internal-esm@17.52.0': {}
 
   '@standard-schema/spec@1.1.0': {}
 

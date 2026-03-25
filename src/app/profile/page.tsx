@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, LogOut, CreditCard, Camera, Check, ChevronRight, Trash2, Flame, Heart, Sparkles, PartyPopper, Pencil, X } from "lucide-react";
 import Link from "next/link";
-import { createClient, signInWithGoogle } from "@/lib/supabase-browser";
+import { createClient } from "@/lib/supabase-browser";
+import SignInModal from "@/components/SignInModal";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 
@@ -35,6 +36,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [subscription, setSubscription] = useState<Subscription>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
 
   // Edit state
   const [editingUsername, setEditingUsername] = useState(false);
@@ -205,11 +207,12 @@ export default function ProfilePage() {
             Track your streaks, manage your subscription, and customize your profile.
           </p>
           <button
-            onClick={() => signInWithGoogle()}
+            onClick={() => setShowSignIn(true)}
             className="px-6 py-3 bg-[#1a1a1a] text-white rounded-xl font-medium text-[14px] press"
           >
-            Sign in with Google
+            Sign in
           </button>
+          <SignInModal open={showSignIn} onClose={() => setShowSignIn(false)} />
         </div>
         <BottomNav />
       </main>

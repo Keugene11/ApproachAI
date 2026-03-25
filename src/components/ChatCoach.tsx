@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ArrowLeft, ArrowUp, Lock, List, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createClient, signInWithGoogle } from "@/lib/supabase-browser";
+import { createClient } from "@/lib/supabase-browser";
+import SignInModal from "@/components/SignInModal";
 
 interface Message {
   role: "user" | "assistant";
@@ -31,6 +32,7 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
   const [sessionsRemaining, setSessionsRemaining] = useState<number | null>(null);
   const [messagesRemaining, setMessagesRemaining] = useState<number | null>(null);
   const [viewingHistory, setViewingHistory] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
   const isSubscribed = useRef(false);
   const convoIdRef = useRef<string | null>(conversationId || null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -256,12 +258,12 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
   const sendMessage = async (content: string) => {
     if (!content.trim() || isLoading || limitReached) return;
 
-    // If not logged in, save message and redirect to Google OAuth
+    // If not logged in, save message and show sign-in modal
     if (!isLoggedIn) {
       try {
         sessionStorage.setItem("wingmate-pending-message", content.trim());
       } catch {}
-      signInWithGoogle();
+      setShowSignIn(true);
       return;
     }
 
@@ -417,15 +419,15 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
       {limitReached ? (
         <div className="mx-4 mb-4 px-5 py-6 shrink-0 bg-bg-card border border-border rounded-2xl text-center animate-fade-in">
           <Lock size={18} strokeWidth={1.5} className="mx-auto text-text-muted mb-2" />
-          <p className="font-display font-bold text-[16px] mb-1">Pro feature</p>
+          <p className="font-display font-bold text-[16px] mb-1">Pro subscription required</p>
           <p className="text-text-muted text-[13px] mb-4">
-            Upgrade to Pro for unlimited AI coaching.
+            Unlimited AI coaching requires a Pro subscription.
           </p>
           <button
             onClick={() => router.push("/plans")}
             className="w-full bg-[#1a1a1a] text-white py-3.5 rounded-2xl font-semibold text-[15px] press"
           >
-            Unlock Wingmate Pro
+            View subscription plans
           </button>
         </div>
       ) : (
@@ -456,6 +458,7 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
           </div>
         </div>
       )}
+      <SignInModal open={showSignIn} onClose={() => setShowSignIn(false)} />
     </div>
   );
 }

@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ArrowLeft, Check, CreditCard, ChevronDown } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { ArrowLeft, Check, CreditCard, ChevronDown, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
-import { signInWithGoogle } from "@/lib/supabase-browser";
+import SignInModal from "@/components/SignInModal";
+import { isNativeiOS } from "@/lib/platform";
+import { initPurchases, identifyUser, getOfferings, purchasePackage, restorePurchases } from "@/lib/purchases";
+import { createClient } from "@/lib/supabase-browser";
 
 type Subscription = {
   status: string;
@@ -12,6 +15,14 @@ type Subscription = {
   current_period_end: string;
   cancel_at_period_end: boolean;
 } | null;
+
+type IAPPackage = {
+  identifier: string;
+  offeringIdentifier: string;
+  product: { identifier: string; priceString: string };
+  packageType: string;
+  presentedOfferingContext: unknown;
+};
 
 const FAQ = [
   {
@@ -36,6 +47,38 @@ export default function PlansPage() {
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [isiOS, setIsiOS] = useState(false);
+  const [iapPackages, setIapPackages] = useState<{ monthly?: IAPPackage; yearly?: IAPPackage }>({});
+  const [restoringPurchases, setRestoringPurchases] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Initialize IAP on iOS
+  const initIAP = useCallback(async () => {
+    if (!isNativeiOS()) return;
+    setIsiOS(true);
+
+    await initPurchases();
+
+    // Identify user if logged in
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await identifyUser(user.id);
+    }
+
+    // Get offerings
+    const offering = await getOfferings();
+    if (offering?.availablePackages) {
+      const pkgs: { monthly?: IAPPackage; yearly?: IAPPackage } = {};
+      for (const pkg of offering.availablePackages) {
+        if (pkg.packageType === "MONTHLY") pkgs.monthly = pkg as unknown as IAPPackage;
+        else if (pkg.packageType === "ANNUAL") pkgs.yearly = pkg as unknown as IAPPackage;
+      }
+      setIapPackages(pkgs);
+    }
+  }, []);
+
   useEffect(() => {
     fetch("/api/stripe/status")
       .then((res) => {
@@ -47,14 +90,40 @@ export default function PlansPage() {
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
-  }, []);
 
-  const [error, setError] = useState<string | null>(null);
+    initIAP();
+  }, [initIAP]);
 
   const handleCheckout = async (plan: "monthly" | "yearly") => {
     setLoading(plan);
     setError(null);
 
+    // iOS In-App Purchase
+    if (isiOS) {
+      const pkg = plan === "monthly" ? iapPackages.monthly : iapPackages.yearly;
+      if (!pkg) {
+        setError("This plan is not available yet. Please try again later.");
+        setLoading(null);
+        return;
+      }
+
+      try {
+        const success = await purchasePackage(pkg as unknown as Parameters<typeof purchasePackage>[0]);
+        if (success) {
+          // Refresh subscription status
+          const res = await fetch("/api/stripe/status");
+          const data = await res.json();
+          if (data.subscription) setSubscription(data.subscription);
+          setError(null);
+        }
+      } catch {
+        setError("Purchase failed. Please try again.");
+      }
+      setLoading(null);
+      return;
+    }
+
+    // Web/Android Stripe checkout
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -74,6 +143,11 @@ export default function PlansPage() {
   };
 
   const handleManageBilling = async () => {
+    if (isiOS) {
+      // On iOS, direct user to iOS Settings for subscription management
+      window.open("https://apps.apple.com/account/subscriptions", "_blank");
+      return;
+    }
     setLoadingPortal(true);
     try {
       const res = await fetch("/api/stripe/portal", { method: "POST" });
@@ -82,6 +156,24 @@ export default function PlansPage() {
     } catch {
       setLoadingPortal(false);
     }
+  };
+
+  const handleRestore = async () => {
+    setRestoringPurchases(true);
+    setError(null);
+    try {
+      const success = await restorePurchases();
+      if (success) {
+        const res = await fetch("/api/stripe/status");
+        const data = await res.json();
+        if (data.subscription) setSubscription(data.subscription);
+      } else {
+        setError("No previous purchases found.");
+      }
+    } catch {
+      setError("Failed to restore purchases.");
+    }
+    setRestoringPurchases(false);
   };
 
   const formatDate = (dateStr: string) =>
@@ -93,6 +185,10 @@ export default function PlansPage() {
 
   const isActive = subscription?.status === "active" || subscription?.status === "trialing";
   const isYearly = subscription?.price_id?.includes("yearly") || subscription?.price_id?.includes("year");
+
+  // Price display — use IAP prices on iOS if available
+  const monthlyPrice = iapPackages.monthly?.product?.priceString || "$19.99";
+  const yearlyPrice = iapPackages.yearly?.product?.priceString || "$179.99";
 
   if (!loaded) return null;
 
@@ -113,7 +209,7 @@ export default function PlansPage() {
         <p className="text-text-muted text-[16px] leading-relaxed max-w-[380px] mx-auto">
           {isActive
             ? "You have unlimited access to all Pro features."
-            : "Unlimited AI coaching, community access, and the full approach tracker."}
+            : "Unlock unlimited AI coaching, community access, and the full approach tracker with a Pro subscription."}
         </p>
       </div>
 
@@ -150,7 +246,7 @@ export default function PlansPage() {
               className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-bg-input text-[14px] font-semibold press disabled:opacity-60"
             >
               <CreditCard size={16} strokeWidth={1.5} className="text-text-muted" />
-              {loadingPortal ? "Redirecting..." : "Manage billing"}
+              {isiOS ? "Manage subscription" : loadingPortal ? "Redirecting..." : "Manage billing"}
             </button>
           </div>
         )}
@@ -164,12 +260,12 @@ export default function PlansPage() {
             </div>
             <div className="text-right">
               <div className="flex items-baseline gap-1.5">
-                <span className="font-display text-[28px] font-extrabold">$20</span>
+                <span className="font-display text-[28px] font-extrabold">{isiOS ? monthlyPrice : "$20"}</span>
                 <span className="text-text-muted text-[14px] font-medium">/mo</span>
               </div>
             </div>
           </div>
-          <p className="text-text-muted text-[12px] mb-5">Cancel anytime</p>
+          <p className="text-text-muted text-[12px] mb-5">Subscription auto-renews. Cancel anytime.</p>
           {!isActive && (
             isLoggedIn ? (
               <button
@@ -177,11 +273,11 @@ export default function PlansPage() {
                 disabled={!!loading}
                 className="w-full bg-bg-input text-text py-3 rounded-xl font-semibold text-[14px] press disabled:opacity-60 mb-5"
               >
-                {loading === "monthly" ? "Redirecting..." : "Subscribe monthly"}
+                {loading === "monthly" ? (isiOS ? "Purchasing..." : "Redirecting...") : "Subscribe monthly"}
               </button>
             ) : (
               <button
-                onClick={() => { localStorage.setItem("pending-checkout-plan", "monthly"); signInWithGoogle(); }}
+                onClick={() => { localStorage.setItem("pending-checkout-plan", "monthly"); setShowSignIn(true); }}
                 className="w-full bg-bg-input text-text py-3 rounded-xl font-semibold text-[14px] press text-center mb-5"
               >
                 Subscribe monthly
@@ -210,13 +306,13 @@ export default function PlansPage() {
             </div>
             <div className="text-right">
               <div className="flex items-baseline gap-1.5">
-                <span className="text-text-muted text-[18px] font-bold line-through">$20</span>
-                <span className="font-display text-[28px] font-extrabold">$15</span>
-                <span className="text-text-muted text-[14px] font-medium">/mo</span>
+                {!isiOS && <span className="text-text-muted text-[18px] font-bold line-through">$20</span>}
+                <span className="font-display text-[28px] font-extrabold">{isiOS ? yearlyPrice : "$15"}</span>
+                <span className="text-text-muted text-[14px] font-medium">{isiOS ? "/yr" : "/mo"}</span>
               </div>
             </div>
           </div>
-          <p className="text-text-muted text-[12px] mb-5">$180 billed annually</p>
+          <p className="text-text-muted text-[12px] mb-5">{isiOS ? "Subscription auto-renews. Cancel anytime." : "$180 billed annually. Subscription auto-renews."}</p>
           {!isActive && (
             isLoggedIn ? (
               <button
@@ -224,11 +320,11 @@ export default function PlansPage() {
                 disabled={!!loading}
                 className="w-full bg-[#1a1a1a] text-white py-3 rounded-xl font-semibold text-[14px] press disabled:opacity-60 mb-5"
               >
-                {loading === "yearly" ? "Redirecting..." : "Subscribe yearly"}
+                {loading === "yearly" ? (isiOS ? "Purchasing..." : "Redirecting...") : "Subscribe yearly"}
               </button>
             ) : (
               <button
-                onClick={() => { localStorage.setItem("pending-checkout-plan", "yearly"); signInWithGoogle(); }}
+                onClick={() => { localStorage.setItem("pending-checkout-plan", "yearly"); setShowSignIn(true); }}
                 className="w-full bg-[#1a1a1a] text-white py-3 rounded-xl font-semibold text-[14px] press text-center mb-5"
               >
                 Subscribe yearly
@@ -245,6 +341,20 @@ export default function PlansPage() {
           </div>
         </div>
       </div>
+
+      {/* Restore purchases (iOS only) */}
+      {isiOS && !isActive && (
+        <div className="text-center mb-8">
+          <button
+            onClick={handleRestore}
+            disabled={restoringPurchases}
+            className="inline-flex items-center gap-2 text-[14px] text-text-muted font-medium press disabled:opacity-60"
+          >
+            <RotateCcw size={14} strokeWidth={1.5} />
+            {restoringPurchases ? "Restoring..." : "Restore purchases"}
+          </button>
+        </div>
+      )}
 
       {/* FAQ */}
       <div className="mb-16">
@@ -284,8 +394,15 @@ export default function PlansPage() {
 
       {/* Footer */}
       <div className="text-center text-[13px] text-text-muted pb-6">
-        <p>Secure payment via Stripe &middot; Cancel anytime</p>
+        <p>Subscription auto-renews. Cancel anytime.</p>
+        {isiOS && (
+          <p className="mt-1">
+            Payment will be charged to your Apple ID account at confirmation of purchase.
+          </p>
+        )}
       </div>
+
+      <SignInModal open={showSignIn} onClose={() => setShowSignIn(false)} />
 
       <BottomNav />
     </main>

@@ -137,7 +137,7 @@ export default function CommunityPage() {
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <p className="text-[48px] mb-4">🔒</p>
-            <p className="text-text-muted text-[15px] mb-6 text-center max-w-[300px]">Community is a Pro feature. Upgrade to connect with other guys on the same path.</p>
+            <p className="text-text-muted text-[15px] mb-6 text-center max-w-[300px]">Community requires a Pro subscription. Subscribe to connect with other guys on the same path.</p>
             <Link
               href="/?tab=plans"
               className="bg-[#1a1a1a] text-white px-8 py-3 rounded-xl font-semibold text-[14px] press"

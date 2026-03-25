@@ -5,6 +5,8 @@ import { Plus, Search, X, Check } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
+import { initPurchases, identifyUser } from "@/lib/purchases";
+import { isNativeiOS } from "@/lib/platform";
 
 import ChatCoach from "@/components/ChatCoach";
 import ConversationList from "@/components/ConversationList";
@@ -100,6 +102,8 @@ function HomeInner() {
       if (data.user) {
         setUserId(data.user.id);
         setIsLoggedIn(true);
+        // Initialize RevenueCat on iOS
+        initPurchases().then(() => identifyUser(data.user.id));
         // Check if onboarding is needed, and save pending goals from pre-auth onboarding
         fetch("/api/profile")
           .then((r) => r.json())
@@ -129,21 +133,26 @@ function HomeInner() {
           if (pendingPlan) {
             sessionStorage.removeItem("wingmate-checkout-plan");
             localStorage.removeItem("pending-checkout-plan");
-            // Only redirect to checkout if not already subscribed
-            fetch("/api/stripe/status")
-              .then((r) => r.json())
-              .then((d) => {
-                if (!d.subscribed) {
-                  return fetch("/api/stripe/checkout", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ plan: pendingPlan }),
-                  })
-                    .then((r) => r.json())
-                    .then((d) => { if (d.url) window.location.href = d.url; });
-                }
-              })
-              .catch(() => {});
+            // On iOS, redirect to plans page for IAP checkout
+            if (isNativeiOS()) {
+              router.replace("/plans");
+            } else {
+              // Only redirect to Stripe checkout if not already subscribed
+              fetch("/api/stripe/status")
+                .then((r) => r.json())
+                .then((d) => {
+                  if (!d.subscribed) {
+                    return fetch("/api/stripe/checkout", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ plan: pendingPlan }),
+                    })
+                      .then((r) => r.json())
+                      .then((d) => { if (d.url) window.location.href = d.url; });
+                  }
+                })
+                .catch(() => {});
+            }
           }
         } catch {}
         // If there's a pending message from pre-auth, switch to coach tab
@@ -457,7 +466,7 @@ function HomeInner() {
               {/* Overlay */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <p className="text-[48px] mb-4">🔒</p>
-                <p className="text-text-muted text-[15px] mb-6 text-center max-w-[300px]">Stats & tracking is a Pro feature. Upgrade to see your approach history and streaks.</p>
+                <p className="text-text-muted text-[15px] mb-6 text-center max-w-[300px]">Stats & tracking requires a Pro subscription. Subscribe to see your approach history and streaks.</p>
                 <button
                   onClick={() => handleTabChange("plans")}
                   className="bg-[#1a1a1a] text-white px-8 py-3 rounded-xl font-semibold text-[14px] press"
@@ -505,7 +514,7 @@ function HomeInner() {
               {/* Overlay */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <p className="text-[48px] mb-4">🔒</p>
-                <p className="text-text-muted text-[15px] mb-6 text-center max-w-[300px]">Community is a Pro feature. Upgrade to connect with other guys on the same path.</p>
+                <p className="text-text-muted text-[15px] mb-6 text-center max-w-[300px]">Community requires a Pro subscription. Subscribe to connect with other guys on the same path.</p>
                 <button
                   onClick={() => handleTabChange("plans")}
                   className="bg-[#1a1a1a] text-white px-8 py-3 rounded-xl font-semibold text-[14px] press"
