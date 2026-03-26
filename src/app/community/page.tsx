@@ -38,7 +38,10 @@ export default function CommunityPage() {
       .range(offset, offset + PAGE_SIZE - 1);
 
     if (query) {
-      q = q.or(`title.ilike.%${query}%,body.ilike.%${query}%,author_name.ilike.%${query}%`);
+      const safe = query.replace(/[%_(),.*\\]/g, "");
+      if (safe) {
+        q = q.or(`title.ilike.%${safe}%,body.ilike.%${safe}%,author_name.ilike.%${safe}%`);
+      }
     }
 
     const { data } = await q;

@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   const expectedToken = process.env.REVENUECAT_WEBHOOK_SECRET;
 
-  if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
+  if (!expectedToken || authHeader !== `Bearer ${expectedToken}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

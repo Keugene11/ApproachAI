@@ -67,7 +67,15 @@ export async function PATCH(req: Request) {
   }
 
   if (body.avatar_url !== undefined) {
-    updates.avatar_url = body.avatar_url;
+    try {
+      const parsed = new URL(body.avatar_url);
+      if (!parsed.protocol.startsWith("http")) {
+        return NextResponse.json({ error: "Invalid avatar URL" }, { status: 400 });
+      }
+      updates.avatar_url = body.avatar_url;
+    } catch {
+      return NextResponse.json({ error: "Invalid avatar URL" }, { status: 400 });
+    }
   }
 
   if (body.goal !== undefined) {

@@ -190,7 +190,9 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const supabase = getSupabase();
 
-  const { talked, note, opportunitiesCount, approachesCount, successesCount, clientDate } = await req.json();
+  const body = await req.json();
+  const { talked, opportunitiesCount, approachesCount, successesCount, clientDate } = body;
+  const note = body.note ? String(body.note).trim().slice(0, 500) : null;
   const today = clientDate || new Date().toISOString().split("T")[0];
 
   // Validate date format
