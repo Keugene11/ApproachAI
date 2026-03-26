@@ -17,8 +17,8 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchAutoHide: true,
       androidScaleType: "CENTER_CROP",
-      splashFullScreen: false,
-      splashImmersive: false,
+      splashFullScreen: true,
+      splashImmersive: true,
       backgroundColor: "#1a1a1a",
     },
     Keyboard: {
@@ -27,6 +27,7 @@ const config: CapacitorConfig = {
     },
     StatusBar: {
       style: "DARK",
+      overlaysWebView: true,
     },
   },
 };
