@@ -2,6 +2,27 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+const ADJECTIVES = [
+  "Bold","Brave","Chill","Cool","Daring","Epic","Fierce","Grand",
+  "Happy","Keen","Lucky","Mighty","Noble","Quick","Sharp","Slick",
+  "Smart","Smooth","Solid","Steady","Swift","Calm","Bright","Witty",
+  "Clutch","Prime","Based","Alpha","Crisp","Fresh","Hype","Lit",
+  "Ace","Chief","Raw","Real","Zen","True","Peak","Woke",
+];
+const ANIMALS = [
+  "Falcon","Tiger","Wolf","Eagle","Hawk","Lion","Bear","Fox",
+  "Shark","Panther","Cobra","Raven","Jaguar","Phoenix","Viper","Otter",
+  "Lynx","Puma","Stallion","Mantis","Raptor","Bison","Crane","Drake",
+  "Hound","Marlin","Osprey","Rhino","Condor","Gecko","Moose","Oryx",
+];
+
+function generateUsername(): string {
+  const adj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+  const animal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+  const num = Math.floor(Math.random() * 100);
+  return `${adj}${animal}${num}`;
+}
+
 async function getSupabase() {
   const cookieStore = await cookies();
   return createServerClient(
@@ -37,7 +58,7 @@ export async function GET() {
   // If no profile yet, create one
   if (!profile) {
     const meta = user.user_metadata;
-    const username = "user_" + user.id.slice(-6);
+    const username = generateUsername();
     const { data: newProfile } = await supabase
       .from("profiles")
       .upsert({ id: user.id, username, avatar_url: meta?.avatar_url || meta?.picture || null })
