@@ -80,6 +80,7 @@ function HomeInner() {
   const [communitySearch, setCommunitySearch] = useState("");
   const [communitySearchOpen, setCommunitySearchOpen] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [planCounts, setPlanCounts] = useState<{ monthly: number; yearly: number } | null>(null);
   const communityDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const communitySearchRef = useRef<HTMLInputElement>(null);
 
@@ -262,6 +263,12 @@ function HomeInner() {
     setHasMore(postList.length === PAGE_SIZE);
     setCommunityLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (activeTab === "plans" && !planCounts) {
+      fetch("/api/stripe/plan-counts").then((r) => r.json()).then(setPlanCounts).catch(() => {});
+    }
+  }, [activeTab, planCounts]);
 
   useEffect(() => {
     if (activeTab === "community" && !communityLoaded) {
@@ -684,7 +691,11 @@ function HomeInner() {
                   </div>
                 </div>
               </div>
-              <p className="text-text-muted text-[12px] mb-5">$180 billed annually</p>
+              <p className="text-text-muted text-[12px] mb-1">$180 billed annually</p>
+              {planCounts && planCounts.yearly > 0 && (
+                <p className="text-text-muted text-[12px] mb-4">{planCounts.yearly} {planCounts.yearly === 1 ? "person" : "people"} on this plan</p>
+              )}
+              {(!planCounts || planCounts.yearly === 0) && <div className="mb-4" />}
               {!isPro && (
                 <button
                   onClick={() => handleCheckout("yearly")}
@@ -718,7 +729,11 @@ function HomeInner() {
                   </div>
                 </div>
               </div>
-              <p className="text-text-muted text-[12px] mb-5">Cancel anytime</p>
+              <p className="text-text-muted text-[12px] mb-1">Cancel anytime</p>
+              {planCounts && planCounts.monthly > 0 && (
+                <p className="text-text-muted text-[12px] mb-4">{planCounts.monthly} {planCounts.monthly === 1 ? "person" : "people"} on this plan</p>
+              )}
+              {(!planCounts || planCounts.monthly === 0) && <div className="mb-4" />}
               {!isPro && (
                 <button
                   onClick={() => handleCheckout("monthly")}

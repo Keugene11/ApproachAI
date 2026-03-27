@@ -52,6 +52,7 @@ export default function PlansPage() {
   const [iapPackages, setIapPackages] = useState<{ monthly?: IAPPackage; yearly?: IAPPackage }>({});
   const [restoringPurchases, setRestoringPurchases] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [planCounts, setPlanCounts] = useState<{ monthly: number; yearly: number } | null>(null);
 
   // Initialize IAP on iOS
   const initIAP = useCallback(async () => {
@@ -92,6 +93,7 @@ export default function PlansPage() {
       .catch(() => setLoaded(true));
 
     initIAP();
+    fetch("/api/stripe/plan-counts").then((r) => r.json()).then(setPlanCounts).catch(() => {});
   }, [initIAP]);
 
   const handleCheckout = async (plan: "monthly" | "yearly") => {
@@ -265,7 +267,11 @@ export default function PlansPage() {
               </div>
             </div>
           </div>
-          <p className="text-text-muted text-[12px] mb-5">Subscription auto-renews. Cancel anytime.</p>
+          <p className="text-text-muted text-[12px] mb-1">Subscription auto-renews. Cancel anytime.</p>
+          {planCounts && planCounts.monthly > 0 && (
+            <p className="text-text-muted text-[12px] mb-4">{planCounts.monthly} {planCounts.monthly === 1 ? "person" : "people"} on this plan</p>
+          )}
+          {(!planCounts || planCounts.monthly === 0) && <div className="mb-4" />}
           {!isActive && (
             isLoggedIn ? (
               <button
@@ -312,7 +318,11 @@ export default function PlansPage() {
               </div>
             </div>
           </div>
-          <p className="text-text-muted text-[12px] mb-5">{isiOS ? "Subscription auto-renews. Cancel anytime." : "$180 billed annually. Subscription auto-renews."}</p>
+          <p className="text-text-muted text-[12px] mb-1">{isiOS ? "Subscription auto-renews. Cancel anytime." : "$180 billed annually. Subscription auto-renews."}</p>
+          {planCounts && planCounts.yearly > 0 && (
+            <p className="text-text-muted text-[12px] mb-4">{planCounts.yearly} {planCounts.yearly === 1 ? "person" : "people"} on this plan</p>
+          )}
+          {(!planCounts || planCounts.yearly === 0) && <div className="mb-4" />}
           {!isActive && (
             isLoggedIn ? (
               <button
