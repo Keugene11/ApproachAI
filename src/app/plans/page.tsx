@@ -268,10 +268,9 @@ export default function PlansPage() {
             </div>
           </div>
           <p className="text-text-muted text-[12px] mb-1">Subscription auto-renews. Cancel anytime.</p>
-          {planCounts && planCounts.monthly > 0 && (
+          {planCounts && (
             <p className="text-text-muted text-[12px] mb-4">{planCounts.monthly} {planCounts.monthly === 1 ? "person" : "people"} on this plan</p>
           )}
-          {(!planCounts || planCounts.monthly === 0) && <div className="mb-4" />}
           {!isActive && (
             isLoggedIn ? (
               <button
@@ -319,10 +318,9 @@ export default function PlansPage() {
             </div>
           </div>
           <p className="text-text-muted text-[12px] mb-1">{isiOS ? "Subscription auto-renews. Cancel anytime." : "$180 billed annually. Subscription auto-renews."}</p>
-          {planCounts && planCounts.yearly > 0 && (
+          {planCounts && (
             <p className="text-text-muted text-[12px] mb-4">{planCounts.yearly} {planCounts.yearly === 1 ? "person" : "people"} on this plan</p>
           )}
-          {(!planCounts || planCounts.yearly === 0) && <div className="mb-4" />}
           {!isActive && (
             isLoggedIn ? (
               <button

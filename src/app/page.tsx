@@ -692,10 +692,9 @@ function HomeInner() {
                 </div>
               </div>
               <p className="text-text-muted text-[12px] mb-1">$180 billed annually</p>
-              {planCounts && planCounts.yearly > 0 && (
+              {planCounts && (
                 <p className="text-text-muted text-[12px] mb-4">{planCounts.yearly} {planCounts.yearly === 1 ? "person" : "people"} on this plan</p>
               )}
-              {(!planCounts || planCounts.yearly === 0) && <div className="mb-4" />}
               {!isPro && (
                 <button
                   onClick={() => handleCheckout("yearly")}
@@ -730,10 +729,9 @@ function HomeInner() {
                 </div>
               </div>
               <p className="text-text-muted text-[12px] mb-1">Cancel anytime</p>
-              {planCounts && planCounts.monthly > 0 && (
+              {planCounts && (
                 <p className="text-text-muted text-[12px] mb-4">{planCounts.monthly} {planCounts.monthly === 1 ? "person" : "people"} on this plan</p>
               )}
-              {(!planCounts || planCounts.monthly === 0) && <div className="mb-4" />}
               {!isPro && (
                 <button
                   onClick={() => handleCheckout("monthly")}
