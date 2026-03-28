@@ -15,6 +15,20 @@
             android:name="asset_statements"
             android:value="${assetStatements}" />
 
+        <!-- Splash screen: warms up Chrome before launching TWA to prevent Chrome logo flash -->
+        <activity
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:label="${launcherName}"
+            android:theme="@style/Theme.LauncherActivity">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- TWA activity: launched by SplashActivity after Chrome is warmed up -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -59,11 +73,6 @@
             <meta-data
                 android:name="android.support.customtabs.trusted.FALLBACK_STRATEGY"
                 android:value="@string/fallback_custom_tab" />
-
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
 
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
