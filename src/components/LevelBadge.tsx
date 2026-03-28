@@ -91,7 +91,7 @@ export default function LevelBadge({ level, xp, xpToNextLevel, xpForCurrentLevel
             >
               {/* Explainer */}
               <p className="text-[14px] text-text-muted leading-relaxed mb-5">
-                Every girl you talk to and log in your check-in earns you <span className="text-text font-semibold">1 XP</span>. Your XP is your total number of approaches — it never resets. Hit the threshold and you level up.
+                Every approach you log earns you <span className="text-text font-semibold">1 XP</span>.
               </p>
 
               {/* Level list */}
@@ -179,11 +179,8 @@ export default function LevelBadge({ level, xp, xpToNextLevel, xpForCurrentLevel
 
               {/* Summary */}
               <div className="mt-5 bg-bg-card border border-border rounded-xl px-4 py-3.5">
-                <p className="text-[13px] font-semibold mb-2">Quick breakdown</p>
-                <div className="space-y-1 text-[13px] text-text-muted">
+                <div className="text-[13px] text-text-muted">
                   <p>1 approach = 1 XP</p>
-                  <p>Your XP = your total approaches (never resets)</p>
-                  <p>100 total approaches to reach max level</p>
                 </div>
               </div>
             </div>
