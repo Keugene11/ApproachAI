@@ -1,9 +1,9 @@
 export const LEVELS = [
   { level: 1, name: "Noob", xpRequired: 0 },
   { level: 2, name: "Beginner", xpRequired: 3 },
-  { level: 3, name: "Novice", xpRequired: 5 },
+  { level: 3, name: "Novice", xpRequired: 7 },
   { level: 4, name: "Casual Cold Approacher", xpRequired: 10 },
-  { level: 5, name: "Advanced Cold Approacher", xpRequired: 20 },
+  { level: 5, name: "Advanced Cold Approacher", xpRequired: 30 },
   { level: 6, name: "God Cold Approacher", xpRequired: 50 },
 ] as const;
 

@@ -182,7 +182,7 @@ export default function LevelBadge({ level, xp, xpToNextLevel, levelName }: Leve
                 <p className="text-[13px] font-semibold mb-2">Quick breakdown</p>
                 <div className="space-y-1 text-[13px] text-text-muted">
                   <p>1 approach = 1 XP</p>
-                  <p>88 total approaches to reach max level</p>
+                  <p>100 total approaches to reach max level</p>
                   <p>XP resets each time you level up</p>
                 </div>
               </div>
