@@ -46,6 +46,23 @@ export async function setupAuthDeepLinkListener() {
 }
 
 /**
+ * Check if the native app build is outdated and needs updating.
+ * Returns true if an update is required.
+ */
+export async function checkForUpdate(): Promise<boolean> {
+  if (!isNativePlatform()) return false;
+  try {
+    const { App } = await import("@capacitor/app");
+    const info = await App.getInfo();
+    const currentBuild = info.build; // e.g. "202603300258"
+    const res = await fetch("/api/version");
+    const { minBuild } = await res.json();
+    if (minBuild && currentBuild < minBuild) return true;
+  } catch {}
+  return false;
+}
+
+/**
  * Open a URL in an in-app browser (SFSafariViewController on iOS).
  * Also listens for the browser to close, and if the user is now
  * authenticated (e.g. deep link set the session), reloads the page.

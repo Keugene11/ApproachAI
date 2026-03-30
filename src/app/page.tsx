@@ -7,7 +7,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
 import { initPurchases, identifyUser } from "@/lib/purchases";
 import { isNativeiOS } from "@/lib/platform";
-import { hideSplash, openInAppBrowser } from "@/lib/capacitor";
+import { hideSplash, openInAppBrowser, checkForUpdate } from "@/lib/capacitor";
+import { isNativePlatform } from "@/lib/platform";
 
 import ChatCoach from "@/components/ChatCoach";
 import ConversationList from "@/components/ConversationList";
@@ -68,6 +69,7 @@ function HomeInner() {
   const [isPro, setIsPro] = useState<boolean | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [checkoutPending, setCheckoutPending] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   // Community state
   const [posts, setPosts] = useState<any[]>([]);
@@ -95,6 +97,11 @@ function HomeInner() {
       try { sessionStorage.setItem("wingmate-active-tab", tabParam); } catch {}
     }
     setHydrated(true);
+
+    // Check for native app updates
+    checkForUpdate().then((needsUpdate) => {
+      if (needsUpdate) setUpdateAvailable(true);
+    });
 
     supabase.auth.getUser().then(({ data }) => {
       const firstName = data.user?.user_metadata?.full_name?.split(" ")[0]
@@ -368,6 +375,24 @@ function HomeInner() {
   // Tab-based layout (tab bar always visible)
   return (
     <main className={`max-w-md mx-auto ${activeTab === "coach" ? "h-[100dvh] overflow-hidden" : "min-h-screen pb-20"}`}>
+
+      {/* Update banner */}
+      {updateAvailable && (
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-[#1a1a1a] text-white px-5 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] flex items-center justify-between animate-slide-up">
+          <p className="text-[14px] font-medium">A new version is available</p>
+          <button
+            onClick={() => {
+              const url = isNativeiOS()
+                ? "https://apps.apple.com/app/id6743187498"
+                : "https://play.google.com/store/apps/details?id=live.wingmate.app";
+              openInAppBrowser(url);
+            }}
+            className="bg-white text-[#1a1a1a] px-4 py-1.5 rounded-full text-[13px] font-semibold press"
+          >
+            Update
+          </button>
+        </div>
+      )}
 
       {/* ===== WINGMATE TAB: CONVERSATIONS ===== */}
       {activeTab === "coach" && state === "conversations" && (
