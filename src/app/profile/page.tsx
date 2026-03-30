@@ -220,7 +220,7 @@ export default function ProfilePage() {
 
   if (isLoggedIn === false) {
     return (
-      <main className="min-h-screen max-w-md mx-auto px-5 pt-6 pb-24 animate-fade-in">
+      <main className="min-h-dvh max-w-md mx-auto px-5 pt-6 pb-24 animate-fade-in">
         <div className="flex items-center gap-3 mb-8">
           <button onClick={() => router.push("/")} className="p-1 -ml-1 press">
             <ArrowLeft size={20} strokeWidth={1.5} />
@@ -249,7 +249,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="min-h-screen max-w-md mx-auto px-5 pt-6 pb-24 animate-fade-in">
+    <main className="min-h-dvh max-w-md mx-auto px-5 pt-6 pb-24 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <button onClick={() => router.push("/")} className="p-1 -ml-1 press">
