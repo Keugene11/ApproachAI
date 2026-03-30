@@ -15,8 +15,8 @@ export async function hideSplash() {
 
 /**
  * Listen for deep link auth callbacks from OAuth.
- * When the native app receives a wingmate:// URL with tokens,
- * set the Supabase session in the WKWebView context.
+ * When the native app receives a wingmate:// URL with the auth code,
+ * exchange it in the WKWebView (which has the PKCE code_verifier cookie).
  */
 export async function setupAuthDeepLinkListener() {
   if (!isNativePlatform()) return;
@@ -25,21 +25,18 @@ export async function setupAuthDeepLinkListener() {
     App.addListener("appUrlOpen", async ({ url }) => {
       if (!url.includes("auth/callback")) return;
       const params = new URL(url);
-      const accessToken = params.searchParams.get("access_token");
-      const refreshToken = params.searchParams.get("refresh_token");
-      if (accessToken && refreshToken) {
+      const code = params.searchParams.get("code");
+      if (code) {
         const supabase = createClient();
-        await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-        // Close the in-app browser if it's still open
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        // Close the in-app browser
         try {
           const { Browser } = await import("@capacitor/browser");
           await Browser.close();
         } catch {}
-        // Navigate to home
-        window.location.href = "/";
+        if (!error) {
+          window.location.href = "/";
+        }
       }
     });
   } catch {}
