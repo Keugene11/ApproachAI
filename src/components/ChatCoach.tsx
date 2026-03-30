@@ -330,8 +330,31 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
     el.style.height = Math.min(el.scrollHeight, 120) + "px";
   };
 
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.visualViewport) return;
+    const vv = window.visualViewport;
+    const onResize = () => {
+      const offset = window.innerHeight - vv.height;
+      setKeyboardOffset(offset > 0 ? offset : 0);
+    };
+    vv.addEventListener("resize", onResize);
+    vv.addEventListener("scroll", onResize);
+    return () => {
+      vv.removeEventListener("resize", onResize);
+      vv.removeEventListener("scroll", onResize);
+    };
+  }, []);
+
   return (
-    <div className={`fixed top-0 left-0 right-0 flex flex-col max-w-md mx-auto bg-bg animate-fade-in overflow-hidden ${showBottomPadding ? "bottom-[5.5rem]" : "bottom-0"}`} style={showBottomPadding ? { paddingBottom: 'env(safe-area-inset-bottom)' } : undefined}>
+    <div
+      className={`fixed top-0 left-0 right-0 flex flex-col max-w-md mx-auto bg-bg animate-fade-in overflow-hidden ${showBottomPadding && keyboardOffset === 0 ? "bottom-[5.5rem]" : "bottom-0"}`}
+      style={{
+        ...(showBottomPadding && keyboardOffset === 0 ? { paddingBottom: 'env(safe-area-inset-bottom)' } : {}),
+        ...(keyboardOffset > 0 ? { bottom: `${keyboardOffset}px` } : {}),
+      }}
+    >
       {/* Header */}
       <div className="flex items-center gap-3 px-5 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 shrink-0 bg-bg/80 backdrop-blur-lg sticky top-0 z-10">
         {onShowHistory ? (
@@ -431,7 +454,7 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
           </button>
         </div>
       ) : (
-        <div className="shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <div className="shrink-0 pb-2">
           <div className="px-4 py-2">
             <form
               onSubmit={handleSubmit}
