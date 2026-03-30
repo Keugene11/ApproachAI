@@ -58,7 +58,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           chmod +x gradlew
-          ./gradlew bundleRelease assembleRelease --no-daemon
+          ./gradlew bundleRelease assembleRelease --no-daemon --stacktrace
 
       - name: List build outputs
         working-directory: android
