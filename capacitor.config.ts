@@ -7,6 +7,7 @@ const config: CapacitorConfig = {
   server: {
     url: "https://wingmate.live",
     cleartext: false,
+    errorPath: "error.html",
   },
   ios: {
     contentInset: "automatic",

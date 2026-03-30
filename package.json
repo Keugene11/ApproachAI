@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "cap:sync": "npx cap sync ios",
+    "cap:prepare": "mkdir -p out && cp capacitor-web/error.html out/error.html && cp capacitor-web/index.html out/index.html",
+    "cap:sync": "npm run cap:prepare && npx cap sync ios",
     "cap:open": "npx cap open ios",
     "test:ipad": "playwright test --project='iPad Air'",
     "test:all": "playwright test"
