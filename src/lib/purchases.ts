@@ -10,8 +10,8 @@ export async function initPurchases() {
   if (!isNativeiOS() || initialized) return;
 
   const apiKey = process.env.NEXT_PUBLIC_REVENUECAT_APPLE_API_KEY;
-  if (!apiKey) {
-    console.warn("RevenueCat API key not configured");
+  if (!apiKey || apiKey.startsWith("test_")) {
+    console.warn("RevenueCat API key not configured or using test key — skipping init");
     return;
   }
 
