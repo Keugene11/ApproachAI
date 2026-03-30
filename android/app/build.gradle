@@ -1,6 +1,8 @@
 apply plugin: 'com.android.application'
 
 def keystoreFile = System.getenv("KEYSTORE_FILE")
+def envVersionCode = System.getenv("VERSION_CODE")
+def appVersionCode = envVersionCode != null ? envVersionCode.toInteger() : 500
 
 android {
     namespace = "com.approachai.twa"
@@ -9,7 +11,7 @@ android {
         applicationId "com.approachai.twa"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode (System.getenv("VERSION_CODE") ?: "500").toInteger()
+        versionCode appVersionCode
         versionName "2.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
