@@ -18,7 +18,7 @@ export default function UserPostsPage({ params }: { params: Promise<{ id: string
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
-  const [isPro, setIsPro] = useState<boolean | null>(true); // TODO: temp override for demo
+  const [isPro, setIsPro] = useState<boolean | null>(null);
 
   const router = useRouter();
   const { data: session } = useSession();

@@ -79,7 +79,7 @@ export default function Terms() {
             <li>You authorize Stripe, our payment processor, to charge your chosen payment method on a recurring basis</li>
             <li>Subscriptions automatically renew unless cancelled before the end of the current billing period</li>
             <li>You may cancel your subscription at any time through the billing portal accessible from your profile</li>
-            <li>Refunds are handled on a case-by-case basis — contact us at <a href="mailto:wingmatesupport@gmail.com" className="underline">wingmatesupport@gmail.com</a></li>
+            <li>Refunds are handled on a case-by-case basis — contact us at <a href="mailto:keugenelee11@gmail.com" className="underline">keugenelee11@gmail.com</a></li>
           </ul>
         </section>
 
@@ -192,7 +192,7 @@ export default function Terms() {
           <h2 className="text-text font-semibold text-[17px] mb-2">17. Contact</h2>
           <p>
             If you have questions about these terms, please contact us at{" "}
-            <a href="mailto:wingmatesupport@gmail.com" className="underline">wingmatesupport@gmail.com</a>.
+            <a href="mailto:keugenelee11@gmail.com" className="underline">keugenelee11@gmail.com</a>.
           </p>
         </section>
       </div>

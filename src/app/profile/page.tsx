@@ -25,7 +25,7 @@ type Profile = {
 const GOAL_OPTIONS = [
   { id: "girlfriend", icon: Heart, label: "Get a girlfriend" },
   { id: "rizz", icon: Sparkles, label: "Improve my rizz" },
-  { id: "hookups", icon: Flame, label: "Hook up with girls" },
+  { id: "hookups", icon: Flame, label: "Meet more people & date casually" },
   { id: "memories", icon: PartyPopper, label: "Just have fun memories" },
 ];
 
@@ -457,7 +457,7 @@ export default function ProfilePage() {
         </Link>
         <button
           onClick={() => {
-            navigator.clipboard.writeText("wingmatesupport@gmail.com");
+            navigator.clipboard.writeText("keugenelee11@gmail.com");
             showToast("Support email copied!");
           }}
           className="text-[12px] text-text-muted underline"

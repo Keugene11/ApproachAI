@@ -155,7 +155,7 @@ export async function POST(req: Request) {
     const goalDescriptions: Record<string, string> = {
       girlfriend: "find a girlfriend and build a real relationship",
       rizz: "improve their social skills and get smoother with girls",
-      hookups: "hook up with girls and enjoy casual connections",
+      hookups: "meet more people, date casually, and enjoy new connections",
       memories: "have fun, meet new people, and make great memories",
     };
 

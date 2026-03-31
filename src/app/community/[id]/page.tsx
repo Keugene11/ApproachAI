@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
-import { ArrowLeft, Heart, Send, Trash2, Pencil, X, Check } from "lucide-react";
+import { ArrowLeft, Heart, Send, Trash2, Pencil, X, Check, Flag, Ban } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -20,9 +20,11 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editBody, setEditBody] = useState("");
-  const [isPro, setIsPro] = useState<boolean | null>(true); // TODO: temp override for demo
+  const [isPro, setIsPro] = useState<boolean | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editCommentText, setEditCommentText] = useState("");
+  const [reported, setReported] = useState(false);
+  const [blocked, setBlocked] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -167,6 +169,31 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
     } catch {}
   };
 
+  const handleReport = async () => {
+    if (reported) return;
+    try {
+      await fetch("/api/community/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target_type: "post", target_id: id, reason: "Flagged by user" }),
+      });
+      setReported(true);
+    } catch {}
+  };
+
+  const handleBlock = async () => {
+    if (!post || blocked) return;
+    try {
+      await fetch("/api/community/block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blocked_user_id: post.user_id }),
+      });
+      setBlocked(true);
+      router.push("/");
+    } catch {}
+  };
+
   if (!post) {
     return (
       <main className="min-h-dvh max-w-md mx-auto px-5 pt-6">
@@ -194,13 +221,22 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
           <ArrowLeft size={20} strokeWidth={1.5} />
         </Link>
         <h1 className="font-display text-[20px] font-bold tracking-tight">Post</h1>
-        {post.user_id === userId && !editing && (
+        {post.user_id === userId && !editing ? (
           <div className="ml-auto flex items-center gap-1">
             <button onClick={startEditing} className="p-2 press text-text-muted">
               <Pencil size={16} strokeWidth={1.5} />
             </button>
             <button onClick={handleDelete} className="p-2 press text-text-muted">
               <Trash2 size={16} strokeWidth={1.5} />
+            </button>
+          </div>
+        ) : post.user_id !== userId && (
+          <div className="ml-auto flex items-center gap-1">
+            <button onClick={handleReport} className="p-2 press text-text-muted" title={reported ? "Reported" : "Report"}>
+              <Flag size={16} strokeWidth={1.5} className={reported ? "fill-red-400 text-red-400" : ""} />
+            </button>
+            <button onClick={handleBlock} className="p-2 press text-text-muted" title="Block user">
+              <Ban size={16} strokeWidth={1.5} />
             </button>
           </div>
         )}
@@ -292,12 +328,26 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
                   {comment.author_name}
                 </Link>
                 <span className="text-[12px] text-text-muted">{timeAgo(comment.created_at)}</span>
-                {comment.user_id === userId && (
+                {comment.user_id === userId ? (
                   <button
                     onClick={() => handleDeleteComment(comment.id)}
                     className="ml-auto opacity-0 group-hover:opacity-100 p-1 press text-text-muted"
                   >
                     <Trash2 size={12} strokeWidth={1.5} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      await fetch("/api/community/report", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ target_type: "comment", target_id: comment.id, reason: "Flagged by user" }),
+                      });
+                    }}
+                    className="ml-auto opacity-0 group-hover:opacity-100 p-1 press text-text-muted"
+                    title="Report comment"
+                  >
+                    <Flag size={12} strokeWidth={1.5} />
                   </button>
                 )}
               </div>

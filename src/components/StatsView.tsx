@@ -20,7 +20,7 @@ const DAY_HEADERS = ["S", "M", "T", "W", "T", "F", "S"];
 
 type ViewMode = "month" | "all-time";
 
-export default function StatsView({ isPro = true }: { isPro?: boolean }) {
+export default function StatsView({ isPro = false }: { isPro?: boolean }) {
   const [showUpgrade, setShowUpgrade] = useState(false);
 
   const guardPro = (fn: () => void) => {

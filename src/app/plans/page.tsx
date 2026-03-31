@@ -283,7 +283,7 @@ export default function PlansPage() {
               </div>
             </div>
           </div>
-          <p className="text-text-muted text-[12px] mb-1">Subscription auto-renews. Cancel anytime.</p>
+          <p className="text-text-muted text-[12px] mb-1">{isiOS ? `${monthlyPrice}/month. ` : "$20/month. "}Auto-renews monthly until cancelled.</p>
           {planCounts && (
             <p className="text-text-muted text-[12px] mb-4">{planCounts.monthly} {planCounts.monthly === 1 ? "person" : "people"} on this plan</p>
           )}
@@ -324,7 +324,7 @@ export default function PlansPage() {
               </div>
             </div>
           </div>
-          <p className="text-text-muted text-[12px] mb-1">{isiOS ? "Subscription auto-renews. Cancel anytime." : "$180 billed annually. Subscription auto-renews."}</p>
+          <p className="text-text-muted text-[12px] mb-1">{isiOS ? `${yearlyPrice}/year. ` : "$180 billed annually. "}Auto-renews yearly until cancelled.</p>
           {planCounts && (
             <p className="text-text-muted text-[12px] mb-4">{planCounts.yearly} {planCounts.yearly === 1 ? "person" : "people"} on this plan</p>
           )}
@@ -399,12 +399,15 @@ export default function PlansPage() {
       </div>
 
       {/* Footer */}
-      <div className="text-center text-[13px] text-text-muted pb-6">
-        <p>Subscription auto-renews. Cancel anytime.</p>
-        {isiOS && (
-          <p className="mt-1">
-            Payment will be charged to your Apple ID account at confirmation of purchase.
-          </p>
+      <div className="text-center text-[13px] text-text-muted pb-6 space-y-1">
+        <p>Subscription auto-renews until cancelled.</p>
+        {isiOS ? (
+          <>
+            <p>Payment will be charged to your Apple ID account at confirmation of purchase.</p>
+            <p>Manage or cancel anytime in Settings &gt; Apple ID &gt; Subscriptions.</p>
+          </>
+        ) : (
+          <p>Cancel anytime from your billing portal.</p>
         )}
       </div>
 

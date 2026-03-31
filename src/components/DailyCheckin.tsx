@@ -39,7 +39,7 @@ interface CheckinData {
 
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
-export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isLoggedIn = true, isPro = true }: { greeting?: string; onTalkAboutIt: (talked: boolean) => void; onCheckedIn?: () => void; isLoggedIn?: boolean; isPro?: boolean }) {
+export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isLoggedIn = true, isPro = false }: { greeting?: string; onTalkAboutIt: (talked: boolean) => void; onCheckedIn?: () => void; isLoggedIn?: boolean; isPro?: boolean }) {
   const [showUpgrade, setShowUpgrade] = useState(false);
 
   const guardPro = (fn: () => void) => {

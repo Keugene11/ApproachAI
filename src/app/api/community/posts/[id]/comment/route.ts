@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { moderateContent } from "@/lib/moderation";
 
 // POST — Add a comment to a post
 export async function POST(
@@ -18,6 +19,12 @@ export async function POST(
   }
 
   const trimmedContent = content.trim().slice(0, 500);
+
+  // Content moderation check
+  const check = moderateContent(trimmedContent);
+  if (!check.allowed) {
+    return NextResponse.json({ error: check.reason }, { status: 400 });
+  }
 
   // Verify post exists
   const posts = await sql`SELECT id FROM posts WHERE id = ${postId}`;

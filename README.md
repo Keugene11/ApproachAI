@@ -12,7 +12,7 @@ Wingmate is a mobile-first app that helps guys build the confidence to approach 
 - **Daily Check-ins** — Track whether you approached someone each day. Build streaks, set weekly goals, and stay accountable.
 - **Stats & Analytics** — Calendar heatmap, streak tracking, approach rate, and monthly breakdowns so you can see your progress over time.
 - **Community** — Share experiences, read field reports, upvote/downvote posts, and comment. All anonymous by username.
-- **Goal-Based Coaching** — Set your goal (girlfriend, improve social skills, hookups, make memories, or custom) and the AI tailors all advice accordingly.
+- **Goal-Based Coaching** — Set your goal (girlfriend, improve social skills, casual dating, make memories, or custom) and the AI tailors all advice accordingly.
 
 ## Tech Stack
 

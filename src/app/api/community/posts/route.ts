@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { moderateContent } from "@/lib/moderation";
 
 const PAGE_SIZE = 20;
 
@@ -17,6 +18,12 @@ export async function GET(req: Request) {
 
   const offset = page * PAGE_SIZE;
   const orderCol = sort === "top" ? "score" : "created_at";
+
+  // Get list of users the current user has blocked
+  const blockedRows = await sql`
+    SELECT blocked_id FROM blocked_users WHERE blocker_id = ${session.user.id}
+  `;
+  const blockedIds = blockedRows.map((r: any) => r.blocked_id);
 
   let posts;
 
@@ -67,6 +74,11 @@ export async function GET(req: Request) {
     }
   }
 
+  // Filter out posts from blocked users
+  if (blockedIds.length > 0) {
+    posts = posts.filter((p: any) => !blockedIds.includes(p.user_id));
+  }
+
   // Fetch current user's votes for these posts
   const votes: Record<string, number> = {};
   if (posts.length > 0) {
@@ -100,6 +112,16 @@ export async function POST(req: Request) {
 
   const trimmedTitle = title.trim().slice(0, 120);
   const trimmedBody = body.trim().slice(0, 2000);
+
+  // Content moderation check
+  const titleCheck = moderateContent(trimmedTitle);
+  if (!titleCheck.allowed) {
+    return NextResponse.json({ error: titleCheck.reason }, { status: 400 });
+  }
+  const bodyCheck = moderateContent(trimmedBody);
+  if (!bodyCheck.allowed) {
+    return NextResponse.json({ error: bodyCheck.reason }, { status: 400 });
+  }
 
   // Get username from profile
   const profiles = await sql`

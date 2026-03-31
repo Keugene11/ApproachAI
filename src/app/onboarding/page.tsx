@@ -10,7 +10,7 @@ import { isNativeiOS, isApplePlatform } from "@/lib/platform";
 import { initPurchases, identifyUser, getOfferings, purchasePackage } from "@/lib/purchases";
 import { hideSplash, setupAuthDeepLinkListener, initSocialLogin } from "@/lib/capacitor";
 
-const STEPS = ["ask", "value", "features"] as const;
+const STEPS = ["age", "ask", "value", "features"] as const;
 type Step = (typeof STEPS)[number];
 
 function ProgressBar({ step }: { step: Step }) {
@@ -63,7 +63,7 @@ export default function OnboardingPage() {
       const saved = typeof window !== "undefined" && sessionStorage.getItem("wingmate-onboarding-step");
       if (saved && STEPS.includes(saved as Step)) return saved as Step;
     } catch {}
-    return "ask";
+    return "age";
   });
   const [stepKey, setStepKey] = useState(0);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
@@ -162,6 +162,39 @@ export default function OnboardingPage() {
     signInWithApple();
   };
 
+  // Step 0: Age verification
+  if (step === "age") {
+    return (
+      <>
+        <ProgressBar step={step} />
+        <main key={stepKey} className="h-[100dvh] max-w-md mx-auto flex flex-col justify-between px-7 pt-24 pb-12 overflow-hidden">
+          <div>
+            <p className="text-[40px] mb-10 onb-emoji">🔒</p>
+            <p className="text-[20px] leading-[1.6] tracking-[-0.01em] text-text font-medium onb-title">
+              Before we get started, please confirm your age.
+            </p>
+            <p className="text-[17px] leading-[1.65] text-text-muted mt-6 onb-body">
+              Wingmate is designed for adults 18 and older. By continuing, you confirm that you are at least 18 years old.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => goToStep("ask")}
+              className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[15px] press"
+            >
+              I am 18 or older
+            </button>
+            <p className="text-center text-[12px] text-text-muted">
+              By tapping above, you confirm you meet the minimum age requirement per our{" "}
+              <a href="/terms" className="underline">Terms of Service</a>.
+            </p>
+          </div>
+        </main>
+      </>
+    );
+  }
+
   // Step 1: The question
   if (step === "ask") {
     return (
@@ -171,7 +204,7 @@ export default function OnboardingPage() {
           <div>
             <p className="text-[40px] mb-10 onb-emoji">🤔</p>
             <p className="text-[20px] leading-[1.6] tracking-[-0.01em] text-text font-medium onb-title">
-              Ask yourself if there&apos;s been an opportunity in the past 30 days where you had the chance to approach a smoking hot girl but you didn&apos;t because you had approach anxiety.
+              Ask yourself if there&apos;s been an opportunity in the past 30 days where you had the chance to approach an attractive girl but you didn&apos;t because you had approach anxiety.
             </p>
           </div>
 
@@ -199,7 +232,7 @@ export default function OnboardingPage() {
               Since you&apos;re now financially committed to talking to more girls, you&apos;re going to talk to 1 more girl per week and 4 more girls per month.
             </p>
             <p className="text-[17px] leading-[1.65] text-text-muted mt-5 onb-body-2">
-              This will improve your rizz skills, create more fun memories, make more valuable connections, and maybe even have sex more often.
+              This will improve your social skills, create more fun memories, make more valuable connections, and build real confidence.
             </p>
             <p className="text-[20px] leading-[1.6] tracking-[-0.01em] text-text font-semibold mt-8 onb-body-2">
               All of this is definitely worth $20.

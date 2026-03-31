@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle, Flag } from "lucide-react";
 import Link from "next/link";
 import { timeAgo } from "@/lib/time";
 
@@ -32,6 +32,21 @@ export default function PostCard({
 }: PostCardProps) {
   const [score, setScore] = useState(initialScore);
   const [liked, setLiked] = useState(initialVote === 1);
+  const [reported, setReported] = useState(false);
+
+  const handleReport = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (reported || userId === currentUserId) return;
+    try {
+      await fetch("/api/community/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target_type: "post", target_id: id, reason: "Flagged by user" }),
+      });
+      setReported(true);
+    } catch {}
+  };
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -97,6 +112,19 @@ export default function PostCard({
             <MessageCircle size={16} strokeWidth={1.5} />
             <span className="text-[13px] font-medium">{commentCount > 0 ? commentCount : ""}</span>
           </span>
+          {userId !== currentUserId && (
+            <button
+              onClick={handleReport}
+              className="ml-auto flex items-center gap-1 press"
+              title={reported ? "Reported" : "Report post"}
+            >
+              <Flag
+                size={14}
+                strokeWidth={1.5}
+                className={reported ? "fill-red-400 text-red-400" : "text-text-muted/50"}
+              />
+            </button>
+          )}
         </div>
       </div>
     </Link>
