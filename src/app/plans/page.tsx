@@ -8,7 +8,7 @@ import SignInModal from "@/components/SignInModal";
 import { isNativeiOS } from "@/lib/platform";
 import { initPurchases, identifyUser, getOfferings, purchasePackage, restorePurchases } from "@/lib/purchases";
 import { useSession } from "next-auth/react";
-import { openInAppBrowser } from "@/lib/capacitor";
+import { openInAppBrowser, initSocialLogin } from "@/lib/capacitor";
 
 type Subscription = {
   status: string;
@@ -91,6 +91,7 @@ export default function PlansPage() {
       .catch(() => setLoaded(true));
 
     initIAP();
+    initSocialLogin();
     fetch("/api/stripe/plan-counts").then((r) => r.json()).then(setPlanCounts).catch(() => {});
   }, [initIAP]);
 

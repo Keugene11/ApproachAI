@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { initPurchases, identifyUser } from "@/lib/purchases";
 import { isNativeiOS } from "@/lib/platform";
-import { hideSplash, openInAppBrowser, checkForUpdate } from "@/lib/capacitor";
+import { hideSplash, openInAppBrowser, checkForUpdate, initSocialLogin } from "@/lib/capacitor";
 import { isNativePlatform } from "@/lib/platform";
 
 import ChatCoach from "@/components/ChatCoach";
@@ -117,7 +117,8 @@ function HomeInner() {
     setUserId(user.id!);
     setIsLoggedIn(true);
     hideSplash();
-    // Initialize RevenueCat on iOS
+    // Initialize native plugins on iOS
+    initSocialLogin();
     initPurchases().then(() => identifyUser(user.id!));
     // Check if onboarding is needed, and save pending goals from pre-auth onboarding
     fetch("/api/profile")

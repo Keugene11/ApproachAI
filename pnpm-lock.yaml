@@ -38,6 +38,9 @@ importers:
       '@capacitor/status-bar':
         specifier: ^8.0.1
         version: 8.0.1(@capacitor/core@8.2.0)
+      '@capgo/capacitor-social-login':
+        specifier: '8'
+        version: 8.3.9(@capacitor/core@8.2.0)
       '@neondatabase/serverless':
         specifier: ^1.0.2
         version: 1.0.2
@@ -212,6 +215,11 @@ packages:
 
   '@capacitor/status-bar@8.0.1':
     resolution: {integrity: sha512-OR59dlbwvmrV5dKsC9lvwv48QaGbqcbSTBpk+9/WXWxXYSdXXdzJZU9p8oyNPAkuJhCdnSa3XmU43fZRPBJJ5w==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+
+  '@capgo/capacitor-social-login@8.3.9':
+    resolution: {integrity: sha512-JhLf24vk1BlUsMLSTWgv0ebJTtN9JS6pxM4YfaaX5nEldJWWb6qirbJwr32t4rCSbM4iyA6KqWYxfH6u2T9Gwg==}
     peerDependencies:
       '@capacitor/core': '>=8.0.0'
 
@@ -1676,6 +1684,10 @@ snapshots:
       '@capacitor/core': 8.2.0
 
   '@capacitor/status-bar@8.0.1(@capacitor/core@8.2.0)':
+    dependencies:
+      '@capacitor/core': 8.2.0
+
+  '@capgo/capacitor-social-login@8.3.9(@capacitor/core@8.2.0)':
     dependencies:
       '@capacitor/core': 8.2.0
 

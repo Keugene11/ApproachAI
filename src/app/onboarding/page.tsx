@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 import SignInModal from "@/components/SignInModal";
 import { isNativeiOS, isApplePlatform } from "@/lib/platform";
 import { initPurchases, identifyUser, getOfferings, purchasePackage } from "@/lib/purchases";
-import { hideSplash, setupAuthDeepLinkListener } from "@/lib/capacitor";
+import { hideSplash, setupAuthDeepLinkListener, initSocialLogin } from "@/lib/capacitor";
 
 const STEPS = ["ask", "value", "features"] as const;
 type Step = (typeof STEPS)[number];
@@ -73,8 +73,9 @@ export default function OnboardingPage() {
 
   // Redirect to home if user is already logged in + init IAP
   useEffect(() => {
-    // Listen for OAuth deep link callbacks on native
+    // Initialize native plugins
     setupAuthDeepLinkListener();
+    initSocialLogin();
 
     hideSplash();
     if (status === "authenticated") {
@@ -242,9 +243,11 @@ export default function OnboardingPage() {
             <div className="flex items-center justify-between mb-3 mt-1">
               <h3 className="font-display text-[16px] font-bold">Pro Yearly</h3>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-text-muted text-[16px] font-bold line-through">$20</span>
-                <span className="font-display text-[22px] font-extrabold">$15</span>
-                <span className="text-text-muted text-[13px]">/mo</span>
+                {!isiOS && <span className="text-text-muted text-[16px] font-bold line-through">$20</span>}
+                <span className="font-display text-[22px] font-extrabold">
+                  {isiOS ? ((iapPackages.yearly as Record<string, unknown>)?.product as Record<string, unknown>)?.priceString as string || "$15" : "$15"}
+                </span>
+                <span className="text-text-muted text-[13px]">{isiOS ? "/yr" : "/mo"}</span>
               </div>
             </div>
             <div className="space-y-2 mb-4">
@@ -260,7 +263,7 @@ export default function OnboardingPage() {
               disabled={!!checkoutLoading}
               className="w-full bg-[#1a1a1a] text-white py-2.5 rounded-xl font-semibold text-[14px] press disabled:opacity-60"
             >
-              {checkoutLoading === "yearly" ? "Redirecting..." : "Get started — $15/mo"}
+              {checkoutLoading === "yearly" ? (isiOS ? "Purchasing..." : "Redirecting...") : isiOS ? "Get started" : "Get started — $15/mo"}
             </button>
           </div>
 
@@ -269,7 +272,9 @@ export default function OnboardingPage() {
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-display text-[16px] font-bold">Pro Monthly</h3>
               <div className="flex items-baseline gap-1">
-                <span className="font-display text-[22px] font-extrabold">$20</span>
+                <span className="font-display text-[22px] font-extrabold">
+                  {isiOS ? ((iapPackages.monthly as Record<string, unknown>)?.product as Record<string, unknown>)?.priceString as string || "$20" : "$20"}
+                </span>
                 <span className="text-text-muted text-[13px]">/mo</span>
               </div>
             </div>
@@ -278,7 +283,7 @@ export default function OnboardingPage() {
               disabled={!!checkoutLoading}
               className="w-full bg-bg-input text-text py-2.5 rounded-xl font-semibold text-[14px] press disabled:opacity-60"
             >
-              {checkoutLoading === "monthly" ? "Redirecting..." : "Subscribe monthly"}
+              {checkoutLoading === "monthly" ? (isiOS ? "Purchasing..." : "Redirecting...") : "Subscribe monthly"}
             </button>
           </div>
         </div>

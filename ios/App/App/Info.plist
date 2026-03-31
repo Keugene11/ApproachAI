@@ -78,6 +78,14 @@
 				<string>wingmate</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>Google Sign-In</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.YOUR_GOOGLE_IOS_CLIENT_ID</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>
