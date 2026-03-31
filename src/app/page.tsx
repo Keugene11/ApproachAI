@@ -103,10 +103,16 @@ function HomeInner() {
       if (needsUpdate) setUpdateAvailable(true);
     });
 
-    if (sessionStatus === "loading") return;
+    if (sessionStatus === "loading") {
+      // Safety: hide splash after timeout so the app never appears frozen
+      const t = setTimeout(() => hideSplash(), 3000);
+      return () => clearTimeout(t);
+    }
+
+    // Session resolved — always hide splash immediately
+    hideSplash();
 
     if (!session?.user) {
-      hideSplash();
       router.replace("/onboarding");
       return;
     }
@@ -116,7 +122,6 @@ function HomeInner() {
     setGreeting(getGreeting(firstName));
     setUserId(user.id!);
     setIsLoggedIn(true);
-    hideSplash();
     // Initialize native plugins on iOS
     initSocialLogin();
     initPurchases().then(() => identifyUser(user.id!));

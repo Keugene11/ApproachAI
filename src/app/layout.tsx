@@ -36,6 +36,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body className="antialiased">
+        {/* Safety net: hide splash after 4s even if React fails to mount */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `setTimeout(function(){try{window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.SplashScreen&&window.Capacitor.Plugins.SplashScreen.hide({fadeOutDuration:200})}catch(e){}},4000);`,
+          }}
+        />
         <Providers>
           {children}
         </Providers>

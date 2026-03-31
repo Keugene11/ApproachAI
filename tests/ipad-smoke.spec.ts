@@ -9,7 +9,19 @@ import { test, expect } from "@playwright/test";
 test.describe("iPad Smoke Tests", () => {
   test("onboarding page loads without crash", async ({ page }) => {
     await page.goto("/onboarding");
-    // Should show the first onboarding question
+    // Should show the age gate first
+    await expect(page.locator("text=confirm your age")).toBeVisible();
+    await expect(
+      page.locator("button:has-text('I am 18 or older')")
+    ).toBeVisible();
+  });
+
+  test("onboarding age gate navigates to ask step", async ({ page }) => {
+    await page.goto("/onboarding");
+    const ageBtn = page.locator("button:has-text('I am 18 or older')");
+    await expect(ageBtn).toBeVisible();
+    await ageBtn.click();
+    // Should show the approach anxiety question
     await expect(page.locator("text=approach anxiety")).toBeVisible();
     // Next button should eventually appear (delayed 5s)
     await expect(page.locator("button:has-text('Next')")).toBeVisible({
@@ -17,19 +29,11 @@ test.describe("iPad Smoke Tests", () => {
     });
   });
 
-  test("onboarding Next button navigates without crash", async ({ page }) => {
-    await page.goto("/onboarding");
-    const nextBtn = page.locator("button:has-text('Next')");
-    await expect(nextBtn).toBeVisible({ timeout: 8000 });
-    await nextBtn.click();
-    // Should navigate to step 2 — value proposition
-    await expect(page.locator("text=subscription")).toBeVisible({
-      timeout: 5000,
-    });
-  });
-
   test("onboarding shows sign-in buttons on final step", async ({ page }) => {
     await page.goto("/onboarding");
+
+    // Age gate
+    await page.locator("button:has-text('I am 18 or older')").click();
 
     // Step 1 → Next
     const next1 = page.locator("button:has-text('Next')");
@@ -81,11 +85,11 @@ test.describe("iPad Smoke Tests", () => {
 
   test("buttons are tappable and not obscured", async ({ page }) => {
     await page.goto("/onboarding");
-    const nextBtn = page.locator("button:has-text('Next')");
-    await expect(nextBtn).toBeVisible({ timeout: 8000 });
+    const ageBtn = page.locator("button:has-text('I am 18 or older')");
+    await expect(ageBtn).toBeVisible();
 
     // Ensure button is within viewport
-    const box = await nextBtn.boundingBox();
+    const box = await ageBtn.boundingBox();
     expect(box).not.toBeNull();
     if (box) {
       const viewport = page.viewportSize()!;
