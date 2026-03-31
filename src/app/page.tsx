@@ -187,6 +187,8 @@ function HomeInner() {
     const isPostCheckout = searchParams.get("checkout") === "success";
     if (isPostCheckout) setCheckoutPending(true);
 
+    let retries = 0;
+    const MAX_RETRIES = 10;
     const checkStatus = () =>
       fetch("/api/stripe/status")
         .then((res) => res.json())
@@ -200,16 +202,18 @@ function HomeInner() {
               url.searchParams.delete("checkout");
               window.history.replaceState({}, "", url.toString());
             }
-          } else if (isPostCheckout) {
-            // Webhook hasn't fired yet — retry
+          } else if (isPostCheckout && retries < MAX_RETRIES) {
+            // Webhook hasn't fired yet — retry (max 10 times = 15s)
+            retries++;
             return new Promise<void>((resolve) =>
               setTimeout(() => checkStatus().then(resolve), 1500)
             );
           } else {
             setIsPro(false);
+            setCheckoutPending(false);
           }
         })
-        .catch(() => setIsPro(false));
+        .catch(() => { setIsPro(false); setCheckoutPending(false); });
 
     checkStatus();
 
@@ -283,6 +287,11 @@ function HomeInner() {
   };
 
   const handleCheckout = async (plan: "monthly" | "yearly") => {
+    // iOS must use In-App Purchase (Apple Guideline 3.1.1) — redirect to /plans
+    if (isNativeiOS()) {
+      router.push("/plans");
+      return;
+    }
     setCheckoutLoading(plan);
     try {
       const res = await fetch("/api/stripe/checkout", {
@@ -660,6 +669,10 @@ function HomeInner() {
               </div>
               <button
                 onClick={async () => {
+                  if (isNativeiOS()) {
+                    openInAppBrowser("https://apps.apple.com/account/subscriptions");
+                    return;
+                  }
                   try {
                     const res = await fetch("/api/stripe/portal", { method: "POST" });
                     const data = await res.json();
@@ -668,7 +681,7 @@ function HomeInner() {
                 }}
                 className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-bg-input text-[14px] font-semibold press"
               >
-                Manage billing
+                {isNativeiOS() ? "Manage subscription" : "Manage billing"}
               </button>
             </div>
           )}

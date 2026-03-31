@@ -187,7 +187,8 @@ export default function OnboardingPage() {
             </button>
             <p className="text-center text-[12px] text-text-muted">
               By tapping above, you confirm you meet the minimum age requirement per our{" "}
-              <a href="/terms" className="underline">Terms of Service</a>.
+              <a href="/terms" className="underline">Terms of Service</a> and{" "}
+              <a href="/privacy" className="underline">Privacy Policy</a>.
             </p>
           </div>
         </main>
