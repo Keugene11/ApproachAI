@@ -47,9 +47,12 @@ export async function POST(req: Request) {
     }
     const payload = await res.json();
 
-    // Verify audience matches our Google client ID
-    const googleClientId = process.env.AUTH_GOOGLE_ID;
-    if (googleClientId && payload.aud !== googleClientId) {
+    // Verify audience matches one of our Google client IDs (web or iOS)
+    const allowedAudiences = [
+      process.env.AUTH_GOOGLE_ID,
+      process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    ].filter(Boolean);
+    if (allowedAudiences.length > 0 && !allowedAudiences.includes(payload.aud)) {
       return NextResponse.json({ error: "Token audience mismatch" }, { status: 401 });
     }
 
