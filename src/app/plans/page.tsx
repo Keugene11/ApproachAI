@@ -66,7 +66,8 @@ export default function PlansPage() {
     setIsiOS(true);
     addDebug("iOS detected, calling initPurchases...");
 
-    await initPurchases();
+    const initResult = await initPurchases();
+    addDebug(`initPurchases result: ${initResult}`);
 
     // Identify user if logged in
     if (session?.user?.id) {

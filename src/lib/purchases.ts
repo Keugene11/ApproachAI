@@ -9,10 +9,10 @@ let initPromise: Promise<void> | null = null;
  * Returns a promise that resolves when initialization is complete.
  * Safe to call multiple times — deduplicates concurrent calls.
  */
-export async function initPurchases() {
-  if (!isNativeiOS()) return;
-  if (initialized) return;
-  if (initPromise) return initPromise;
+export async function initPurchases(): Promise<string> {
+  if (!isNativeiOS()) return "skip:not-ios";
+  if (initialized) return "already-initialized";
+  if (initPromise) { await initPromise; return initialized ? "ok:from-existing-promise" : "fail:existing-promise-failed"; }
 
   initPromise = (async () => {
     const apiKey = process.env.NEXT_PUBLIC_REVENUECAT_APPLE_API_KEY?.trim();
@@ -28,12 +28,13 @@ export async function initPurchases() {
       initialized = true;
       console.log("[IAP] RevenueCat initialized successfully");
     } catch (e) {
-      console.error("Failed to initialize RevenueCat:", e);
+      console.error("[IAP] Failed to initialize RevenueCat:", e);
       initPromise = null; // Allow retry on next call
     }
   })();
 
-  return initPromise;
+  await initPromise;
+  return initialized ? "ok:initialized" : `fail:key=${process.env.NEXT_PUBLIC_REVENUECAT_APPLE_API_KEY ? "present" : "MISSING"}`;
 }
 
 /**
@@ -55,8 +56,8 @@ export async function identifyUser(userId: string) {
  * Get available subscription packages.
  */
 export async function getOfferings(): Promise<{ availablePackages?: unknown[]; [key: string]: unknown } | null> {
-  if (!isNativeiOS()) { console.log("[IAP] getOfferings: not iOS"); return null; }
-  if (!initialized) { console.log("[IAP] getOfferings: not initialized"); return null; }
+  if (!isNativeiOS()) { console.log("[IAP] getOfferings: not iOS, Capacitor=" + typeof window?.Capacitor); return null; }
+  if (!initialized) { console.log("[IAP] getOfferings: not initialized, initPromise=" + !!initPromise); return null; }
 
   try {
     const { Purchases } = await import("@revenuecat/purchases-capacitor");
