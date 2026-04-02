@@ -75,15 +75,25 @@ export default function PlansPage() {
 
     addDebug("initPurchases done, initialized");
 
+    // Intercept console.log to capture IAP debug messages
+    const origLog = console.log;
+    const origErr = console.error;
+    console.log = (...args: unknown[]) => { origLog(...args); if (String(args[0]).includes("[IAP]")) addDebug(args.map(String).join(" ")); };
+    console.error = (...args: unknown[]) => { origErr(...args); if (String(args[0]).includes("[IAP]")) addDebug("ERR: " + args.map(String).join(" ")); };
+
     // Get offerings — retry once if first attempt fails
     let offering = await getOfferings();
-    addDebug(`1st getOfferings: ${offering ? `${offering.availablePackages?.length || 0} pkgs` : "null"}`);
+    addDebug(`1st result: ${offering ? `${(offering.availablePackages as unknown[])?.length || 0} pkgs` : "null"}`);
     if (!offering?.availablePackages) {
       // Wait briefly and retry — StoreKit sandbox can be slow
-      await new Promise((r) => setTimeout(r, 1500));
+      await new Promise((r) => setTimeout(r, 3000));
       offering = await getOfferings();
-      addDebug(`2nd getOfferings: ${offering ? `${offering.availablePackages?.length || 0} pkgs` : "null"}`);
+      addDebug(`2nd result: ${offering ? `${(offering.availablePackages as unknown[])?.length || 0} pkgs` : "null"}`);
     }
+
+    // Restore original console
+    console.log = origLog;
+    console.error = origErr;
 
     if (offering?.availablePackages) {
       const pkgs: { monthly?: IAPPackage; yearly?: IAPPackage } = {};

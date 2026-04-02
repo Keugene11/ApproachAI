@@ -54,16 +54,20 @@ export async function identifyUser(userId: string) {
 /**
  * Get available subscription packages.
  */
-export async function getOfferings() {
-  if (!isNativeiOS() || !initialized) return null;
+export async function getOfferings(): Promise<{ availablePackages?: unknown[]; [key: string]: unknown } | null> {
+  if (!isNativeiOS()) { console.log("[IAP] getOfferings: not iOS"); return null; }
+  if (!initialized) { console.log("[IAP] getOfferings: not initialized"); return null; }
 
   try {
     const { Purchases } = await import("@revenuecat/purchases-capacitor");
     const offerings = await Purchases.getOfferings();
-    console.log("[IAP] Raw offerings:", JSON.stringify(offerings, null, 2));
-    return offerings.current;
-  } catch (e) {
-    console.error("Failed to get offerings:", e);
+    console.log("[IAP] Raw offerings keys:", Object.keys(offerings || {}));
+    console.log("[IAP] Current offering:", JSON.stringify(offerings?.current));
+    console.log("[IAP] All offerings:", JSON.stringify(offerings?.all));
+    return offerings.current as { availablePackages?: unknown[]; [key: string]: unknown } | null;
+  } catch (e: unknown) {
+    const err = e as { message?: string; code?: string; underlyingErrorMessage?: string };
+    console.error("[IAP] getOfferings ERROR:", err.message, err.code, err.underlyingErrorMessage, JSON.stringify(e));
     return null;
   }
 }
