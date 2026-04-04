@@ -106,10 +106,11 @@ export default function PlansPage() {
 
     if (offering?.availablePackages) {
       const pkgs: { monthly?: IAPPackage; yearly?: IAPPackage } = {};
-      for (const pkg of offering.availablePackages) {
-        addDebug(`pkg: ${pkg.packageType} / ${pkg.identifier} / ${(pkg as unknown as IAPPackage).product?.identifier || "no product"}`);
-        if (pkg.packageType === "MONTHLY") pkgs.monthly = pkg as unknown as IAPPackage;
-        else if (pkg.packageType === "ANNUAL") pkgs.yearly = pkg as unknown as IAPPackage;
+      for (const _pkg of offering.availablePackages) {
+        const pkg = _pkg as unknown as IAPPackage;
+        addDebug(`pkg: ${pkg.packageType} / ${pkg.identifier} / ${pkg.product?.identifier || "no product"}`);
+        if (pkg.packageType === "MONTHLY") pkgs.monthly = pkg;
+        else if (pkg.packageType === "ANNUAL") pkgs.yearly = pkg;
       }
       addDebug(`monthly: ${pkgs.monthly ? "yes" : "no"}, yearly: ${pkgs.yearly ? "yes" : "no"}`);
       setIapPackages(pkgs);
