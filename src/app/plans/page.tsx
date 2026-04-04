@@ -249,8 +249,8 @@ export default function PlansPage() {
   const isYearly = subscription?.price_id?.includes("yearly") || subscription?.price_id?.includes("year");
 
   // Price display — use IAP prices on iOS if available
-  const monthlyPrice = iapPackages.monthly?.product?.priceString || "$9.99";
-  const yearlyPrice = iapPackages.yearly?.product?.priceString || "$49.99";
+  const monthlyPrice = iapPackages.monthly?.product?.priceString || "$10";
+  const yearlyPrice = iapPackages.yearly?.product?.priceString || "$50";
 
   if (!loaded) return null;
 
