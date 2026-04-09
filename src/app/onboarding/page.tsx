@@ -70,6 +70,7 @@ export default function OnboardingPage() {
   const [showSignIn, setShowSignIn] = useState(false);
   const [isiOS, setIsiOS] = useState(false);
   const [iapPackages, setIapPackages] = useState<Record<string, unknown>>({});
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
 
   // Redirect to home if user is already logged in + init IAP
   useEffect(() => {
@@ -86,7 +87,11 @@ export default function OnboardingPage() {
     if (isNativeiOS()) {
       setIsiOS(true);
       initPurchases().then(async () => {
-        const offering = await getOfferings();
+        let offering = await getOfferings();
+        for (let attempt = 0; attempt < 3 && !offering?.availablePackages; attempt++) {
+          await new Promise((r) => setTimeout(r, 2000));
+          offering = await getOfferings();
+        }
         if (offering?.availablePackages) {
           const pkgs: Record<string, unknown> = {};
           for (const pkg of offering.availablePackages) {
@@ -112,21 +117,37 @@ export default function OnboardingPage() {
 
     // iOS In-App Purchase — no sign-in required (Apple Guideline 5.1.1(v))
     if (isiOS) {
+      setPurchaseError(null);
       const pkg = iapPackages[plan];
-      if (pkg) {
-        try {
-          // Identify user if logged in, but don't require it
-          if (session?.user?.id) {
-            await identifyUser(session.user.id);
+      if (!pkg) {
+        setPurchaseError("This plan is not available yet. Please try again later.");
+        setCheckoutLoading(null);
+        return;
+      }
+      try {
+        // Identify user if logged in, but don't require it
+        if (session?.user?.id) {
+          await identifyUser(session.user.id);
+        }
+        const success = await purchasePackage(pkg as Parameters<typeof purchasePackage>[0]);
+        if (success) {
+          // After successful IAP, prompt optional sign-in to link subscription
+          setShowSignIn(true);
+          setCheckoutLoading(null);
+          return;
+        }
+      } catch (e: unknown) {
+        const err = e as { code?: number | string; message?: string };
+        const code = String(err.code ?? "");
+        if (code !== "1" && !err.message?.includes("cancelled")) {
+          if (code === "2") {
+            setPurchaseError("The App Store couldn't process this purchase right now. Please try again in a moment.");
+          } else if (code === "3") {
+            setPurchaseError("Purchases are not allowed on this device. Please check your App Store settings.");
+          } else {
+            setPurchaseError("Purchase could not be completed. Please try again.");
           }
-          const success = await purchasePackage(pkg as Parameters<typeof purchasePackage>[0]);
-          if (success) {
-            // After successful IAP, prompt optional sign-in to link subscription
-            setShowSignIn(true);
-            setCheckoutLoading(null);
-            return;
-          }
-        } catch {}
+        }
       }
       setCheckoutLoading(null);
       return;
@@ -267,6 +288,13 @@ export default function OnboardingPage() {
             Wingmate also allows you to set goals on how many cold approaches you want to make per week and track exactly how many girls you approach over time.
           </p>
         </div>
+
+        {/* Error banner */}
+        {purchaseError && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-center mb-4">
+            <p className="text-[14px] font-medium text-red-700">{purchaseError}</p>
+          </div>
+        )}
 
         {/* Plan cards */}
         <div className="space-y-3 mb-4 onb-goals">

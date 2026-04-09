@@ -97,10 +97,11 @@ export default function PlansPage() {
       addDebug(`ERROR: ${err.message || err.code || JSON.stringify(e)?.substring(0, 200)}`);
     }
 
-    // Original getOfferings flow for actual functionality
+    // Original getOfferings flow for actual functionality — retry up to 3 times
+    // (sandbox/review environments can be slow to load products)
     let offering = await getOfferings();
-    if (!offering?.availablePackages) {
-      await new Promise((r) => setTimeout(r, 3000));
+    for (let attempt = 0; attempt < 3 && !offering?.availablePackages; attempt++) {
+      await new Promise((r) => setTimeout(r, 2000));
       offering = await getOfferings();
     }
 
@@ -166,13 +167,26 @@ export default function PlansPage() {
           }
         }
       } catch (e: unknown) {
-        const err = e as { code?: number; message?: string };
-        if (err.code === 2 || err.message?.includes("cancelled")) {
-          // User cancelled — not an error
-        } else if (err.code === 1) {
+        const err = e as { code?: number | string; message?: string };
+        // purchasePackage already handles cancellation (returns false), so
+        // any error here is a real failure. Use string comparison for RevenueCat codes.
+        const code = String(err.code ?? "");
+        if (code === "1" || err.message?.includes("cancelled")) {
+          // User cancelled — not an error (safety fallback)
+        } else if (code === "2") {
+          // STORE_PROBLEM — StoreKit/App Store issue
+          setError("The App Store couldn't process this purchase right now. Please try again in a moment.");
+        } else if (code === "3") {
+          // PURCHASE_NOT_ALLOWED — device restrictions or not signed into App Store
+          setError("Purchases are not allowed on this device. Please check your App Store settings and try again.");
+        } else if (code === "5" || code === "7") {
+          // PRODUCT_NOT_AVAILABLE or PRODUCT_ALREADY_PURCHASED
           setError("This subscription is not available for purchase right now. Please try again later.");
+        } else if (code === "10") {
+          // NETWORK_ERROR
+          setError("Network error — please check your connection and try again.");
         } else {
-          setError("Purchase could not be completed. Please check your payment method and try again.");
+          setError("Purchase could not be completed. Please try again.");
         }
       }
       setLoading(null);
@@ -467,14 +481,6 @@ export default function PlansPage() {
       </div>
 
       <SignInModal open={showSignIn} onClose={() => setShowSignIn(false)} />
-
-      {/* Debug panel — remove after testing */}
-      {isiOS && debugLog.length > 0 && (
-        <div className="fixed bottom-20 left-2 right-2 bg-black/90 text-green-400 text-[11px] font-mono p-3 rounded-lg max-h-[200px] overflow-y-auto z-50">
-          <div className="font-bold text-white mb-1">IAP Debug</div>
-          {debugLog.map((msg, i) => <div key={i}>{msg}</div>)}
-        </div>
-      )}
 
       <BottomNav />
     </main>

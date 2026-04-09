@@ -88,9 +88,11 @@ export async function purchasePackage(packageToPurchase: any) {
     const entitlements = result?.customerInfo?.entitlements?.active;
     return !!entitlements && Object.keys(entitlements).length > 0;
   } catch (e: unknown) {
-    const error = e as { code?: number; userCancelled?: boolean };
-    if (error.userCancelled) return false;
-    console.error("Purchase failed:", e);
+    const error = e as { code?: number | string; userCancelled?: boolean; message?: string };
+    // RevenueCat code 1 = PURCHASE_CANCELLED_ERROR
+    const code = String(error.code ?? "");
+    if (error.userCancelled || code === "1") return false;
+    console.error("Purchase failed:", JSON.stringify(e));
     throw e;
   }
 }
