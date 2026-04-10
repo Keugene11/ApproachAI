@@ -35,9 +35,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientSecret: process.env.AUTH_APPLE_SECRET,
     }),
   ],
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/onboarding",
+    error: "/onboarding",
   },
   callbacks: {
     async signIn({ user, account }) {

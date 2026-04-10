@@ -1,14 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signInWithGoogle, signInWithApple } from "@/lib/auth-client";
 import { useSession } from "next-auth/react";
 import { hideSplash, setupAuthDeepLinkListener, initSocialLogin } from "@/lib/capacitor";
 
 export default function OnboardingPage() {
+  return (
+    <Suspense fallback={null}>
+      <OnboardingInner />
+    </Suspense>
+  );
+}
+
+function OnboardingInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
+  const error = searchParams.get("error");
 
   useEffect(() => {
     setupAuthDeepLinkListener();
@@ -31,6 +41,13 @@ export default function OnboardingPage() {
       </div>
 
       <div className="space-y-3">
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-center mb-2">
+            <p className="text-[14px] font-medium text-red-700">
+              Sign-in failed. Please try again.
+            </p>
+          </div>
+        )}
         <button
           onClick={() => signInWithGoogle()}
           className="w-full flex items-center justify-center gap-3 bg-white border border-border py-3.5 rounded-2xl font-semibold text-[15px] press shadow-sm"
