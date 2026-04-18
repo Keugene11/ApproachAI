@@ -8,6 +8,9 @@ const config: CapacitorConfig = {
     url: "https://wingmate.live",
     cleartext: false,
     errorPath: "error.html",
+    // Without this, Capacitor opens external hosts in the system browser instead
+    // of navigating in the WebView — which breaks OAuth redirects to Google.
+    allowNavigation: ["accounts.google.com", "*.google.com", "appleid.apple.com"],
   },
   ios: {
     contentInset: "automatic",
