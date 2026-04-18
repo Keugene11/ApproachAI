@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signInWithGoogle, signInWithApple } from "@/lib/auth-client";
 import { useSession } from "next-auth/react";
@@ -17,8 +17,9 @@ export default function OnboardingPage() {
 function OnboardingInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session, status } = useSession();
-  const error = searchParams.get("error");
+  const { status } = useSession();
+  const [liveError, setLiveError] = useState<string | null>(null);
+  const error = liveError || searchParams.get("error");
 
   useEffect(() => {
     setupAuthDeepLinkListener();
@@ -28,6 +29,18 @@ function OnboardingInner() {
       router.replace("/");
     }
   }, [router, status]);
+
+  const handleGoogle = async () => {
+    setLiveError(null);
+    const r = await signInWithGoogle();
+    if (r.error) setLiveError(r.error);
+  };
+
+  const handleApple = async () => {
+    setLiveError(null);
+    const r = await signInWithApple();
+    if (r.error) setLiveError(r.error);
+  };
 
   return (
     <main className="h-[100dvh] max-w-md mx-auto flex flex-col justify-between px-7 pt-24 pb-[calc(3rem+env(safe-area-inset-bottom))]">
@@ -42,14 +55,14 @@ function OnboardingInner() {
 
       <div className="space-y-3">
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-center mb-2">
-            <p className="text-[14px] font-medium text-red-700">
-              Sign-in failed. Please try again.
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-2">
+            <p className="text-[14px] font-medium text-red-700 break-words text-left whitespace-pre-wrap">
+              {error}
             </p>
           </div>
         )}
         <button
-          onClick={() => signInWithGoogle()}
+          onClick={handleGoogle}
           className="w-full flex items-center justify-center gap-3 bg-white border border-border py-3.5 rounded-2xl font-semibold text-[15px] press shadow-sm"
         >
           <svg width="18" height="18" viewBox="0 0 48 48">
@@ -62,7 +75,7 @@ function OnboardingInner() {
         </button>
 
         <button
-          onClick={() => signInWithApple()}
+          onClick={handleApple}
           className="w-full flex items-center justify-center gap-3 bg-[#1a1a1a] text-white border border-[#1a1a1a] py-3.5 rounded-2xl font-semibold text-[15px] press"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="white">

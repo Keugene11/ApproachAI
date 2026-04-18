@@ -1,28 +1,21 @@
 import { signIn } from "next-auth/react";
 import { isNativePlatform } from "./platform";
 
-/**
- * Attempt native sign-in using the SocialLogin Capacitor plugin.
- * Returns true if successful, false if native sign-in is unavailable.
- */
-async function nativeSignIn(provider: "apple" | "google"): Promise<boolean> {
+type Result = { error: null } | { error: string };
+
+async function nativeSignIn(provider: "apple" | "google"): Promise<Result> {
   try {
     const { SocialLogin } = await import("@capgo/capacitor-social-login");
     const res = provider === "google"
       ? await SocialLogin.login({ provider: "google", options: { forcePrompt: true } })
       : await SocialLogin.login({ provider: "apple", options: { scopes: ["name", "email"] } });
 
-    // Extract the ID token from the response
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = res?.result as any;
     const idToken: string | null = result?.idToken ?? null;
 
-    if (!idToken) {
-      console.error("Native sign-in returned no idToken");
-      return false;
-    }
+    if (!idToken) return { error: "Native sign-in returned no idToken" };
 
-    // Send token to our backend to verify and create session
     const tokenRes = await fetch("/api/auth/native/token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -30,55 +23,29 @@ async function nativeSignIn(provider: "apple" | "google"): Promise<boolean> {
     });
 
     if (!tokenRes.ok) {
-      console.error("Token verification failed:", await tokenRes.text());
-      return false;
+      const body = await tokenRes.text();
+      return { error: `Token verification failed: ${tokenRes.status} ${body}` };
     }
 
-    // Cookie is set by the response — reload to pick up the session
     window.location.href = "/";
-    return true;
+    return { error: null };
   } catch (e: unknown) {
     const error = e as { code?: string; message?: string };
-    // User cancelled — not an error
     if (error.message?.includes("cancel") || error.code === "SIGN_IN_CANCELLED") {
-      return true; // Return true to prevent fallback to browser
+      return { error: null };
     }
-    console.error("Native sign-in error:", e);
-    return false;
+    return { error: error.message || error.code || JSON.stringify(e) };
   }
 }
 
-/**
- * Triggers Google OAuth sign-in.
- * Uses native Google Sign-In on Capacitor, Auth.js redirect on web.
- */
-export async function signInWithGoogle() {
-  if (isNativePlatform()) {
-    const success = await nativeSignIn("google");
-    if (success) return { error: null };
-    // Native failed on Android — fall back to browser OAuth
-    const { isNativeAndroid } = await import("./platform");
-    if (isNativeAndroid()) {
-      const { openInAppBrowser } = await import("./capacitor");
-      await openInAppBrowser("/api/auth/native/google");
-      return { error: null };
-    }
-    return { error: "Sign-in failed" };
-  }
+export async function signInWithGoogle(): Promise<Result> {
+  if (isNativePlatform()) return nativeSignIn("google");
   await signIn("google", { redirectTo: "/" });
   return { error: null };
 }
 
-/**
- * Triggers Apple OAuth sign-in.
- * Uses native Apple Sign-In on Capacitor, Auth.js redirect on web.
- */
-export async function signInWithApple() {
-  if (isNativePlatform()) {
-    const success = await nativeSignIn("apple");
-    if (success) return { error: null };
-    return { error: "Sign-in failed" };
-  }
+export async function signInWithApple(): Promise<Result> {
+  if (isNativePlatform()) return nativeSignIn("apple");
   await signIn("apple", { redirectTo: "/" });
   return { error: null };
 }
