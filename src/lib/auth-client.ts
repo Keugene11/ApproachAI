@@ -41,13 +41,33 @@ async function nativeSignIn(provider: "apple" | "google"): Promise<Result> {
 }
 
 export async function signInWithGoogle(): Promise<Result> {
-  // iOS: native sign-in works reliably.
   if (isNativeiOS()) return nativeSignIn("google");
-  // Android: Custom Tab flow. Shares cookies with Chrome so users get one-tap
-  // if they're already logged into Google in Chrome. After OAuth, the server
-  // issues a wingmate://auth/callback?session_token deep link which the app
-  // intercepts (see setupAuthDeepLinkListener) to set the session cookie.
   if (isNativeAndroid()) {
+    // Try Credential Manager first (one-tap from device account picker).
+    // If it fails for any reason — flaky GCP propagation, stale grant, device
+    // account state — silently fall back to Custom Tab + deep link OAuth.
+    try {
+      await initSocialLogin();
+      const { SocialLogin } = await import("@capgo/capacitor-social-login");
+      // Best-effort: clear any stale credential state from prior bad attempts.
+      try { await SocialLogin.logout({ provider: "google" }); } catch {}
+      const res = await SocialLogin.login({ provider: "google", options: { forcePrompt: false } });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const idToken = (res?.result as any)?.idToken as string | null;
+      if (idToken) {
+        const tokenRes = await fetch("/api/auth/native/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ provider: "google", idToken }),
+        });
+        if (tokenRes.ok) {
+          window.location.href = "/";
+          return { error: null };
+        }
+      }
+    } catch {
+      // fall through to Custom Tab
+    }
     await openInAppBrowser("/api/auth/native/google");
     return { error: null };
   }
