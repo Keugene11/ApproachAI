@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@capgo/capacitor-social-login@8.3.9':
+    hash: qosyct336wixbpnx4abkpeohda
+    path: patches/@capgo__capacitor-social-login@8.3.9.patch
+
 importers:
 
   .:
@@ -40,7 +45,7 @@ importers:
         version: 8.0.1(@capacitor/core@8.2.0)
       '@capgo/capacitor-social-login':
         specifier: '8'
-        version: 8.3.9(@capacitor/core@8.2.0)
+        version: 8.3.9(patch_hash=qosyct336wixbpnx4abkpeohda)(@capacitor/core@8.2.0)
       '@neondatabase/serverless':
         specifier: ^1.0.2
         version: 1.0.2
@@ -1687,7 +1692,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.2.0
 
-  '@capgo/capacitor-social-login@8.3.9(@capacitor/core@8.2.0)':
+  '@capgo/capacitor-social-login@8.3.9(patch_hash=qosyct336wixbpnx4abkpeohda)(@capacitor/core@8.2.0)':
     dependencies:
       '@capacitor/core': 8.2.0
 

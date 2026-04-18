@@ -1,0 +1,44 @@
+diff --git a/android/src/main/java/ee/forgr/capacitor/social/login/GoogleProvider.java b/android/src/main/java/ee/forgr/capacitor/social/login/GoogleProvider.java
+index 5cfaa74c9726d956179ab3d282366cb0c8b1899b..7a9ea1b8609c7dcbd70ab44dc3651c7838c6652a 100644
+--- a/android/src/main/java/ee/forgr/capacitor/social/login/GoogleProvider.java
++++ b/android/src/main/java/ee/forgr/capacitor/social/login/GoogleProvider.java
+@@ -545,7 +545,31 @@ public class GoogleProvider implements SocialProvider {
+                     response.put("provider", "google");
+                     JSObject resultObj = new JSObject();
+ 
++                    GoogleIdTokenCredential googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.getData());
++
++                    // PATCHED: skip the secondary Identity.authorize() consent UI. We only need
++                    // the idToken for backend session creation; the additional access_token
++                    // request was triggering a SECOND account picker on every sign-in.
+                     JSONObject options = call.getObject("options", new JSObject());
++                    boolean skipAccessToken = true;
++                    try {
++                        if (options != null && options.has("requestAccessToken")) {
++                            skipAccessToken = !options.getBoolean("requestAccessToken");
++                        }
++                    } catch (JSONException e) {
++                        // ignore
++                    }
++
++                    if (skipAccessToken) {
++                        resultObj.put("profile", user);
++                        resultObj.put("idToken", googleIdTokenCredential.getIdToken());
++                        resultObj.put("responseType", "online");
++                        response.put("result", resultObj);
++                        try { persistState(googleIdTokenCredential.getIdToken(), null); } catch (JSONException e) { /* ignore */ }
++                        call.resolve(response);
++                        return;
++                    }
++
+                     Boolean forceRefreshToken = false;
+                     try {
+                         forceRefreshToken = options != null && options.has("forceRefreshToken") && options.getBoolean("forceRefreshToken");
+@@ -553,7 +577,6 @@ public class GoogleProvider implements SocialProvider {
+                         Log.e(LOG_TAG, "Error parsing forceRefreshToken option", e);
+                     }
+ 
+-                    GoogleIdTokenCredential googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.getData());
+                     ListenableFuture<AuthorizationResult> future = getAuthorizationResult(forceRefreshToken);
+ 
+                     // Use ExecutorService to retrieve the access token

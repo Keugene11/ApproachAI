@@ -60,5 +60,10 @@
     "sharp": "^0.34.5",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@capgo/capacitor-social-login@8.3.9": "patches/@capgo__capacitor-social-login@8.3.9.patch"
+    }
   }
 }
