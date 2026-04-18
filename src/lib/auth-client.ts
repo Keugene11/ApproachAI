@@ -43,35 +43,54 @@ async function nativeSignIn(provider: "apple" | "google"): Promise<Result> {
 export async function signInWithGoogle(): Promise<Result> {
   if (isNativeiOS()) return nativeSignIn("google");
   if (isNativeAndroid()) {
-    // Try Credential Manager first (one-tap from device account picker).
-    // If it fails for any reason — flaky GCP propagation, stale grant, device
-    // account state — silently fall back to Custom Tab + deep link OAuth.
-    try {
-      await initSocialLogin();
-      const { SocialLogin } = await import("@capgo/capacitor-social-login");
-      // Best-effort: clear any stale credential state from prior bad attempts.
-      try { await SocialLogin.logout({ provider: "google" }); } catch {}
-      const res = await SocialLogin.login({ provider: "google", options: { forcePrompt: false } });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const idToken = (res?.result as any)?.idToken as string | null;
-      if (idToken) {
-        const tokenRes = await fetch("/api/auth/native/token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ provider: "google", idToken }),
-        });
-        if (tokenRes.ok) {
-          window.location.href = "/";
-          return { error: null };
-        }
-      }
-    } catch {
-      // fall through to Custom Tab
-    }
-    await openInAppBrowser("/api/auth/native/google");
-    return { error: null };
+    return androidGoogleSignIn();
   }
   await signIn("google", { redirectTo: "/" });
+  return { error: null };
+}
+
+async function androidGoogleSignIn(): Promise<Result> {
+  await initSocialLogin();
+  const { SocialLogin } = await import("@capgo/capacitor-social-login");
+  // Best-effort: clear any stale credential state.
+  try { await SocialLogin.logout({ provider: "google" }); } catch {}
+
+  // Try a sequence of Credential Manager modes. Each has different code paths
+  // inside Google Identity Services and tolerates different device states.
+  const attempts: Array<{ label: string; opts: Record<string, unknown> }> = [
+    { label: "bottom-sheet", opts: { style: "bottom", forcePrompt: false, filterByAuthorizedAccounts: false, autoSelectEnabled: false } },
+    { label: "standard", opts: { forcePrompt: true } },
+  ];
+
+  let lastError = "unknown error";
+  for (const attempt of attempts) {
+    try {
+      const res = await SocialLogin.login({ provider: "google", options: attempt.opts as never });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const idToken = (res?.result as any)?.idToken as string | null;
+      if (!idToken) { lastError = `${attempt.label}: no idToken returned`; continue; }
+      const tokenRes = await fetch("/api/auth/native/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider: "google", idToken }),
+      });
+      if (!tokenRes.ok) { lastError = `${attempt.label}: token verify ${tokenRes.status}`; continue; }
+      window.location.href = "/";
+      return { error: null };
+    } catch (e: unknown) {
+      const err = e as { message?: string; code?: string };
+      if (err.message?.includes("cancel") || err.code === "SIGN_IN_CANCELLED") {
+        return { error: null };
+      }
+      lastError = `${attempt.label}: ${err.message || err.code || JSON.stringify(e)}`;
+    }
+  }
+
+  // All native attempts failed — fall back to Custom Tab + deep link OAuth.
+  // This works regardless of Credential Manager state, but requires typing
+  // the email if you're not signed into Google in Chrome.
+  console.warn("Native Google sign-in fell back to Custom Tab. Last error:", lastError);
+  await openInAppBrowser("/api/auth/native/google");
   return { error: null };
 }
 
