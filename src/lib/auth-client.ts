@@ -1,6 +1,7 @@
 import { signIn } from "next-auth/react";
 import { isNativePlatform, isNativeiOS, isNativeAndroid } from "./platform";
 import { initSocialLogin } from "./capacitor";
+import { LegacyGoogleAuth } from "./legacy-google-auth";
 
 type Result = { error: null } | { error: string };
 
@@ -50,32 +51,18 @@ export async function signInWithGoogle(): Promise<Result> {
 }
 
 async function androidGoogleSignIn(): Promise<Result> {
+  // Use our custom Capacitor plugin that uses the legacy GoogleSignIn API
+  // directly. Bypasses Credential Manager (which has the [16] reauth bug
+  // for freshly-created OAuth clients).
+  const webClientId = (process.env.NEXT_PUBLIC_AUTH_GOOGLE_ID || "").trim();
+  if (!webClientId) return { error: "NEXT_PUBLIC_AUTH_GOOGLE_ID is empty" };
   try {
-    await initSocialLogin();
-  } catch (e: unknown) {
-    const err = e as { message?: string };
-    return { error: `init: ${err.message || JSON.stringify(e)}` };
-  }
-  const { SocialLogin } = await import("@capgo/capacitor-social-login");
-  // Best-effort: clear stale Credential Manager state that triggers [16] reauth failed.
-  try { await SocialLogin.logout({ provider: "google" }); } catch {}
-
-  // Use the bottom-sheet path (GetGoogleIdOption). Standard path
-  // (GetSignInWithGoogleOption) throws [16] Account reauth failed for our
-  // freshly-created OAuth client; bottom-sheet uses a different Credential
-  // Manager code path that doesn't hit that bug.
-  try {
-    const res = await SocialLogin.login({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      provider: "google", options: { style: "bottom", forcePrompt: false, filterByAuthorizedAccounts: false, autoSelectEnabled: false } as any,
-    });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const idToken = (res?.result as any)?.idToken as string | null;
-    if (!idToken) return { error: "no idToken returned from native sign-in" };
+    const res = await LegacyGoogleAuth.signIn({ webClientId });
+    if (!res.idToken) return { error: "no idToken from legacy Google Auth" };
     const tokenRes = await fetch("/api/auth/native/token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ provider: "google", idToken }),
+      body: JSON.stringify({ provider: "google", idToken: res.idToken }),
     });
     if (!tokenRes.ok) {
       const body = await tokenRes.text();
@@ -85,10 +72,10 @@ async function androidGoogleSignIn(): Promise<Result> {
     return { error: null };
   } catch (e: unknown) {
     const err = e as { message?: string; code?: string };
-    if (err.message?.includes("cancel") || err.code === "SIGN_IN_CANCELLED") {
+    if (err.message?.includes("cancel") || err.message?.includes("12501") || err.code === "SIGN_IN_CANCELLED") {
       return { error: null };
     }
-    return { error: `native: ${err.message || err.code || JSON.stringify(e)}` };
+    return { error: `legacy: ${err.message || err.code || JSON.stringify(e)}` };
   }
 }
 
