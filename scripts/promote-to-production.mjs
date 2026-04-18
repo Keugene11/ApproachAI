@@ -45,54 +45,61 @@ async function api(token, method, path, body) {
   return text ? JSON.parse(text) : {};
 }
 
+async function apiRaw(token, method, path, body) {
+  const url = `${BASE}/${path}`;
+  const headers = { Authorization: `Bearer ${token}` };
+  if (body) headers["Content-Type"] = "application/json";
+  const res = await fetch(url, { method, headers, body: body || undefined });
+  const text = await res.text();
+  let json;
+  try { json = JSON.parse(text); } catch { json = text; }
+  return { ok: res.ok, status: res.status, body: json };
+}
+
 async function main() {
   const token = await getToken();
   console.log("Authenticated.\n");
 
-  // Create edit
   const edit = await api(token, "POST", "edits", "{}");
   console.log(`Edit ID: ${edit.id}`);
 
-  // Get current internal track
-  console.log("\nFetching internal track...");
-  const track = await api(token, "GET", `edits/${edit.id}/tracks/internal`);
-  console.log("Internal track:", JSON.stringify(track, null, 2));
+  const alpha = await api(token, "GET", `edits/${edit.id}/tracks/alpha`);
+  const latest = alpha.releases?.find(r => r.status === "completed")
+    || alpha.releases?.[0];
+  if (!latest) { console.log("No alpha releases."); process.exit(1); }
+  const versionCodes = latest.versionCodes;
+  console.log(`Alpha latest: versionCodes=${versionCodes} status=${latest.status}`);
 
-  if (!track.releases || track.releases.length === 0) {
-    console.log("No releases found on internal track.");
-    return;
-  }
-
-  // Get the latest version code from internal
-  const latestRelease = track.releases[0];
-  const versionCodes = latestRelease.versionCodes;
-  console.log(`\nLatest version codes: ${versionCodes}`);
-
-  // Promote to production
-  console.log("\nPromoting to production...");
+  const desiredStatus = process.env.STATUS || "draft";
   const prodTrack = {
     track: "production",
     releases: [{
-      versionCodes: versionCodes,
-      status: "completed",
-      releaseNotes: [{
-        language: "en-US",
-        text: "Initial release of Wingmate - your AI cold approach confidence coach."
-      }]
-    }]
+      name: latest.name || `${versionCodes[0]}`,
+      versionCodes,
+      status: desiredStatus,
+      releaseNotes: [{ language: "en-US", text: "Bug fixes and improvements." }],
+    }],
   };
 
-  await api(token, "PUT", `edits/${edit.id}/tracks/production`, JSON.stringify(prodTrack));
-  console.log("  Set production track!");
+  console.log(`\nSetting production track to ${desiredStatus}...`);
+  const put = await apiRaw(token, "PUT", `edits/${edit.id}/tracks/production`, JSON.stringify(prodTrack));
+  console.log("PUT response:", JSON.stringify(put, null, 2));
+  if (!put.ok) { await apiRaw(token, "DELETE", `edits/${edit.id}`); process.exit(1); }
 
-  // Commit
+  console.log("\nValidating edit...");
+  const val = await apiRaw(token, "POST", `edits/${edit.id}:validate`);
+  console.log("Validate response:", JSON.stringify(val, null, 2));
+  if (!val.ok) { await apiRaw(token, "DELETE", `edits/${edit.id}`); process.exit(1); }
+
   console.log("\nCommitting edit...");
-  const commit = await api(token, "POST", `edits/${edit.id}:commit`);
-  console.log(`  Committed! Edit: ${commit.id}`);
+  const commit = await apiRaw(token, "POST", `edits/${edit.id}:commit`);
+  console.log("Commit response:", JSON.stringify(commit, null, 2));
+  if (!commit.ok) process.exit(1);
 
-  console.log("\n=== APP PROMOTED TO PRODUCTION ===");
-  console.log("The app will go through Google's review process.");
-  console.log("This typically takes a few hours to a few days.");
+  console.log(`\n=== Production track set to ${desiredStatus} with version ${versionCodes[0]} ===`);
+  if (desiredStatus === "draft") {
+    console.log("Go to Play Console → Production to finalize and roll out.");
+  }
 }
 
 main().catch(e => { console.error(e); process.exit(1); });
