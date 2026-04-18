@@ -1,4 +1,4 @@
-import { isNativePlatform, isNativeiOS } from "./platform";
+import { isNativePlatform, isNativeiOS, isNativeAndroid } from "./platform";
 
 /**
  * Hide the native splash screen once the web content is ready.
@@ -64,10 +64,15 @@ export function initSocialLogin(): Promise<void> {
     const appleClientId = (process.env.NEXT_PUBLIC_APPLE_CLIENT_ID || "live.wingmate.app").trim();
     if (!webClientId) throw new Error("NEXT_PUBLIC_AUTH_GOOGLE_ID is empty in this build");
     const { SocialLogin } = await import("@capgo/capacitor-social-login");
-    await SocialLogin.initialize({
-      apple: { clientId: appleClientId },
+    // Apple init on Android requires redirectUrl. We don't support Apple sign-in
+    // on Android, so skip the apple config entirely there to avoid blocking Google init.
+    const config: Parameters<typeof SocialLogin.initialize>[0] = {
       google: { iOSClientId, webClientId },
-    });
+    };
+    if (!isNativeAndroid()) {
+      config.apple = { clientId: appleClientId };
+    }
+    await SocialLogin.initialize(config);
   })();
   // Reset on failure so a retry can re-initialize
   socialLoginInitPromise.catch(() => { socialLoginInitPromise = null; });
