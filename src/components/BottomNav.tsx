@@ -24,7 +24,7 @@ export default function BottomNav({ active, onChange }: BottomNavProps) {
   const isProfilePage = pathname === "/profile";
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-bg/80 backdrop-blur-lg border-t border-border z-50 shadow-nav">
+    <nav className="fixed bottom-0 left-0 right-0 bg-bg border-t border-border z-50 shadow-nav" style={{ transform: "translateZ(0)", willChange: "transform" }}>
       <div className="max-w-md mx-auto flex items-center justify-around py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {tabs.map(({ id, label, icon: Icon }) => {
           const isActive = !isProfilePage && active === id;
