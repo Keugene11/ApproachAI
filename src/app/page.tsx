@@ -88,14 +88,22 @@ function HomeInner() {
 
   const { data: session, status: sessionStatus } = useSession();
 
+  // React to URL tab changes (BottomNav uses Link navigation).
   useEffect(() => {
     const tabParam = searchParams.get("tab") as Tab | null;
     if (tabParam && ["checkin", "coach", "stats", "community", "plans"].includes(tabParam)) {
       setActiveTab(tabParam);
-      if (tabParam === "coach") setState("chat");
-      else setState("tabs");
+      setState(tabParam === "coach" ? "chat" : "tabs");
       try { sessionStorage.setItem("wingmate-active-tab", tabParam); } catch {}
+    } else if (!tabParam) {
+      // No ?tab= => checkin (default landing tab).
+      setActiveTab("checkin");
+      setState("tabs");
+      try { sessionStorage.setItem("wingmate-active-tab", "checkin"); } catch {}
     }
+  }, [searchParams]);
+
+  useEffect(() => {
     setHydrated(true);
 
     // Check for native app updates
