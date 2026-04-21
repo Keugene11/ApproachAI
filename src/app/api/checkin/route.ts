@@ -48,7 +48,7 @@ function computeConsecutiveApproaches(checkins: { talked: boolean }[] | any[]): 
 
 async function getFullStats(userId: string, clientToday?: string) {
   const allCheckins = await sql`
-    SELECT checked_in_at, talked, opportunities_count, approaches_count, successes_count
+    SELECT checked_in_at::text AS checked_in_at, talked, opportunities_count, approaches_count, successes_count
     FROM checkins
     WHERE user_id = ${userId}
     ORDER BY checked_in_at DESC

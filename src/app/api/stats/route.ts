@@ -11,7 +11,7 @@ export async function GET() {
   if (!(await isPro(userId))) return NextResponse.json({ error: "Pro subscription required" }, { status: 403 });
 
   const allCheckins = await sql`
-    SELECT checked_in_at, talked, opportunities_count, approaches_count, successes_count
+    SELECT checked_in_at::text AS checked_in_at, talked, opportunities_count, approaches_count, successes_count
     FROM checkins
     WHERE user_id = ${userId}
     ORDER BY checked_in_at DESC
