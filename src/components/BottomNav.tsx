@@ -3,6 +3,7 @@
 import { Flame, MessageCircle, Users, User, BarChart3, Crown } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 export type Tab = "checkin" | "coach" | "stats" | "community" | "plans";
 
@@ -23,9 +24,20 @@ export default function BottomNav({ active, onChange }: BottomNavProps) {
   const pathname = usePathname();
   const isProfilePage = pathname === "/profile";
 
+  // Snapshot env(safe-area-inset-bottom) once on mount. Android's gesture nav bar
+  // can change this value mid-scroll, which stretches the nav. Lock it in a CSS var.
+  useEffect(() => {
+    const probe = document.createElement("div");
+    probe.style.cssText = "position:absolute;visibility:hidden;padding-bottom:env(safe-area-inset-bottom)";
+    document.body.appendChild(probe);
+    const sab = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+    document.body.removeChild(probe);
+    document.documentElement.style.setProperty("--sab-locked", `${sab}px`);
+  }, []);
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-bg border-t border-border z-50 shadow-nav" style={{ transform: "translateZ(0)", willChange: "transform" }}>
-      <div className="max-w-md mx-auto flex items-center justify-around py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+    <nav className="fixed bottom-0 left-0 right-0 bg-bg border-t border-border z-50 shadow-nav" style={{ transform: "translateZ(0)", willChange: "transform", contain: "layout paint" }}>
+      <div className="max-w-md mx-auto flex items-center justify-around py-2 pb-[max(0.5rem,var(--sab-locked,env(safe-area-inset-bottom)))]">
         {tabs.map(({ id, label, icon: Icon }) => {
           const isActive = !isProfilePage && active === id;
           return onChange ? (
