@@ -3,7 +3,7 @@
 import { Flame, MessageCircle, Users, User, BarChart3, Crown } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export type Tab = "checkin" | "coach" | "stats" | "community" | "plans";
 
@@ -23,55 +23,67 @@ const tabs: { id: Tab; label: string; icon: typeof Flame }[] = [
 export default function BottomNav({ active, onChange }: BottomNavProps) {
   const pathname = usePathname();
   const isProfilePage = pathname === "/profile";
+  const [sab, setSab] = useState(0);
 
-  // Snapshot env(safe-area-inset-bottom) once on mount. Android's gesture nav bar
-  // can change this value mid-scroll, which stretches the nav. Lock it in a CSS var.
+  // Snapshot env(safe-area-inset-bottom) once on mount. Android targetSdk 36
+  // forces edge-to-edge — the inset reports the system gesture-nav area, which
+  // we need as a constant (it changes mid-scroll on some devices).
   useEffect(() => {
     const probe = document.createElement("div");
     probe.style.cssText = "position:absolute;visibility:hidden;padding-bottom:env(safe-area-inset-bottom)";
     document.body.appendChild(probe);
-    const sab = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+    const measured = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
     document.body.removeChild(probe);
-    document.documentElement.style.setProperty("--sab-locked", `${sab}px`);
+    setSab(measured);
   }, []);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-bg border-t border-border z-50 shadow-nav" style={{ transform: "translateZ(0)", willChange: "transform", contain: "layout paint" }}>
-      <div className="max-w-md mx-auto flex items-center justify-around py-2 pb-[max(0.5rem,var(--sab-locked,env(safe-area-inset-bottom)))]">
-        {tabs.map(({ id, label, icon: Icon }) => {
-          const isActive = !isProfilePage && active === id;
-          return onChange ? (
-            <button
-              key={id}
-              onClick={() => onChange(id)}
-              className={`flex flex-col items-center gap-0.5 px-4 py-1 press transition-colors ${
-                isActive ? "text-text" : "text-text-muted/50"
-              }`}
-            >
-              <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
-              <span className="text-[10px] font-medium">{label}</span>
-            </button>
-          ) : (
-            <Link
-              key={id}
-              href={`/?tab=${id}`}
-              className={`flex flex-col items-center gap-0.5 px-4 py-1 press text-text-muted/50`}
-            >
-              <Icon size={20} strokeWidth={1.5} />
-              <span className="text-[10px] font-medium">{label}</span>
-            </Link>
-          );
-        })}
-        <Link
-          href="/profile"
-          className={`flex flex-col items-center gap-0.5 px-4 py-1 press transition-colors ${
-            isProfilePage ? "text-text" : "text-text-muted/50"
-          }`}
-        >
-          <User size={20} strokeWidth={isProfilePage ? 2 : 1.5} />
-          <span className="text-[10px] font-medium">Profile</span>
-        </Link>
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50"
+      style={{ transform: "translateZ(0)" }}
+    >
+      <div
+        className="bg-bg border-t border-border shadow-nav"
+      >
+        <div className="max-w-md mx-auto flex items-center justify-around py-2">
+          {tabs.map(({ id, label, icon: Icon }) => {
+            const isActive = !isProfilePage && active === id;
+            return onChange ? (
+              <button
+                key={id}
+                onClick={() => onChange(id)}
+                className={`flex flex-col items-center gap-0.5 px-4 py-1 press transition-colors ${
+                  isActive ? "text-text" : "text-text-muted/50"
+                }`}
+              >
+                <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
+                <span className="text-[10px] font-medium">{label}</span>
+              </button>
+            ) : (
+              <Link
+                key={id}
+                href={`/?tab=${id}`}
+                className={`flex flex-col items-center gap-0.5 px-4 py-1 press text-text-muted/50`}
+              >
+                <Icon size={20} strokeWidth={1.5} />
+                <span className="text-[10px] font-medium">{label}</span>
+              </Link>
+            );
+          })}
+          <Link
+            href="/profile"
+            className={`flex flex-col items-center gap-0.5 px-4 py-1 press transition-colors ${
+              isProfilePage ? "text-text" : "text-text-muted/50"
+            }`}
+          >
+            <User size={20} strokeWidth={isProfilePage ? 2 : 1.5} />
+            <span className="text-[10px] font-medium">Profile</span>
+          </Link>
+        </div>
       </div>
+      {/* Android targetSdk 36 enforces edge-to-edge; theme navigationBarColor
+          is ignored. Paint a gray strip behind the transparent system nav. */}
+      <div style={{ height: sab, background: "#D1D1D6" }} />
     </nav>
   );
 }

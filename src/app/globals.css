@@ -23,16 +23,22 @@
 
 html {
   height: 100%;
+  overflow: hidden;
   overscroll-behavior: none;
 }
 
+/* Body is the scroll container (not html). With html overflow:hidden, the
+   document itself never scrolls, so Android WebView has no document-level
+   scroll transform to apply to fixed children -> no nav shift. */
 body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  min-height: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: none;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
