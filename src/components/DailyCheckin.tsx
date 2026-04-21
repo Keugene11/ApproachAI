@@ -87,7 +87,7 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
 
   const refreshData = async () => {
     try {
-      const res = await fetch(`/api/checkin?today=${getLocalDate()}`);
+      const res = await fetch(`/api/checkin?today=${getLocalDate()}`, { cache: "no-store" });
       if (!res.ok) {
         console.error("GET /api/checkin failed:", res.status, await res.text());
         return;
@@ -386,7 +386,7 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
               </div>
             </div>
 
-            {data.checkedInToday && flowApproaches === 0 ? (
+            {data.checkedInToday && flowApproaches === 0 && data.approachesCount === 0 ? (
               <div className="flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white/10 text-white/60 text-[14px] font-medium">
                 <span className="text-green-400">✓</span> Checked in — no approaches today
               </div>
@@ -398,8 +398,8 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
                     {submitting ? "..." : "No approaches today"}
                   </button>
                 )}
-                <button onClick={() => guardPro(() => submitCheckin(true, flowApproaches, flowApproaches, 0))}
-                  disabled={submitting}
+                <button onClick={() => guardPro(() => submitCheckin(flowApproaches > 0, flowApproaches, flowApproaches, 0))}
+                  disabled={submitting || (data.checkedInToday && flowApproaches === data.approachesCount)}
                   className="flex-1 py-3.5 rounded-xl bg-white text-[#1a1a1a] text-[14px] font-semibold press disabled:opacity-60">
                   {submitting ? "..." : data.checkedInToday ? "Update" : "Save"}
                 </button>
