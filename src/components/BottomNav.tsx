@@ -4,6 +4,7 @@ import { Flame, MessageCircle, Users, User, BarChart3, Crown } from "lucide-reac
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export type Tab = "checkin" | "coach" | "stats" | "community" | "plans";
 
@@ -24,6 +25,7 @@ export default function BottomNav({ active, onChange }: BottomNavProps) {
   const pathname = usePathname();
   const isProfilePage = pathname === "/profile";
   const [sab, setSab] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   // Snapshot env(safe-area-inset-bottom) once on mount. Android targetSdk 36
   // forces edge-to-edge — the inset reports the system gesture-nav area, which
@@ -35,12 +37,13 @@ export default function BottomNav({ active, onChange }: BottomNavProps) {
     const measured = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
     document.body.removeChild(probe);
     setSab(measured);
+    setMounted(true);
   }, []);
 
-  return (
+  const nav = (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50"
-      style={{ transform: "translateZ(0)" }}
+      style={{ transform: "translateZ(0)", willChange: "transform", backfaceVisibility: "hidden" }}
     >
       <div
         className="bg-bg border-t border-border shadow-nav"
@@ -86,4 +89,10 @@ export default function BottomNav({ active, onChange }: BottomNavProps) {
       <div style={{ height: sab, background: "#D1D1D6" }} />
     </nav>
   );
+
+  // Portal to document.body so the nav escapes any <main> ancestor that might
+  // be creating a compositing context (e.g. animate-fade-in opacity animation)
+  // which would trap fixed positioning inside the ancestor's layer.
+  if (!mounted) return null;
+  return createPortal(nav, document.body);
 }
