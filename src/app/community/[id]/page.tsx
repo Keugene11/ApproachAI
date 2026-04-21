@@ -18,7 +18,6 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
   const [score, setScore] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState("");
   const [editBody, setEditBody] = useState("");
   const [isPro, setIsPro] = useState<boolean | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
@@ -124,25 +123,24 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
 
   const handleDelete = async () => {
     await fetch(`/api/community/posts/${id}`, { method: "DELETE" });
-    router.push("/");
+    router.push("/?tab=community");
   };
 
   const startEditing = () => {
-    setEditTitle(post.title);
     setEditBody(post.body);
     setEditing(true);
   };
 
   const handleSaveEdit = async () => {
-    if (!editTitle.trim() || !editBody.trim()) return;
+    if (!editBody.trim()) return;
     try {
       const res = await fetch(`/api/community/posts/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: editTitle.trim(), body: editBody.trim() }),
+        body: JSON.stringify({ body: editBody.trim() }),
       });
       if (res.ok) {
-        setPost((prev: any) => ({ ...prev, title: editTitle.trim(), body: editBody.trim() }));
+        setPost((prev: any) => ({ ...prev, body: editBody.trim() }));
         setEditing(false);
       }
     } catch {}
@@ -190,14 +188,14 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
         body: JSON.stringify({ blocked_user_id: post.user_id }),
       });
       setBlocked(true);
-      router.push("/");
+      router.push("/?tab=community");
     } catch {}
   };
 
   if (!post) {
     return (
       <main className="min-h-app max-w-md mx-auto px-5 pt-6">
-        <Link href="/" className="p-1 -ml-1 press inline-block">
+        <Link href="/?tab=community" className="p-1 -ml-1 press inline-block">
           <ArrowLeft size={20} strokeWidth={1.5} />
         </Link>
         <p className="text-center text-text-muted text-[14px] py-20">Loading...</p>
@@ -217,7 +215,7 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
     <main className="min-h-app max-w-md mx-auto px-5 pt-6 pb-24 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/" className="p-1 -ml-1 press">
+        <Link href="/?tab=community" className="p-1 -ml-1 press">
           <ArrowLeft size={20} strokeWidth={1.5} />
         </Link>
         <h1 className="font-display text-[20px] font-bold tracking-tight">Post</h1>
@@ -259,22 +257,16 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
 
         {editing ? (
           <div className="space-y-3">
-            <input
-              type="text"
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value.slice(0, 120))}
-              className="w-full bg-bg-card border border-border rounded-xl shadow-card px-4 py-2.5 text-[16px] font-bold outline-none focus:border-text-muted transition-colors"
-            />
             <textarea
               value={editBody}
               onChange={(e) => setEditBody(e.target.value.slice(0, 2000))}
-              rows={4}
+              rows={6}
               className="w-full bg-bg-card border border-border rounded-xl shadow-card px-4 py-3 text-[15px] leading-relaxed outline-none focus:border-text-muted transition-colors resize-none"
             />
             <div className="flex items-center gap-2">
               <button
                 onClick={handleSaveEdit}
-                disabled={!editTitle.trim() || !editBody.trim()}
+                disabled={!editBody.trim()}
                 className="flex items-center gap-1.5 px-4 py-2 bg-[#1a1a1a] text-white rounded-full text-[13px] font-medium press disabled:opacity-50"
               >
                 <Check size={14} strokeWidth={2} /> Save
@@ -289,7 +281,6 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
           </div>
         ) : (
           <>
-            <h2 className="font-display text-[20px] font-bold tracking-tight leading-snug mb-2">{post.title}</h2>
             <p className="text-[15px] leading-relaxed whitespace-pre-wrap mb-4">{post.body}</p>
 
             {/* Like button */}
@@ -357,8 +348,11 @@ export default function PostPage({ params }: { params: Promise<{ id: string }> }
         </div>
       )}
 
-      {/* Comment input — fixed to bottom */}
-      <div className="fixed bottom-0 left-0 right-0 bg-bg border-t border-border px-5 py-3">
+      {/* Comment input — fixed to bottom, lifted above system nav */}
+      <div
+        className="fixed left-0 right-0 bg-bg border-t border-border px-5 py-3"
+        style={{ bottom: "env(safe-area-inset-bottom)" }}
+      >
         <div className="max-w-md mx-auto flex items-center gap-2">
           <input
             type="text"

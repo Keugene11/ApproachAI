@@ -119,20 +119,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Pro subscription required" }, { status: 403 });
   }
 
-  const { title, body } = await req.json();
+  const { body } = await req.json();
 
-  if (!title?.trim() || !body?.trim()) {
-    return NextResponse.json({ error: "Title and body are required" }, { status: 400 });
+  if (!body?.trim()) {
+    return NextResponse.json({ error: "Body is required" }, { status: 400 });
   }
 
-  const trimmedTitle = title.trim().slice(0, 120);
   const trimmedBody = body.trim().slice(0, 2000);
+  const trimmedTitle = ""; // Twitter-style: no separate title.
 
-  // Content moderation check
-  const titleCheck = moderateContent(trimmedTitle);
-  if (!titleCheck.allowed) {
-    return NextResponse.json({ error: titleCheck.reason }, { status: 400 });
-  }
   const bodyCheck = moderateContent(trimmedBody);
   if (!bodyCheck.allowed) {
     return NextResponse.json({ error: bodyCheck.reason }, { status: 400 });

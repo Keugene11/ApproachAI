@@ -15,8 +15,10 @@ const NAV_HIDDEN_PATHS = new Set([
 
 function shouldShowNav(pathname: string) {
   if (NAV_HIDDEN_PATHS.has(pathname)) return false;
-  // Nested community routes (e.g. /community/new, /community/[id]) still want
-  // the nav — they fall through to true.
+  // Hide on community sub-routes (post detail, new post, user profile).
+  // These have their own back nav and — on detail — a fixed comment input
+  // that would otherwise be covered by the BottomNav.
+  if (pathname.startsWith("/community/")) return false;
   return true;
 }
 

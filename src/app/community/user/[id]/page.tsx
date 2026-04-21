@@ -87,7 +87,7 @@ export default function UserPostsPage({ params }: { params: Promise<{ id: string
     <main className="min-h-app max-w-md mx-auto px-5 pt-6 pb-10 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/community" className="p-1 -ml-1 press">
+        <Link href="/?tab=community" className="p-1 -ml-1 press">
           <ArrowLeft size={20} strokeWidth={1.5} />
         </Link>
         <h1 className="font-display text-[20px] font-bold tracking-tight">
@@ -109,7 +109,6 @@ export default function UserPostsPage({ params }: { params: Promise<{ id: string
             <PostCard
               key={post.id}
               id={post.id}
-              title={post.title}
               body={post.body}
               authorName={post.author_name}
               score={post.score}

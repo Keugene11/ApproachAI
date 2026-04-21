@@ -473,21 +473,6 @@ function HomeInner() {
             </div>
           )}
 
-          {/* Sort toggle */}
-          <div className="flex gap-1 mb-5 bg-bg-card border border-border rounded-full p-1 w-fit">
-            {(["new", "top"] as const).map((mode) => (
-              <button
-                key={mode}
-                onClick={() => handleSortChange(mode)}
-                className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-colors ${
-                  sort === mode ? "bg-[#1a1a1a] text-white" : "text-text-muted"
-                }`}
-              >
-                {mode === "new" ? "New" : "Top"}
-              </button>
-            ))}
-          </div>
-
           {/* Posts */}
           {communityLoading ? (
             <div className="text-center text-text-muted text-[14px] py-20">Loading...</div>
@@ -512,7 +497,6 @@ function HomeInner() {
                 <PostCard
                   key={post.id}
                   id={post.id}
-                  title={post.title}
                   body={post.body}
                   authorName={post.author_name}
                   score={post.score}

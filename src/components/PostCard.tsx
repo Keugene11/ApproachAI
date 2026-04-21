@@ -7,7 +7,6 @@ import { timeAgo } from "@/lib/time";
 
 interface PostCardProps {
   id: string;
-  title: string;
   body: string;
   authorName: string;
   score: number;
@@ -20,7 +19,6 @@ interface PostCardProps {
 
 export default function PostCard({
   id,
-  title,
   body,
   authorName,
   score: initialScore,
@@ -74,57 +72,54 @@ export default function PostCard({
   return (
     <Link href={`/community/${id}`} className="block">
       <div className="bg-bg-card border border-border rounded-2xl px-5 py-4 press">
-        {/* Author + time */}
-        <div className="flex items-center gap-2 mb-2.5">
-          <div className="w-7 h-7 rounded-full bg-bg-input flex items-center justify-center text-[12px] font-bold text-text-muted">
+        <div className="flex gap-3">
+          <div className="w-10 h-10 rounded-full bg-bg-input flex items-center justify-center text-[13px] font-bold text-text-muted shrink-0">
             {authorName.charAt(0).toUpperCase()}
           </div>
-          <Link
-            href={`/community/user/${userId}`}
-            onClick={(e) => e.stopPropagation()}
-            className="text-[14px] font-semibold hover:underline"
-          >
-            {authorName}
-          </Link>
-          <span className="text-text-muted text-[13px]">· {timeAgo(createdAt)}</span>
-        </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Link
+                href={`/community/user/${userId}`}
+                onClick={(e) => e.stopPropagation()}
+                className="text-[14px] font-semibold hover:underline truncate"
+              >
+                {authorName}
+              </Link>
+              <span className="text-text-muted text-[13px]">· {timeAgo(createdAt)}</span>
+            </div>
 
-        {/* Content */}
-        <h3 className="font-semibold text-[15px] leading-snug mb-1">{title}</h3>
-        <p className="text-text-muted text-[14px] leading-relaxed line-clamp-3 mb-3">{body}</p>
+            <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words mb-3">{body}</p>
 
-        {/* Actions */}
-        <div className="flex items-center gap-5 text-text-muted">
-          <button
-            onClick={handleLike}
-            className="flex items-center gap-1.5 press"
-          >
-            <Heart
-              size={16}
-              strokeWidth={1.5}
-              className={liked ? "fill-red-500 text-red-500" : ""}
-            />
-            <span className={`text-[13px] font-medium ${liked ? "text-red-500" : ""}`}>
-              {score > 0 ? score : ""}
-            </span>
-          </button>
-          <span className="flex items-center gap-1.5">
-            <MessageCircle size={16} strokeWidth={1.5} />
-            <span className="text-[13px] font-medium">{commentCount > 0 ? commentCount : ""}</span>
-          </span>
-          {userId !== currentUserId && (
-            <button
-              onClick={handleReport}
-              className="ml-auto flex items-center gap-1 press"
-              title={reported ? "Reported" : "Report post"}
-            >
-              <Flag
-                size={14}
-                strokeWidth={1.5}
-                className={reported ? "fill-red-400 text-red-400" : "text-text-muted/50"}
-              />
-            </button>
-          )}
+            <div className="flex items-center gap-5 text-text-muted">
+              <button onClick={handleLike} className="flex items-center gap-1.5 press">
+                <Heart
+                  size={16}
+                  strokeWidth={1.5}
+                  className={liked ? "fill-red-500 text-red-500" : ""}
+                />
+                <span className={`text-[13px] font-medium ${liked ? "text-red-500" : ""}`}>
+                  {score > 0 ? score : ""}
+                </span>
+              </button>
+              <span className="flex items-center gap-1.5">
+                <MessageCircle size={16} strokeWidth={1.5} />
+                <span className="text-[13px] font-medium">{commentCount > 0 ? commentCount : ""}</span>
+              </span>
+              {userId !== currentUserId && (
+                <button
+                  onClick={handleReport}
+                  className="ml-auto flex items-center gap-1 press"
+                  title={reported ? "Reported" : "Report post"}
+                >
+                  <Flag
+                    size={14}
+                    strokeWidth={1.5}
+                    className={reported ? "fill-red-400 text-red-400" : "text-text-muted/50"}
+                  />
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </Link>

@@ -97,7 +97,7 @@ export default function CommunityPage() {
     return (
       <main className="min-h-app max-w-md mx-auto px-5 pt-6 pb-10 animate-fade-in">
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/" className="p-1 -ml-1 press">
+          <Link href="/?tab=community" className="p-1 -ml-1 press">
             <ArrowLeft size={20} strokeWidth={1.5} />
           </Link>
           <h1 className="font-display text-[20px] font-bold tracking-tight">Community</h1>
@@ -143,7 +143,7 @@ export default function CommunityPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Link href="/" className="p-1 -ml-1 press">
+          <Link href="/?tab=community" className="p-1 -ml-1 press">
             <ArrowLeft size={20} strokeWidth={1.5} />
           </Link>
           <h1 className="font-display text-[20px] font-bold tracking-tight">Community</h1>
@@ -185,21 +185,6 @@ export default function CommunityPage() {
         </div>
       )}
 
-      {/* Sort toggle */}
-      <div className="flex gap-1 mb-5 bg-bg-card border border-border rounded-full p-1 w-fit">
-        {(["new", "top"] as SortMode[]).map((mode) => (
-          <button
-            key={mode}
-            onClick={() => { setLoading(true); setSort(mode); }}
-            className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-colors ${
-              sort === mode ? "bg-[#1a1a1a] text-white" : "text-text-muted"
-            }`}
-          >
-            {mode === "new" ? "New" : "Top"}
-          </button>
-        ))}
-      </div>
-
       {/* Posts */}
       {loading ? (
         <div className="text-center text-text-muted text-[14px] py-20">Loading...</div>
@@ -224,7 +209,6 @@ export default function CommunityPage() {
             <PostCard
               key={post.id}
               id={post.id}
-              title={post.title}
               body={post.body}
               authorName={post.author_name}
               score={post.score}

@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function NewPostPage() {
-  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [isPro, setIsPro] = useState<boolean | null>(null);
@@ -22,7 +21,7 @@ export default function NewPostPage() {
       .catch(() => router.replace("/?tab=plans"));
   }, [router]);
 
-  const canSubmit = title.trim().length > 0 && body.trim().length > 0 && !submitting;
+  const canSubmit = body.trim().length > 0 && !submitting;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -32,7 +31,7 @@ export default function NewPostPage() {
       const res = await fetch("/api/community/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim(), body: body.trim() }),
+        body: JSON.stringify({ body: body.trim() }),
       });
 
       if (!res.ok) {
@@ -40,7 +39,7 @@ export default function NewPostPage() {
         return;
       }
 
-      router.push("/");
+      router.push("/?tab=community");
     } catch {
       setSubmitting(false);
     }
@@ -56,10 +55,9 @@ export default function NewPostPage() {
 
   return (
     <main className="min-h-app max-w-md mx-auto px-5 pt-6 pb-10 animate-fade-in">
-      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <Link href="/" className="p-1 -ml-1 press">
+          <Link href="/?tab=community" className="p-1 -ml-1 press">
             <ArrowLeft size={20} strokeWidth={1.5} />
           </Link>
           <h1 className="font-display text-[20px] font-bold tracking-tight">New post</h1>
@@ -77,21 +75,14 @@ export default function NewPostPage() {
         </button>
       </div>
 
-      {/* Form */}
-      <div className="space-y-4">
-        <input
-          type="text"
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value.slice(0, 120))}
-          className="w-full bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 text-[16px] font-medium placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors"
-        />
+      <div className="space-y-2">
         <textarea
-          placeholder="Share your experience..."
+          placeholder="What's on your mind?"
           value={body}
           onChange={(e) => setBody(e.target.value.slice(0, 2000))}
-          rows={8}
-          className="w-full bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 text-[15px] leading-relaxed placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors resize-none"
+          rows={10}
+          autoFocus
+          className="w-full bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 text-[16px] leading-relaxed placeholder:text-text-muted/50 outline-none focus:border-text-muted transition-colors resize-none"
         />
         <p className="text-[12px] text-text-muted text-right">{body.length}/2000</p>
       </div>
