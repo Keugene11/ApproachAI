@@ -266,8 +266,8 @@ export default function PlansPage() {
   const isYearly = subscription?.price_id?.includes("yearly") || subscription?.price_id?.includes("year");
 
   // Price display — use IAP prices on iOS if available
-  const monthlyPrice = iapPackages.monthly?.product?.priceString || "$10";
-  const yearlyPrice = iapPackages.yearly?.product?.priceString || "$50";
+  const monthlyPrice = iapPackages.monthly?.product?.priceString || "$9.99";
+  const yearlyPrice = iapPackages.yearly?.product?.priceString || "$29.99";
 
   if (!loaded) return null;
 
@@ -312,7 +312,7 @@ export default function PlansPage() {
                 <div className="w-2 h-2 rounded-full bg-green-500" />
                 <span className="text-[14px] font-semibold">Wingmate Pro · {isYearly ? "Yearly" : "Monthly"}</span>
               </div>
-              <span className="text-[14px] font-bold">{isYearly ? "$50/yr" : "$10/mo"}</span>
+              <span className="text-[14px] font-bold">{isYearly ? "$29.99/yr" : "$9.99/mo"}</span>
             </div>
             <p className="text-text-muted text-[13px] mb-4">
               {subscription?.cancel_at_period_end
@@ -339,13 +339,13 @@ export default function PlansPage() {
             </div>
             <div className="text-right">
               <div className="flex items-baseline gap-1.5">
-                <span className="text-text-muted text-[13px] font-medium line-through">$50</span>
-                <span className="font-display text-[28px] font-extrabold">{isNative ? monthlyPrice : "$10"}</span>
+                <span className="text-text-muted text-[13px] font-medium line-through">$30</span>
+                <span className="font-display text-[28px] font-extrabold">{isNative ? monthlyPrice : "$9.99"}</span>
                 <span className="text-text-muted text-[14px] font-medium">/mo</span>
               </div>
             </div>
           </div>
-          <p className="text-text-muted text-[12px] mb-1">{isNative ? `${monthlyPrice}/month. ` : "$10/month. "}Auto-renews monthly until cancelled.</p>
+          <p className="text-text-muted text-[12px] mb-1">{isNative ? `${monthlyPrice}/month. ` : "$9.99/month. "}Auto-renews monthly until cancelled.</p>
           {planCounts && (
             <p className="text-text-muted text-[12px] mb-4">{planCounts.monthly} {planCounts.monthly === 1 ? "person" : "people"} on this plan</p>
           )}
@@ -371,7 +371,7 @@ export default function PlansPage() {
         {/* Yearly Pro */}
         <div className="bg-bg-card border-2 border-[#1a1a1a] rounded-2xl p-6 relative">
           <span className="absolute -top-3 left-6 bg-green-500 text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-            Save 90%
+            Save 75%
           </span>
           <div className="flex items-start justify-between mt-1 mb-2">
             <div>
@@ -380,13 +380,13 @@ export default function PlansPage() {
             </div>
             <div className="text-right">
               <div className="flex items-baseline gap-1.5">
-                <span className="text-text-muted text-[13px] font-medium line-through">$500</span>
-                <span className="font-display text-[28px] font-extrabold">{isNative ? yearlyPrice : "$50"}</span>
+                <span className="text-text-muted text-[13px] font-medium line-through">$100</span>
+                <span className="font-display text-[28px] font-extrabold">{isNative ? yearlyPrice : "$29.99"}</span>
                 <span className="text-text-muted text-[14px] font-medium">/yr</span>
               </div>
             </div>
           </div>
-          <p className="text-text-muted text-[12px] mb-1">{isNative ? `${yearlyPrice}/year. ` : "$50 billed annually. "}Auto-renews yearly until cancelled.</p>
+          <p className="text-text-muted text-[12px] mb-1">{isNative ? `${yearlyPrice}/year. ` : "$29.99 billed annually. "}Auto-renews yearly until cancelled.</p>
           {planCounts && (
             <p className="text-text-muted text-[12px] mb-4">{planCounts.yearly} {planCounts.yearly === 1 ? "person" : "people"} on this plan</p>
           )}
