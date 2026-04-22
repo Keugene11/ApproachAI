@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -56,12 +55,9 @@ export default function NewPostPage() {
   return (
     <main className="min-h-app max-w-md mx-auto px-5 pt-6 pb-10 animate-fade-in">
       <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <Link href="/?tab=community" className="p-1 -ml-1 press">
-            <ArrowLeft size={20} strokeWidth={1.5} />
-          </Link>
-          <h1 className="font-display text-[20px] font-bold tracking-tight">New post</h1>
-        </div>
+        <Link href="/?tab=community" className="press text-[15px] font-medium text-text">
+          Cancel
+        </Link>
         <button
           onClick={handleSubmit}
           disabled={!canSubmit}
