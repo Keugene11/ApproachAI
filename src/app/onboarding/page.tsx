@@ -243,18 +243,18 @@ function OnboardingInner() {
         </h1>
 
         <div className="space-y-4 shrink-0">
-          <button
-            onClick={() => setStep("approaches")}
-            className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
-          >
-            Get started
-          </button>
           <p className="text-center text-[14px] text-text-muted">
             Already have an account?{" "}
             <button onClick={() => setStep("auth")} className="text-text font-semibold underline press">
               Sign in
             </button>
           </p>
+          <button
+            onClick={() => setStep("approaches")}
+            className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+          >
+            Get started
+          </button>
         </div>
       </main>
     );
@@ -781,16 +781,16 @@ function OnboardingInner() {
 
         <div className="space-y-3">
           <button
-            onClick={requestNotifications}
-            className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
-          >
-            Allow notifications
-          </button>
-          <button
             onClick={() => setStep("auth")}
             className="w-full text-center text-text-muted text-[14px] font-medium press py-2"
           >
             Maybe later
+          </button>
+          <button
+            onClick={requestNotifications}
+            className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+          >
+            Allow notifications
           </button>
         </div>
       </main>
@@ -798,7 +798,7 @@ function OnboardingInner() {
   }
 
   return (
-    <main className="h-app max-w-md mx-auto flex flex-col justify-between px-7 pt-16 pb-[calc(3rem+env(safe-area-inset-bottom))]">
+    <main className="h-app max-w-md mx-auto flex flex-col justify-between px-7 pt-10 pb-[calc(2rem+env(safe-area-inset-bottom))]">
       <div>
         <button
           onClick={() => setStep("notifications")}
@@ -822,6 +822,11 @@ function OnboardingInner() {
             </p>
           </div>
         )}
+        <p className="text-center text-[12px] text-text-muted pb-1">
+          By signing in, you confirm you are at least 18 years old and agree to our{" "}
+          <a href="/terms" className="underline">Terms of Service</a> and{" "}
+          <a href="/privacy" className="underline">Privacy Policy</a>.
+        </p>
         <button
           onClick={handleGoogle}
           className="w-full flex items-center justify-center gap-3 bg-white border border-border py-3.5 rounded-2xl font-semibold text-[15px] press shadow-sm"
@@ -844,12 +849,6 @@ function OnboardingInner() {
           </svg>
           Continue with Apple
         </button>
-
-        <p className="text-center text-[12px] text-text-muted pt-2">
-          By signing in, you confirm you are at least 18 years old and agree to our{" "}
-          <a href="/terms" className="underline">Terms of Service</a> and{" "}
-          <a href="/privacy" className="underline">Privacy Policy</a>.
-        </p>
       </div>
     </main>
   );
