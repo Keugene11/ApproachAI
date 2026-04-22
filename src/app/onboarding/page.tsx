@@ -179,7 +179,25 @@ function OnboardingInner() {
   const [birthYear, setBirthYear] = useState<number | null>(null);
   const [goals, setGoals] = useState<string[]>([]);
   const [weeklyTarget, setWeeklyTarget] = useState<number>(5);
+  const targetRangeRef = useRef<HTMLInputElement>(null);
   const error = liveError || searchParams.get("error");
+
+  // Desktop mouse-wheel on the weekly-target slider (range inputs don't
+  // natively respond to wheel; React's onWheel is passive so attach natively).
+  useEffect(() => {
+    if (step !== "target") return;
+    const el = targetRangeRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+      if (delta === 0) return;
+      e.preventDefault();
+      const direction = delta < 0 ? 1 : -1;
+      setWeeklyTarget((prev) => Math.max(TARGET_MIN, Math.min(TARGET_MAX, prev + direction)));
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [step]);
 
   const toggleGoal = (id: string) => {
     setGoals((prev) => (prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]));
@@ -603,6 +621,7 @@ function OnboardingInner() {
               </div>
               {/* Large invisible hit area */}
               <input
+                ref={targetRangeRef}
                 type="range"
                 min={TARGET_MIN}
                 max={TARGET_MAX}
@@ -1015,6 +1034,26 @@ function WheelPicker({
     if (value === null && options[0]) onChange(options[0].value);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Desktop mouse-wheel: advance one item per notch (React's synthetic
+  // onWheel is passive so we attach natively to call preventDefault).
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let lastTime = 0;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const now = performance.now();
+      if (now - lastTime < 60) return;
+      lastTime = now;
+      const currentIdx = Math.round(el.scrollTop / ITEM_HEIGHT);
+      const direction = e.deltaY > 0 ? 1 : -1;
+      const newIdx = Math.max(0, Math.min(options.length - 1, currentIdx + direction));
+      el.scrollTo({ top: newIdx * ITEM_HEIGHT, behavior: "smooth" });
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [options.length]);
 
   const handleScroll = () => {
     const el = scrollRef.current;
