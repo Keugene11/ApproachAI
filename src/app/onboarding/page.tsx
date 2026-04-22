@@ -253,7 +253,7 @@ function OnboardingInner() {
             onClick={() => setStep("approaches")}
             className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
           >
-            Get started
+            Next
           </button>
         </div>
       </main>
@@ -459,7 +459,7 @@ function OnboardingInner() {
           onClick={() => setStep("birthday")}
           className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
         >
-          Continue
+          Next
         </button>
       </main>
     );
@@ -698,7 +698,7 @@ function OnboardingInner() {
           onClick={() => setStep("thanks")}
           className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
         >
-          Let&apos;s go
+          Next
         </button>
       </main>
     );
@@ -728,7 +728,7 @@ function OnboardingInner() {
           onClick={() => setStep("notifications")}
           className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
         >
-          Continue
+          Next
         </button>
       </main>
     );
