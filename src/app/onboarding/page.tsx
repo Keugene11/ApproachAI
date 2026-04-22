@@ -179,14 +179,23 @@ function OnboardingInner() {
   const [birthYear, setBirthYear] = useState<number | null>(null);
   const [goals, setGoals] = useState<string[]>([]);
   const [weeklyTarget, setWeeklyTarget] = useState<number>(5);
-  const targetRangeRef = useRef<HTMLInputElement>(null);
+  const targetTrackRef = useRef<HTMLDivElement>(null);
   const error = liveError || searchParams.get("error");
 
-  // Desktop mouse-wheel on the weekly-target slider (range inputs don't
-  // natively respond to wheel; React's onWheel is passive so attach natively).
+  const setTargetFromClientX = (clientX: number) => {
+    const el = targetTrackRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const val = Math.round(TARGET_MIN + pct * (TARGET_MAX - TARGET_MIN));
+    setWeeklyTarget(val);
+  };
+
+  // Desktop mouse-wheel on the weekly-target slider. React's onWheel is
+  // passive so we attach natively to call preventDefault.
   useEffect(() => {
     if (step !== "target") return;
-    const el = targetRangeRef.current;
+    const el = targetTrackRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
       const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
@@ -600,12 +609,37 @@ function OnboardingInner() {
           </div>
 
           <div className="w-full px-3">
-            <div className="relative h-12 flex items-center">
+            <div
+              ref={targetTrackRef}
+              role="slider"
+              tabIndex={0}
+              aria-valuemin={TARGET_MIN}
+              aria-valuemax={TARGET_MAX}
+              aria-valuenow={weeklyTarget}
+              onPointerDown={(e) => {
+                e.currentTarget.setPointerCapture(e.pointerId);
+                setTargetFromClientX(e.clientX);
+              }}
+              onPointerMove={(e) => {
+                if (e.buttons & 1) setTargetFromClientX(e.clientX);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setWeeklyTarget((v) => Math.max(TARGET_MIN, v - 1));
+                } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setWeeklyTarget((v) => Math.min(TARGET_MAX, v + 1));
+                }
+              }}
+              className="relative h-12 flex items-center cursor-pointer outline-none select-none"
+              style={{ touchAction: "none" }}
+            >
               {/* Thin track */}
-              <div className="absolute left-0 right-0 h-1 bg-bg-input rounded-full" />
+              <div className="absolute left-0 right-0 h-1 bg-bg-input rounded-full pointer-events-none" />
               {/* Filled portion */}
               <div
-                className="absolute left-0 h-1 bg-[#1a1a1a] rounded-full transition-[width] duration-75"
+                className="absolute left-0 h-1 bg-[#1a1a1a] rounded-full transition-[width] duration-75 pointer-events-none"
                 style={{
                   width: `${((weeklyTarget - TARGET_MIN) / (TARGET_MAX - TARGET_MIN)) * 100}%`,
                 }}
@@ -619,17 +653,6 @@ function OnboardingInner() {
               >
                 <div className="w-7 h-7 rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.08)]" />
               </div>
-              {/* Large invisible hit area */}
-              <input
-                ref={targetRangeRef}
-                type="range"
-                min={TARGET_MIN}
-                max={TARGET_MAX}
-                step={1}
-                value={weeklyTarget}
-                onChange={(e) => setWeeklyTarget(Number(e.target.value))}
-                className="wing-range absolute inset-0 w-full opacity-0 z-10"
-              />
             </div>
             <div className="flex justify-between mt-3 text-[11px] font-medium text-text-muted">
               <span>{TARGET_MIN}</span>
@@ -637,32 +660,6 @@ function OnboardingInner() {
             </div>
           </div>
         </div>
-
-        <style jsx global>{`
-          .wing-range {
-            -webkit-appearance: none;
-            appearance: none;
-            height: 48px;
-            outline: none;
-            cursor: grab;
-          }
-          .wing-range:active { cursor: grabbing; }
-          .wing-range::-webkit-slider-runnable-track { background: transparent; height: 48px; }
-          .wing-range::-moz-range-track { background: transparent; height: 48px; }
-          .wing-range::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 48px;
-            height: 48px;
-            background: transparent;
-          }
-          .wing-range::-moz-range-thumb {
-            width: 48px;
-            height: 48px;
-            background: transparent;
-            border: 0;
-          }
-        `}</style>
 
         <button
           onClick={() => setStep("doable")}
