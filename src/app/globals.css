@@ -173,7 +173,6 @@ main.onb-anim > *:not(:first-child):not(:last-child) {
 }
 
 main.onb-anim > *:last-child {
-  animation: onb-fade-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
   position: relative;
 }
 
