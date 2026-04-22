@@ -21,7 +21,8 @@ type Step =
   | "auth";
 
 const TARGET_MIN = 1;
-const TARGET_MAX = 30;
+const TARGET_MAX = 20;
+const TARGET_THUMB = 28;
 
 const GOAL_OPTIONS = [
   { id: "girlfriend", label: "Get a girlfriend", emoji: "💖" },
@@ -186,7 +187,8 @@ function OnboardingInner() {
     const el = targetTrackRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const usable = Math.max(1, rect.width - TARGET_THUMB);
+    const pct = Math.max(0, Math.min(1, (clientX - rect.left - TARGET_THUMB / 2) / usable));
     const val = Math.round(TARGET_MIN + pct * (TARGET_MAX - TARGET_MIN));
     setWeeklyTarget(val);
   };
@@ -637,18 +639,18 @@ function OnboardingInner() {
             >
               {/* Thin track */}
               <div className="absolute left-0 right-0 h-1 bg-bg-input rounded-full pointer-events-none" />
-              {/* Filled portion */}
+              {/* Filled portion — reaches thumb center */}
               <div
                 className="absolute left-0 h-1 bg-[#1a1a1a] rounded-full transition-[width] duration-75 pointer-events-none"
                 style={{
-                  width: `${((weeklyTarget - TARGET_MIN) / (TARGET_MAX - TARGET_MIN)) * 100}%`,
+                  width: `calc(${((weeklyTarget - TARGET_MIN) / (TARGET_MAX - TARGET_MIN)) * 100}% + ${TARGET_THUMB / 2 - ((weeklyTarget - TARGET_MIN) / (TARGET_MAX - TARGET_MIN)) * TARGET_THUMB}px)`,
                 }}
               />
-              {/* Clean circular thumb */}
+              {/* Clean circular thumb — inset so it stays inside the track */}
               <div
                 className="absolute top-1/2 -translate-y-1/2 pointer-events-none transition-transform"
                 style={{
-                  left: `calc(${((weeklyTarget - TARGET_MIN) / (TARGET_MAX - TARGET_MIN)) * 100}% - 14px)`,
+                  left: `calc(${((weeklyTarget - TARGET_MIN) / (TARGET_MAX - TARGET_MIN)) * 100}% - ${((weeklyTarget - TARGET_MIN) / (TARGET_MAX - TARGET_MIN)) * TARGET_THUMB}px)`,
                 }}
               >
                 <div className="w-7 h-7 rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.08)]" />
