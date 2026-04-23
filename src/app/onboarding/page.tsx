@@ -1335,9 +1335,11 @@ function OnboardingInner() {
         </div>
 
         <div className="shrink-0">
-          <p className="text-center text-[14px] font-medium text-text-muted mb-3">
-            {selectedPlan === "yearly" ? "No Payment Due Now" : "Billed monthly · Cancel anytime"}
-          </p>
+          {selectedPlan === "yearly" && (
+            <p className="text-center text-[14px] font-medium text-text-muted mb-3">
+              No Payment Due Now
+            </p>
+          )}
           <button
             onClick={handleStartTrial}
             disabled={purchasing}
