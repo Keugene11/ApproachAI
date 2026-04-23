@@ -188,6 +188,12 @@ main.onb-anim > *:last-child::before {
   pointer-events: none;
 }
 
+/* Opt-out: on steps where the last child isn't a pinned CTA but a
+   centered content block, the divider lands inside the content area. */
+main.onb-anim.onb-no-divider > *:last-child::before {
+  display: none;
+}
+
 main.onb-anim > *:nth-child(2) { animation-delay: 60ms; }
 main.onb-anim > *:nth-child(3) { animation-delay: 150ms; }
 main.onb-anim > *:nth-child(4) { animation-delay: 240ms; }

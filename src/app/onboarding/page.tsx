@@ -1128,7 +1128,7 @@ function OnboardingInner() {
   }
 
   return (
-    <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
+    <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim onb-no-divider">
       <QuizHeader onBack={() => setStep("planReady")} progress={progressFor("auth")} />
 
       <div className="mt-8">
