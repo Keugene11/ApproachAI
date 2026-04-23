@@ -1133,7 +1133,7 @@ function OnboardingInner() {
             Try for $0.00
           </button>
           <p className="text-center text-[12px] text-text-muted mt-3">
-            Just <span className="font-semibold text-text">$29.99/year</span> ($2.49/mo) after your 3-day free trial. Cancel anytime.
+            Just <span className="font-semibold text-text">$29.99/year</span> ($2.49/mo)
           </p>
         </div>
       </main>
@@ -1169,7 +1169,7 @@ function OnboardingInner() {
             Continue for FREE
           </button>
           <p className="text-center text-[12px] text-text-muted mt-3">
-            Just <span className="font-semibold text-text">$29.99/year</span> ($2.49/mo) after your 3-day free trial. Cancel anytime.
+            Just <span className="font-semibold text-text">$29.99/year</span> ($2.49/mo)
           </p>
         </div>
       </main>
