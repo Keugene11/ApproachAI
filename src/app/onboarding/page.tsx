@@ -1000,6 +1000,8 @@ function OnboardingInner() {
   if (step === "planIntro") {
     return (
       <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
+        <QuizHeader onBack={() => setStep("rating")} progress={1} />
+
         <div className="flex-1 flex flex-col items-center justify-center text-center">
           <div className="w-24 h-24 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-8">
             <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
