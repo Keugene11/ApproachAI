@@ -4,7 +4,7 @@ import { initSocialLogin } from "./capacitor";
 
 type Result = { error: null } | { error: string };
 
-async function nativeSignIn(provider: "apple" | "google"): Promise<Result> {
+async function nativeSignIn(provider: "apple" | "google", redirectTo: string = "/"): Promise<Result> {
   try {
     await initSocialLogin();
     const { SocialLogin } = await import("@capgo/capacitor-social-login");
@@ -44,7 +44,7 @@ async function nativeSignIn(provider: "apple" | "google"): Promise<Result> {
       return { error: `Token verification failed: ${tokenRes.status} ${body}` };
     }
 
-    window.location.href = "/";
+    window.location.href = redirectTo;
     return { error: null };
   } catch (e: unknown) {
     const error = e as { code?: string; message?: string };
@@ -55,14 +55,14 @@ async function nativeSignIn(provider: "apple" | "google"): Promise<Result> {
   }
 }
 
-export async function signInWithGoogle(): Promise<Result> {
-  if (isNativePlatform()) return nativeSignIn("google");
-  await signIn("google", { redirectTo: "/" });
+export async function signInWithGoogle(redirectTo: string = "/"): Promise<Result> {
+  if (isNativePlatform()) return nativeSignIn("google", redirectTo);
+  await signIn("google", { redirectTo });
   return { error: null };
 }
 
-export async function signInWithApple(): Promise<Result> {
-  if (isNativePlatform()) return nativeSignIn("apple");
-  await signIn("apple", { redirectTo: "/" });
+export async function signInWithApple(redirectTo: string = "/"): Promise<Result> {
+  if (isNativePlatform()) return nativeSignIn("apple", redirectTo);
+  await signIn("apple", { redirectTo });
   return { error: null };
 }

@@ -26,7 +26,10 @@ type Step =
   | "planIntro"
   | "planGenerating"
   | "planReady"
-  | "auth";
+  | "auth"
+  | "trialIntro"
+  | "trialReminder"
+  | "trialPayment";
 
 const TARGET_MIN = 1;
 const TARGET_MAX = 20;
@@ -271,19 +274,25 @@ function OnboardingInner() {
     initSocialLogin();
     hideSplash();
     if (status === "authenticated") {
-      router.replace("/");
+      // Users returning from OAuth with ?paywall=1 are mid-onboarding — drop
+      // them on the trial intro instead of bouncing to home.
+      if (searchParams.get("paywall") === "1") {
+        setStep("trialIntro");
+      } else {
+        router.replace("/");
+      }
     }
-  }, [router, status]);
+  }, [router, status, searchParams]);
 
   const handleGoogle = async () => {
     setLiveError(null);
-    const r = await signInWithGoogle();
+    const r = await signInWithGoogle("/onboarding?paywall=1");
     if (r.error) setLiveError(r.error);
   };
 
   const handleApple = async () => {
     setLiveError(null);
-    const r = await signInWithApple();
+    const r = await signInWithApple("/onboarding?paywall=1");
     if (r.error) setLiveError(r.error);
   };
 
@@ -1104,6 +1113,127 @@ function OnboardingInner() {
     );
   }
 
+  if (step === "trialIntro") {
+    return (
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim onb-no-divider">
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
+          <div className="w-24 h-24 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-8">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 12v10H4V12" />
+              <path d="M2 7h20v5H2z" />
+              <path d="M12 22V7" />
+              <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+              <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+            </svg>
+          </div>
+          <h1 className="font-display text-[32px] font-extrabold tracking-tight leading-[1.1] mb-4">
+            We want you to try Wingmate for free.
+          </h1>
+          <p className="text-text-muted text-[15px] leading-relaxed max-w-[320px]">
+            Full access to the coach, plan, and every feature — no commitment, no charge up front.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setStep("trialReminder")}
+          className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+        >
+          Continue
+        </button>
+      </main>
+    );
+  }
+
+  if (step === "trialReminder") {
+    return (
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim onb-no-divider">
+        <div className="mt-8 text-center">
+          <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15]">
+            We&apos;ll send you a reminder before your free trial ends.
+          </h1>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-full max-w-[320px]">
+            <TrialTimelineRow
+              dot="dark"
+              title="Today"
+              body="Unlock full access to your plan, the AI coach, and everything else."
+              emoji="🔓"
+            />
+            <TrialTimelineRow
+              dot="dark"
+              title="Day 2"
+              body="We send a heads-up — your trial ends tomorrow."
+              emoji="🔔"
+            />
+            <TrialTimelineRow
+              dot="outline"
+              title="Day 3"
+              body="Your trial ends. Cancel anytime before to pay nothing."
+              emoji="💳"
+              last
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={() => setStep("trialPayment")}
+          className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+        >
+          Continue
+        </button>
+      </main>
+    );
+  }
+
+  if (step === "trialPayment") {
+    return (
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim onb-no-divider">
+        <div className="mt-8 text-center">
+          <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.1]">
+            Start your 3-day <span className="text-green-500">FREE</span> trial to continue.
+          </h1>
+          <p className="text-text-muted text-[14px] leading-relaxed mt-3">
+            Cancel anytime. No charge for 3 days.
+          </p>
+        </div>
+
+        <div className="flex-1 flex items-center py-6">
+          <div className="w-full space-y-3">
+            <div className="bg-bg-card border-2 border-[#1a1a1a] rounded-2xl p-5 relative">
+              <div className="absolute -top-2.5 right-4 bg-[#1a1a1a] text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
+                Best value
+              </div>
+              <div className="flex items-baseline justify-between mb-1">
+                <p className="text-[16px] font-bold">Yearly</p>
+                <p className="font-display text-[22px] font-extrabold tabular-nums">$49.99<span className="text-[12px] font-medium text-text-muted">/yr</span></p>
+              </div>
+              <p className="text-[12px] text-text-muted">Just $4.16/month · save 60%</p>
+            </div>
+            <div className="bg-bg-card border-2 border-border rounded-2xl p-5">
+              <div className="flex items-baseline justify-between mb-1">
+                <p className="text-[16px] font-bold">Monthly</p>
+                <p className="font-display text-[22px] font-extrabold tabular-nums">$9.99<span className="text-[12px] font-medium text-text-muted">/mo</span></p>
+              </div>
+              <p className="text-[12px] text-text-muted">Cancel anytime</p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => router.push("/plans")}
+          className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+        >
+          Start my 3-day free trial
+        </button>
+        <p className="text-center text-[11px] text-text-muted mt-3">
+          No charge for 3 days. Cancel anytime.
+        </p>
+      </main>
+    );
+  }
+
   return (
     <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim onb-no-divider">
       <QuizHeader onBack={() => setStep("planReady")} progress={progressFor("auth")} />
@@ -1149,7 +1279,7 @@ function OnboardingInner() {
           )}
 
           <button
-            onClick={() => router.replace("/")}
+            onClick={() => setStep("trialIntro")}
             className="w-full bg-bg-card border-2 border-border py-4 rounded-2xl font-semibold text-[16px] press"
           >
             Skip
@@ -1362,6 +1492,40 @@ function buildPlan({
       },
     ],
   };
+}
+
+function TrialTimelineRow({
+  dot,
+  title,
+  body,
+  emoji,
+  last,
+}: {
+  dot: "dark" | "outline";
+  title: string;
+  body: string;
+  emoji: string;
+  last?: boolean;
+}) {
+  return (
+    <div className="flex gap-4">
+      <div className="flex flex-col items-center shrink-0">
+        <div
+          className={`w-10 h-10 rounded-full flex items-center justify-center text-[18px] ${
+            dot === "dark" ? "bg-[#1a1a1a] text-white" : "bg-bg-card border-2 border-border"
+          }`}
+          aria-hidden
+        >
+          {emoji}
+        </div>
+        {!last && <div className="w-0.5 flex-1 bg-border my-1" />}
+      </div>
+      <div className={`flex-1 ${last ? "" : "pb-6"}`}>
+        <p className="text-[15px] font-semibold leading-tight">{title}</p>
+        <p className="text-[13px] text-text-muted leading-snug mt-1">{body}</p>
+      </div>
+    </div>
+  );
 }
 
 function NotificationsStep({
