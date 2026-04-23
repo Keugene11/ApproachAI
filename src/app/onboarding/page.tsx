@@ -1253,10 +1253,6 @@ function OnboardingInner() {
   }
 
   if (step === "trialPayment") {
-    const fineTextByPlan = {
-      yearly: "3 days free, then $29.99/year ($2.49/mo)",
-      monthly: "3 days free, then $9.99/month",
-    };
     return (
       <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-6 pb-4 onb-anim onb-no-divider">
         <TrialHeader onBack={() => setStep("trialReminder")} onClose={() => setStep("auth")} />
@@ -1306,7 +1302,7 @@ function OnboardingInner() {
               }`}
             >
               <div className="absolute -top-2.5 right-4 bg-green-500 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
-                Best value · Save 75%
+                3-day free trial
               </div>
               <div className="flex items-baseline justify-between">
                 <p className="text-[16px] font-bold">Yearly</p>
@@ -1315,7 +1311,7 @@ function OnboardingInner() {
                 </p>
               </div>
               <p className={`text-[12px] mt-0.5 ${selectedPlan === "yearly" ? "text-white/60" : "text-text-muted"}`}>
-                Just $2.49/month
+                Just $2.49/month · save 75%
               </p>
             </button>
 
@@ -1332,7 +1328,7 @@ function OnboardingInner() {
                 </p>
               </div>
               <p className={`text-[12px] mt-0.5 ${selectedPlan === "monthly" ? "text-white/60" : "text-text-muted"}`}>
-                Cancel anytime
+                No trial · billed right away
               </p>
             </button>
           </div>
@@ -1340,17 +1336,21 @@ function OnboardingInner() {
 
         <div className="shrink-0">
           <p className="text-center text-[14px] font-medium text-text-muted mb-3">
-            No Payment Due Now
+            {selectedPlan === "yearly" ? "No Payment Due Now" : "Billed monthly · Cancel anytime"}
           </p>
           <button
             onClick={handleStartTrial}
             disabled={purchasing}
             className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press disabled:opacity-60"
           >
-            {purchasing ? "Starting…" : "Start my 3-day free trial"}
+            {purchasing ? "Starting…" : selectedPlan === "yearly" ? "Start my 3-day free trial" : "Subscribe monthly"}
           </button>
           <p className="text-center text-[12px] text-text-muted mt-3">
-            <span className="font-semibold text-text">3 days free</span>, then {fineTextByPlan[selectedPlan].replace("3 days free, then ", "")}
+            {selectedPlan === "yearly" ? (
+              <><span className="font-semibold text-text">3 days free</span>, then $29.99/year ($2.49/mo)</>
+            ) : (
+              <>$9.99/month · No trial</>
+            )}
           </p>
         </div>
       </main>

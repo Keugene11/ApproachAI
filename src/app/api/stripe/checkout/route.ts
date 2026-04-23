@@ -50,6 +50,9 @@ export async function POST(request: NextRequest) {
 
     const origin = request.headers.get("origin") || "http://localhost:3000";
 
+    // 3-day free trial applies to the yearly plan only.
+    const isYearly = plan === "yearly";
+
     const checkoutSession = await getStripe().checkout.sessions.create({
       customer: customerId,
       line_items: [{ price: prices.data[0].id, quantity: 1 }],
@@ -58,14 +61,14 @@ export async function POST(request: NextRequest) {
       cancel_url: `${origin}/plans?checkout=cancelled`,
       subscription_data: {
         metadata: { supabase_user_id: userId },
-        // 3-day free trial. Stripe emails reminders 7 days before trial ends
-        // by default; we also enable a 2-day reminder via trial_settings.
-        trial_period_days: 3,
-        trial_settings: {
-          end_behavior: { missing_payment_method: "cancel" },
-        },
+        ...(isYearly && {
+          trial_period_days: 3,
+          trial_settings: {
+            end_behavior: { missing_payment_method: "cancel" },
+          },
+        }),
       },
-      payment_method_collection: "always",
+      ...(isYearly && { payment_method_collection: "always" }),
     });
 
     return NextResponse.json({ url: checkoutSession.url });
