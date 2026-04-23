@@ -1152,39 +1152,41 @@ function OnboardingInner() {
   if (step === "trialReminder") {
     return (
       <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim onb-no-divider">
-        <div className="mt-8 text-center">
-          <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15]">
+        <div className="mt-4 text-center">
+          <h1 className="font-display text-[26px] font-bold tracking-tight leading-[1.15]">
             We&apos;ll send you a reminder before your free trial ends.
           </h1>
         </div>
 
         <div className="flex-1 flex items-center justify-center">
-          <div className="w-full max-w-[320px]">
-            <TrialTimelineRow
-              dot="dark"
-              title="Today"
-              body="Unlock full access to your plan, the AI coach, and everything else."
-              emoji="🔓"
-            />
-            <TrialTimelineRow
-              dot="dark"
-              title="Day 2"
-              body="We send a heads-up — your trial ends tomorrow."
-              emoji="🔔"
-            />
-            <TrialTimelineRow
-              dot="outline"
-              title="Day 3"
-              body="Your trial ends. Cancel anytime before to pay nothing."
-              emoji="💳"
-              last
-            />
+          <div className="w-40 h-40 rounded-[44px] bg-[#1a1a1a] flex items-center justify-center shadow-[0_20px_50px_-12px_rgba(0,0,0,0.35)]">
+            <svg width="88" height="88" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+            </svg>
+          </div>
+        </div>
+
+        <div className="bg-bg-card border border-border rounded-2xl p-4 space-y-3">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[14px] font-medium">No payment due now</span>
+            <span className="text-[13px] text-text-muted">—</span>
+          </div>
+          <div className="flex items-baseline justify-between">
+            <span className="text-[14px] font-medium">Continue for FREE</span>
+            <span className="text-[14px] font-semibold tabular-nums text-green-500">$0.00</span>
+          </div>
+          <div className="flex items-baseline justify-between pt-3 border-t border-border">
+            <span className="text-[14px] font-medium">Then just</span>
+            <span className="text-[14px] font-semibold tabular-nums">
+              $29.99/yr <span className="text-text-muted text-[12px] font-medium">($2.49/mo)</span>
+            </span>
           </div>
         </div>
 
         <button
           onClick={() => setStep("trialPayment")}
-          className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+          className="mt-3 w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
         >
           Continue
         </button>
@@ -1497,40 +1499,6 @@ function buildPlan({
       },
     ],
   };
-}
-
-function TrialTimelineRow({
-  dot,
-  title,
-  body,
-  emoji,
-  last,
-}: {
-  dot: "dark" | "outline";
-  title: string;
-  body: string;
-  emoji: string;
-  last?: boolean;
-}) {
-  return (
-    <div className="flex gap-4">
-      <div className="flex flex-col items-center shrink-0">
-        <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center text-[18px] ${
-            dot === "dark" ? "bg-[#1a1a1a] text-white" : "bg-bg-card border-2 border-border"
-          }`}
-          aria-hidden
-        >
-          {emoji}
-        </div>
-        {!last && <div className="w-0.5 flex-1 bg-border my-1" />}
-      </div>
-      <div className={`flex-1 ${last ? "" : "pb-6"}`}>
-        <p className="text-[15px] font-semibold leading-tight">{title}</p>
-        <p className="text-[13px] text-text-muted leading-snug mt-1">{body}</p>
-      </div>
-    </div>
-  );
 }
 
 function NotificationsStep({
