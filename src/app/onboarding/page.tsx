@@ -496,7 +496,8 @@ function OnboardingInner() {
           </p>
         </div>
 
-        <div className="mt-8 space-y-3 onb-list">
+        <div className="flex-1 flex items-center">
+          <div className="w-full space-y-3 onb-list">
           {APPROACH_OPTIONS.map((opt) => {
             const selected = approaches === opt.id;
             return (
@@ -534,6 +535,7 @@ function OnboardingInner() {
               </button>
             );
           })}
+          </div>
         </div>
 
         <button
