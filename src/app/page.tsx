@@ -117,13 +117,17 @@ function HomeInner() {
       return () => clearTimeout(t);
     }
 
-    // Session resolved — always hide splash immediately
-    hideSplash();
-
     if (!session?.user) {
+      // Leave the splash up so there's no flash of the home page before
+      // /onboarding mounts. The onboarding page calls hideSplash itself.
       router.replace("/onboarding");
       return;
     }
+
+    // Session resolved and user is authenticated — hide splash, we may
+    // still be checking subscription but the gate below keeps the UI
+    // on a spinner until that resolves.
+    hideSplash();
 
     const user = session.user;
     const firstName = user.name?.split(" ")[0];
@@ -313,7 +317,14 @@ function HomeInner() {
     updateState("tabs");
   };
 
-  if (!hydrated || isLoggedIn === null || isPro === null || isPro === false) return (
+  if (
+    !hydrated ||
+    sessionStatus === "loading" ||
+    !session?.user ||
+    isLoggedIn === null ||
+    isPro === null ||
+    isPro === false
+  ) return (
     <main className="min-h-app flex items-center justify-center">
       <div className="w-5 h-5 border-2 border-text-muted border-t-transparent rounded-full animate-spin" />
     </main>
