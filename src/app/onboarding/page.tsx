@@ -34,74 +34,12 @@ const GOAL_OPTIONS = [
   { id: "memories", label: "Make fun memories", emoji: "🎉" },
 ] as const;
 
-const CITIES = [
-  "New York, NY",
-  "Los Angeles, CA",
-  "Chicago, IL",
-  "Houston, TX",
-  "Phoenix, AZ",
-  "Philadelphia, PA",
-  "San Antonio, TX",
-  "San Diego, CA",
-  "Dallas, TX",
-  "San Jose, CA",
-  "Austin, TX",
-  "Jacksonville, FL",
-  "Fort Worth, TX",
-  "Columbus, OH",
-  "Indianapolis, IN",
-  "Charlotte, NC",
-  "San Francisco, CA",
-  "Seattle, WA",
-  "Denver, CO",
-  "Washington, DC",
-  "Boston, MA",
-  "Nashville, TN",
-  "Portland, OR",
-  "Las Vegas, NV",
-  "Detroit, MI",
-  "Memphis, TN",
-  "Baltimore, MD",
-  "Milwaukee, WI",
-  "Sacramento, CA",
-  "Kansas City, MO",
-  "Atlanta, GA",
-  "Raleigh, NC",
-  "Miami, FL",
-  "Oakland, CA",
-  "Minneapolis, MN",
-  "Tampa, FL",
-  "New Orleans, LA",
-  "Cleveland, OH",
-  "Cincinnati, OH",
-  "Pittsburgh, PA",
-  "St. Louis, MO",
-  "Salt Lake City, UT",
-  "Orlando, FL",
-  "Honolulu, HI",
-  "Toronto, Canada",
-  "Vancouver, Canada",
-  "Montreal, Canada",
-  "London, UK",
-  "Manchester, UK",
-  "Dublin, Ireland",
-  "Sydney, Australia",
-  "Melbourne, Australia",
-  "Paris, France",
-  "Berlin, Germany",
-  "Amsterdam, Netherlands",
-  "Madrid, Spain",
-  "Barcelona, Spain",
-  "Tokyo, Japan",
-  "Seoul, South Korea",
-  "Singapore",
-  "Hong Kong",
-  "Dubai, UAE",
-  "Mumbai, India",
-  "Delhi, India",
-  "Mexico City, Mexico",
-  "São Paulo, Brazil",
-];
+const LOCATION_OPTIONS = [
+  { id: "city", label: "Big city", sub: "Dense, lots of people around", emoji: "🏙️" },
+  { id: "suburb", label: "Suburbs", sub: "Quieter neighborhoods near a city", emoji: "🏡" },
+  { id: "town", label: "Small town", sub: "A few thousand people", emoji: "🏘️" },
+  { id: "rural", label: "Rural", sub: "Lots of space, few people", emoji: "🌾" },
+] as const;
 
 const STATUS_OPTIONS = [
   { id: "highschool", label: "High school student", emoji: "🎒" },
@@ -264,7 +202,7 @@ function OnboardingInner() {
   const [approaches, setApproaches] = useState<string | null>(null);
   const [source, setSource] = useState<string | null>(null);
   const [experience, setExperience] = useState<string | null>(null);
-  const [location, setLocation] = useState<string>("");
+  const [location, setLocation] = useState<string | null>(null);
   const [birthMonth, setBirthMonth] = useState<number | null>(null);
   const [birthDay, setBirthDay] = useState<number | null>(null);
   const [birthYear, setBirthYear] = useState<number | null>(null);
@@ -616,12 +554,6 @@ function OnboardingInner() {
   }
 
   if (step === "location") {
-    const query = location.trim().toLowerCase();
-    const matches = query
-      ? CITIES.filter((c) => c.toLowerCase().includes(query)).slice(0, 6)
-      : CITIES.slice(0, 6);
-    const exactMatch = CITIES.some((c) => c.toLowerCase() === query);
-
     return (
       <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
         <QuizHeader onBack={() => setStep("pitch")} progress={0.45} />
@@ -631,52 +563,51 @@ function OnboardingInner() {
             Where do you live?
           </h1>
           <p className="text-text-muted text-[15px] leading-relaxed mt-2">
-            Type your city — pick from the list or enter your own.
+            This helps us tailor approach suggestions.
           </p>
         </div>
 
-        <div className="mt-6 onb-list">
-          <div className="relative">
-            <svg
-              className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted"
-              width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="7" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="Search city..."
-              autoComplete="off"
-              className="w-full pl-11 pr-4 py-4 rounded-2xl border-2 border-border bg-bg-card text-[16px] font-medium outline-none focus:border-[#1a1a1a] transition-colors"
-            />
-          </div>
-
-          {matches.length > 0 && !exactMatch && (
-            <div className="mt-2 space-y-1.5 max-h-[320px] overflow-y-auto">
-              {matches.map((city) => (
-                <button
-                  key={city}
-                  onClick={() => setLocation(city)}
-                  className="w-full flex items-center gap-3 text-left px-5 py-3 rounded-xl border border-border bg-bg-card press hover:border-[#1a1a1a] transition-colors"
+        <div className="mt-8 space-y-3 onb-list">
+          {LOCATION_OPTIONS.map((opt) => {
+            const selected = location === opt.id;
+            return (
+              <button
+                key={opt.id}
+                onClick={() => setLocation(opt.id)}
+                className={`w-full flex items-center gap-4 text-left px-5 py-4 rounded-2xl border-2 transition-colors press ${
+                  selected
+                    ? "border-[#1a1a1a] bg-[#1a1a1a] text-white"
+                    : "border-border bg-bg-card"
+                }`}
+              >
+                <span className="text-[30px] leading-none shrink-0" aria-hidden>
+                  {opt.emoji}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[18px] font-semibold leading-tight">{opt.label}</p>
+                  <p className={`text-[13px] font-medium mt-0.5 ${selected ? "text-white/60" : "text-text-muted"}`}>
+                    {opt.sub}
+                  </p>
+                </div>
+                <div
+                  className={`w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center ${
+                    selected ? "border-white bg-white" : "border-border"
+                  }`}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-text-muted shrink-0">
-                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  <span className="text-[15px] font-medium truncate">{city}</span>
-                </button>
-              ))}
-            </div>
-          )}
+                  {selected && (
+                    <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" strokeWidth="3">
+                      <path d="M3 8l3 3 7-7" />
+                    </svg>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         <button
           onClick={() => setStep("birthday")}
-          disabled={location.trim().length === 0}
+          disabled={!location}
           className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press disabled:bg-border disabled:text-text-muted disabled:pointer-events-none"
         >
           Next
