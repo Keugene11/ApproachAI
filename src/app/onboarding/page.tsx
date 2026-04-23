@@ -1132,11 +1132,13 @@ function OnboardingInner() {
     <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
       <QuizHeader onBack={() => setStep("planReady")} progress={progressFor("auth")} />
 
-      <div className="flex-1 flex flex-col justify-center">
-        <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15] text-center mb-8">
+      <div className="mt-8">
+        <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15]">
           Create an account
         </h1>
+      </div>
 
+      <div className="flex-1 flex flex-col justify-center">
         <div className="space-y-3">
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-2">
@@ -1147,7 +1149,7 @@ function OnboardingInner() {
           )}
           <button
             onClick={handleGoogle}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-border py-4 rounded-2xl font-semibold text-[16px] press shadow-sm"
+            className="w-full flex items-center justify-center gap-3 bg-[#1a1a1a] text-white border border-[#1a1a1a] py-4 rounded-2xl font-semibold text-[16px] press"
           >
             <svg width="18" height="18" viewBox="0 0 48 48">
               <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -1172,7 +1174,7 @@ function OnboardingInner() {
 
           <button
             onClick={() => router.replace("/")}
-            className="w-full text-center text-text-muted text-[14px] font-medium press py-3"
+            className="w-full bg-bg-card border-2 border-border py-4 rounded-2xl font-semibold text-[16px] press"
           >
             Skip
           </button>
