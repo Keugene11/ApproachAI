@@ -1296,20 +1296,8 @@ function OnboardingInner() {
           </h1>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0 -mx-6 px-6 py-5">
-          <div className="flex justify-center mb-5">
-            <div className="inline-flex items-center gap-1.5 bg-[#1a1a1a] text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.1em]">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.09 6.26L20 9.27l-4.54 4.42L16.18 20 12 16.77 7.82 20l.72-6.31L4 9.27l5.91-1.01L12 2z" /></svg>
-              Wingmate Pro
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <FeatureRow emoji="🧠" title="AI coach in the moment" />
-            <FeatureRow emoji="🎯" title="Your custom weekly plan" />
-            <FeatureRow emoji="💬" title="Openers & scripts" />
-            <FeatureRow emoji="📈" title="Daily check-ins & streaks" />
-          </div>
+        <div className="flex-1 flex items-center justify-center min-h-0">
+          <PhoneMockup width="min(220px, 62vw)" />
         </div>
 
         <div className="shrink-0 pb-2">
@@ -1609,20 +1597,6 @@ function TrialHeader({ onBack, onClose }: { onBack?: () => void; onClose: () => 
           <path d="m6 6 12 12" />
         </svg>
       </button>
-    </div>
-  );
-}
-
-function FeatureRow({ emoji, title, body }: { emoji: string; title: string; body?: string }) {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="w-9 h-9 rounded-xl bg-bg-input flex items-center justify-center text-[18px] shrink-0" aria-hidden>
-        {emoji}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[15px] font-semibold leading-tight">{title}</p>
-        {body && <p className="text-[12.5px] text-text-muted leading-snug mt-0.5">{body}</p>}
-      </div>
     </div>
   );
 }

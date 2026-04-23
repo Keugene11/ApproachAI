@@ -1,6 +1,6 @@
 "use client";
 
-import { Flame, MessageCircle, Users, User, BarChart3, Crown } from "lucide-react";
+import { Flame, MessageCircle, Users, User, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
@@ -11,7 +11,6 @@ const tabs: { id: Tab; label: string; icon: typeof Flame }[] = [
   { id: "coach", label: "Wingmate", icon: MessageCircle },
   { id: "stats", label: "Stats", icon: BarChart3 },
   { id: "community", label: "Community", icon: Users },
-  { id: "plans", label: "Plans", icon: Crown },
 ];
 
 function useActiveTab(): { active: Tab | null; isProfile: boolean } {
