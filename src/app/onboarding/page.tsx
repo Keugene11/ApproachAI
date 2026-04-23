@@ -1123,7 +1123,7 @@ function OnboardingInner() {
         </h1>
 
         <div className="mt-auto shrink-0">
-          <p className="text-center text-[13px] font-semibold uppercase tracking-wide text-text-muted mb-2">
+          <p className="text-center text-[13px] font-semibold text-text-muted mb-2">
             No Payment Due Now
           </p>
           <button
@@ -1159,7 +1159,7 @@ function OnboardingInner() {
         </div>
 
         <div className="shrink-0">
-          <p className="text-center text-[13px] font-semibold uppercase tracking-wide text-text-muted mb-2">
+          <p className="text-center text-[13px] font-semibold text-text-muted mb-2">
             No Payment Due Now
           </p>
           <button
