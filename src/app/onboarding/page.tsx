@@ -230,6 +230,7 @@ function OnboardingInner() {
   const [blocker, setBlocker] = useState<string | null>(null);
   const [weeklyTarget, setWeeklyTarget] = useState<number>(5);
   const [showApple, setShowApple] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
   const targetTrackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1118,15 +1119,15 @@ function OnboardingInner() {
       <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-6 pb-4 onb-anim onb-no-divider">
         <TrialHeader onClose={() => setStep("auth")} />
 
-        <div className="mt-4">
-          <PhoneMockup width="min(160px, 42vw)" />
-        </div>
-
-        <h1 className="mt-auto font-display text-[26px] font-extrabold tracking-tight leading-[1.1] text-center">
+        <h1 className="mt-6 font-display text-[28px] font-extrabold tracking-tight leading-[1.1] text-center">
           We want you to try Wingmate for free.
         </h1>
 
-        <div className="mt-auto shrink-0">
+        <div className="mt-6 flex-1 flex items-center justify-center min-h-0">
+          <PhoneMockup width="min(240px, 68vw)" />
+        </div>
+
+        <div className="shrink-0">
           <p className="text-center text-[13px] font-semibold text-text-muted mb-2">
             No Payment Due Now
           </p>
@@ -1183,6 +1184,10 @@ function OnboardingInner() {
   }
 
   if (step === "trialPayment") {
+    const fineTextByPlan = {
+      yearly: "3 days free, then $29.99/year ($2.49/mo)",
+      monthly: "3 days free, then $9.99/month",
+    };
     return (
       <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-6 pb-4 onb-anim onb-no-divider">
         <TrialHeader onBack={() => setStep("trialReminder")} onClose={() => setStep("auth")} />
@@ -1193,8 +1198,15 @@ function OnboardingInner() {
           </h1>
         </div>
 
-        <div className="flex-1 flex items-center">
-          <div className="w-full space-y-3">
+        <div className="flex-1 overflow-y-auto min-h-0 -mx-6 px-6 py-5">
+          <div className="flex justify-center mb-5">
+            <div className="inline-flex items-center gap-1.5 bg-[#1a1a1a] text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.1em]">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.09 6.26L20 9.27l-4.54 4.42L16.18 20 12 16.77 7.82 20l.72-6.31L4 9.27l5.91-1.01L12 2z" /></svg>
+              Wingmate Pro
+            </div>
+          </div>
+
+          <div className="space-y-3 mb-6">
             <FeatureRow
               emoji="🧠"
               title="AI coach on call"
@@ -1216,6 +1228,45 @@ function OnboardingInner() {
               body="Track approaches, build your streak, see your confidence level climb."
             />
           </div>
+
+          <div className="space-y-2.5">
+            <button
+              onClick={() => setSelectedPlan("yearly")}
+              className={`relative w-full text-left px-5 py-4 rounded-2xl border-2 transition-colors press ${
+                selectedPlan === "yearly" ? "border-[#1a1a1a] bg-[#1a1a1a] text-white" : "border-border bg-bg-card"
+              }`}
+            >
+              <div className="absolute -top-2.5 right-4 bg-green-500 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
+                Best value · Save 75%
+              </div>
+              <div className="flex items-baseline justify-between">
+                <p className="text-[16px] font-bold">Yearly</p>
+                <p className="font-display text-[20px] font-extrabold tabular-nums">
+                  $29.99<span className={`text-[12px] font-medium ${selectedPlan === "yearly" ? "text-white/60" : "text-text-muted"}`}>/yr</span>
+                </p>
+              </div>
+              <p className={`text-[12px] mt-0.5 ${selectedPlan === "yearly" ? "text-white/60" : "text-text-muted"}`}>
+                Just $2.49/month
+              </p>
+            </button>
+
+            <button
+              onClick={() => setSelectedPlan("monthly")}
+              className={`w-full text-left px-5 py-4 rounded-2xl border-2 transition-colors press ${
+                selectedPlan === "monthly" ? "border-[#1a1a1a] bg-[#1a1a1a] text-white" : "border-border bg-bg-card"
+              }`}
+            >
+              <div className="flex items-baseline justify-between">
+                <p className="text-[16px] font-bold">Monthly</p>
+                <p className="font-display text-[20px] font-extrabold tabular-nums">
+                  $9.99<span className={`text-[12px] font-medium ${selectedPlan === "monthly" ? "text-white/60" : "text-text-muted"}`}>/mo</span>
+                </p>
+              </div>
+              <p className={`text-[12px] mt-0.5 ${selectedPlan === "monthly" ? "text-white/60" : "text-text-muted"}`}>
+                Cancel anytime
+              </p>
+            </button>
+          </div>
         </div>
 
         <div className="shrink-0">
@@ -1223,13 +1274,13 @@ function OnboardingInner() {
             No Payment Due Now
           </p>
           <button
-            onClick={() => router.push("/plans")}
+            onClick={() => router.push(`/plans?plan=${selectedPlan}`)}
             className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
           >
             Start my 3-day free trial
           </button>
           <p className="text-center text-[12px] text-text-muted mt-3">
-            <span className="font-semibold text-text">3 days free</span>, then $29.99/year ($2.49/mo)
+            <span className="font-semibold text-text">3 days free</span>, then {fineTextByPlan[selectedPlan].replace("3 days free, then ", "")}
           </p>
         </div>
       </main>
@@ -1498,26 +1549,18 @@ function buildPlan({
 
 function TrialHeader({ onBack, onClose }: { onBack?: () => void; onClose: () => void }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between h-11">
       {onBack ? (
-        <button
-          onClick={onBack}
-          className="w-11 h-11 rounded-full bg-bg-input flex items-center justify-center press shrink-0"
-          aria-label="Back"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <button onClick={onBack} className="p-2 -ml-2 press shrink-0" aria-label="Back">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
       ) : (
-        <div className="w-11 h-11" aria-hidden />
+        <div aria-hidden />
       )}
-      <button
-        onClick={onClose}
-        className="w-11 h-11 rounded-full bg-bg-input flex items-center justify-center press shrink-0"
-        aria-label="Close"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <button onClick={onClose} className="p-2 -mr-2 press shrink-0" aria-label="Close">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 6 6 18" />
           <path d="m6 6 12 12" />
         </svg>
