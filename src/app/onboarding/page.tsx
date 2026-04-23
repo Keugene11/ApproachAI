@@ -22,6 +22,9 @@ type Step =
   | "thanks"
   | "notifications"
   | "rating"
+  | "planIntro"
+  | "planGenerating"
+  | "planReady"
   | "auth";
 
 const TARGET_MIN = 1;
@@ -53,7 +56,6 @@ const BLOCKER_OPTIONS = [
   { id: "words", label: "Don't know what to say", emoji: "🤐" },
   { id: "confidence", label: "Low confidence", emoji: "😔" },
   { id: "time", label: "Never the right moment", emoji: "⏰" },
-  { id: "nothing", label: "Nothing's stopping me", emoji: "💪" },
 ] as const;
 
 const MONTHS = [
@@ -205,9 +207,9 @@ function OnboardingInner() {
   const [location, setLocation] = useState<string | null>(null);
   const [birthMonth, setBirthMonth] = useState<number | null>(null);
   const [birthDay, setBirthDay] = useState<number | null>(null);
-  const [birthYear, setBirthYear] = useState<number | null>(null);
+  const [birthYear, setBirthYear] = useState<number | null>(2001);
   const [goals, setGoals] = useState<string[]>([]);
-  const [blockers, setBlockers] = useState<string[]>([]);
+  const [blocker, setBlocker] = useState<string | null>(null);
   const [weeklyTarget, setWeeklyTarget] = useState<number>(5);
   const targetTrackRef = useRef<HTMLDivElement>(null);
   const error = liveError || searchParams.get("error");
@@ -243,13 +245,6 @@ function OnboardingInner() {
     setGoals((prev) => (prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]));
   };
 
-  const toggleBlocker = (id: string) => {
-    setBlockers((prev) => {
-      if (id === "nothing") return prev.includes(id) ? [] : [id];
-      const next = prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id];
-      return next.filter((g) => g !== "nothing");
-    });
-  };
 
   useEffect(() => {
     setupAuthDeepLinkListener();
@@ -865,18 +860,18 @@ function OnboardingInner() {
             What&apos;s stopping you from reaching your goals?
           </h1>
           <p className="text-text-muted text-[15px] leading-relaxed mt-2">
-            Pick any that apply.
+            Pick the biggest one.
           </p>
         </div>
 
         <div className="flex-1 flex items-center">
           <div className="w-full space-y-3 onb-list">
             {BLOCKER_OPTIONS.map((opt) => {
-              const selected = blockers.includes(opt.id);
+              const selected = blocker === opt.id;
               return (
                 <button
                   key={opt.id}
-                  onClick={() => toggleBlocker(opt.id)}
+                  onClick={() => setBlocker(opt.id)}
                   className={`w-full flex items-center gap-4 text-left px-5 py-4 rounded-2xl border-2 transition-colors press ${
                     selected
                       ? "border-[#1a1a1a] bg-[#1a1a1a] text-white"
@@ -895,7 +890,7 @@ function OnboardingInner() {
 
         <button
           onClick={() => setStep("thanks")}
-          disabled={blockers.length === 0}
+          disabled={!blocker}
           className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press disabled:bg-border disabled:text-text-muted disabled:pointer-events-none"
         >
           Next
@@ -1045,10 +1040,116 @@ function OnboardingInner() {
         </div>
 
         <button
-          onClick={() => setStep("auth")}
+          onClick={() => setStep("planIntro")}
           className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
         >
           Continue
+        </button>
+      </main>
+    );
+  }
+
+  if (step === "planIntro") {
+    return (
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
+          <div className="w-24 h-24 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-8">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <path d="M14 2v6h6" />
+              <path d="M9 13l2 2 4-4" />
+            </svg>
+          </div>
+          <h1 className="font-display text-[32px] font-extrabold tracking-tight leading-[1.1] mb-4">
+            Time to build your plan.
+          </h1>
+          <p className="text-text-muted text-[15px] leading-relaxed max-w-[320px]">
+            We&apos;ll use your answers to put together a custom rizz plan — routines, focus areas, and a weekly target that&apos;s actually doable for you.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setStep("planGenerating")}
+          className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+        >
+          Generate my plan
+        </button>
+      </main>
+    );
+  }
+
+  if (step === "planGenerating") {
+    const answers = {
+      status: status_,
+      approaches,
+      source,
+      experience,
+      location,
+      birthMonth,
+      birthDay,
+      birthYear,
+      goals,
+      weeklyTarget,
+      blocker,
+    };
+    return (
+      <PlanGenerating
+        answers={answers}
+        onDone={() => setStep("planReady")}
+      />
+    );
+  }
+
+  if (step === "planReady") {
+    const plan = buildPlan({
+      status: status_,
+      location,
+      goals,
+      weeklyTarget,
+      blocker,
+    });
+    return (
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-600 px-3 py-1 rounded-full text-[12px] font-semibold mb-4">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12l5 5L20 6" />
+            </svg>
+            Ready
+          </div>
+          <h1 className="font-display text-[30px] font-extrabold tracking-tight leading-[1.1]">
+            Your custom plan is ready.
+          </h1>
+          <p className="text-text-muted text-[14px] leading-relaxed mt-2">
+            Built from your answers. Tweak anytime.
+          </p>
+        </div>
+
+        <div className="flex-1 flex items-center py-6">
+          <div className="w-full bg-bg-card border border-border rounded-2xl shadow-card p-5 space-y-4">
+            <div className="flex items-baseline justify-between">
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Weekly target</p>
+              <p className="font-display text-[24px] font-extrabold leading-none tabular-nums">{weeklyTarget}</p>
+            </div>
+            <div className="border-t border-border pt-4 space-y-3">
+              {plan.bullets.map((b, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <span className="text-[18px] leading-none shrink-0 mt-0.5" aria-hidden>{b.emoji}</span>
+                  <div className="min-w-0">
+                    <p className="text-[14px] font-semibold leading-tight">{b.title}</p>
+                    <p className="text-[12.5px] text-text-muted leading-snug mt-0.5">{b.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setStep("auth")}
+          className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+        >
+          Let&apos;s do this
         </button>
       </main>
     );
@@ -1058,7 +1159,7 @@ function OnboardingInner() {
     <main key={step} className="h-app max-w-md mx-auto flex flex-col justify-between px-6 pt-10 pb-4 onb-anim">
       <div>
         <button
-          onClick={() => setStep("rating")}
+          onClick={() => setStep("planReady")}
           className="text-text-muted text-[14px] font-medium mb-8 press"
         >
           ← Back
@@ -1109,6 +1210,210 @@ function OnboardingInner() {
       </div>
     </main>
   );
+}
+
+type PlanAnswers = {
+  status: string | null;
+  approaches: string | null;
+  source: string | null;
+  experience: string | null;
+  location: string | null;
+  birthMonth: number | null;
+  birthDay: number | null;
+  birthYear: number | null;
+  goals: string[];
+  weeklyTarget: number;
+  blocker: string | null;
+};
+
+const GEN_STAGES = [
+  "Analyzing your answers",
+  "Matching your vibe and goals",
+  "Building weekly routines",
+  "Tuning your focus areas",
+  "Finalizing your plan",
+];
+
+function PlanGenerating({ answers, onDone }: { answers: PlanAnswers; onDone: () => void }) {
+  const [pct, setPct] = useState(0);
+  const savedRef = useRef(false);
+
+  useEffect(() => {
+    // Persist answers once on mount so the plan is tied to this session.
+    if (!savedRef.current) {
+      try {
+        localStorage.setItem(
+          "wingmate:onboarding",
+          JSON.stringify({ ...answers, savedAt: Date.now() })
+        );
+      } catch {}
+      savedRef.current = true;
+    }
+
+    const duration = 3800;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      // ease-out quint
+      const eased = 1 - Math.pow(1 - t, 5);
+      setPct(Math.round(eased * 100));
+      if (t < 1) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        setTimeout(onDone, 350);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [answers, onDone]);
+
+  const stageIdx = Math.min(GEN_STAGES.length - 1, Math.floor((pct / 100) * GEN_STAGES.length));
+
+  return (
+    <main className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
+      <div className="flex-1 flex flex-col items-center justify-center text-center">
+        <div className="relative w-36 h-36 mb-8">
+          <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="46" stroke="#efefef" strokeWidth="6" fill="none" />
+            <circle
+              cx="50" cy="50" r="46"
+              stroke="#1a1a1a" strokeWidth="6" fill="none"
+              strokeLinecap="round"
+              strokeDasharray={2 * Math.PI * 46}
+              strokeDashoffset={2 * Math.PI * 46 * (1 - pct / 100)}
+              style={{ transition: "stroke-dashoffset 80ms linear" }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="font-display text-[40px] font-extrabold tabular-nums leading-none">
+              {pct}
+              <span className="text-[22px] font-bold text-text-muted">%</span>
+            </span>
+          </div>
+        </div>
+
+        <h1 className="font-display text-[26px] font-bold tracking-tight leading-[1.15] mb-2">
+          Building your plan...
+        </h1>
+        <p className="text-text-muted text-[14px] leading-relaxed min-h-[20px]">
+          {GEN_STAGES[stageIdx]}
+        </p>
+
+        <div className="w-full max-w-[280px] mt-8 space-y-2">
+          {GEN_STAGES.map((stage, i) => {
+            const done = i < stageIdx || pct >= 100;
+            const active = i === stageIdx && pct < 100;
+            return (
+              <div key={stage} className="flex items-center gap-3 text-left">
+                <div
+                  className={`w-4 h-4 rounded-full shrink-0 flex items-center justify-center ${
+                    done ? "bg-[#1a1a1a]" : active ? "border-2 border-[#1a1a1a]" : "border-2 border-border"
+                  }`}
+                >
+                  {done && (
+                    <svg width="8" height="8" viewBox="0 0 16 16" fill="none" stroke="#fff" strokeWidth="3">
+                      <path d="M3 8l3 3 7-7" />
+                    </svg>
+                  )}
+                </div>
+                <span className={`text-[13px] ${done || active ? "text-text font-medium" : "text-text-muted"}`}>
+                  {stage}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function buildPlan({
+  status,
+  location,
+  goals,
+  weeklyTarget,
+  blocker,
+}: {
+  status: string | null;
+  location: string | null;
+  goals: string[];
+  weeklyTarget: number;
+  blocker: string | null;
+}) {
+  const perDay = weeklyTarget <= 1 ? "1 approach this week" : `${Math.max(1, Math.ceil(weeklyTarget / 7))}/day`;
+
+  const focusByBlocker: Record<string, { emoji: string; title: string; body: string }> = {
+    rejection: {
+      emoji: "🛡️",
+      title: "Rejection reps",
+      body: "Short daily drills that reframe rejection as data, not defeat.",
+    },
+    words: {
+      emoji: "💬",
+      title: "Opener playbook",
+      body: "Prebuilt openers for your exact scenarios so you're never stuck.",
+    },
+    confidence: {
+      emoji: "🔥",
+      title: "Confidence routine",
+      body: "A 5-minute morning reset so you show up grounded, not shaky.",
+    },
+    time: {
+      emoji: "⚡",
+      title: "Micro-approaches",
+      body: "Low-stakes 10-second reps you can run any time you're out.",
+    },
+  };
+
+  const focus = blocker ? focusByBlocker[blocker] : focusByBlocker.rejection;
+
+  const envByLocation: Record<string, { emoji: string; title: string; body: string }> = {
+    city: {
+      emoji: "🏙️",
+      title: "City hotspots",
+      body: "Coffee shops, bookstores, parks — a weekly rotation of places to go.",
+    },
+    suburb: {
+      emoji: "🏡",
+      title: "Suburb game plan",
+      body: "Gyms, cafés, events — where to reliably meet people near you.",
+    },
+    town: {
+      emoji: "🏘️",
+      title: "Small town angle",
+      body: "Lean into the fact that you'll see them again. Warmth over novelty.",
+    },
+    rural: {
+      emoji: "🌾",
+      title: "Rural strategy",
+      body: "Travel approaches, apps, and social events for wider reach.",
+    },
+  };
+  const env = location ? envByLocation[location] : envByLocation.city;
+
+  const goalLine = goals.length
+    ? goals.includes("girlfriend")
+      ? "tracked toward getting a girlfriend"
+      : goals.includes("rizz")
+      ? "tuned for improving your rizz"
+      : "built for having more fun"
+    : "built around your answers";
+
+  return {
+    summary: `A plan ${goalLine}, with ${perDay} as your rhythm.`,
+    bullets: [
+      { emoji: "🎯", title: "Daily rhythm", body: `${perDay} — small, repeatable, compounding.` },
+      focus,
+      env,
+      {
+        emoji: "🧠",
+        title: "AI coach on call",
+        body: `Real-time advice in the moment — specific to ${status === "highschool" ? "high school" : status === "college" ? "college" : status === "working" ? "workplace" : "your"} settings.`,
+      },
+    ],
+  };
 }
 
 function NotifPreview({
