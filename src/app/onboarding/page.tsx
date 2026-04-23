@@ -497,14 +497,14 @@ function OnboardingInner() {
           </h1>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-2.5 onb-list">
+        <div className="mt-6 space-y-2 onb-list">
           {SOURCE_OPTIONS.map((opt) => {
             const selected = source === opt.id;
             return (
               <button
                 key={opt.id}
                 onClick={() => setSource(opt.id)}
-                className={`flex items-center gap-3 px-3.5 py-3 rounded-2xl border-2 transition-colors press ${
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl border-2 transition-colors press ${
                   selected
                     ? "border-[#1a1a1a] bg-[#1a1a1a] text-white"
                     : "border-border bg-bg-card"
@@ -513,7 +513,7 @@ function OnboardingInner() {
                 <span className="w-6 h-6 flex items-center justify-center shrink-0" aria-hidden>
                   <SourceLogo id={opt.id} selected={selected} />
                 </span>
-                <p className="text-[14px] font-semibold leading-tight truncate">{opt.label}</p>
+                <p className="text-[15px] font-semibold leading-tight truncate text-left">{opt.label}</p>
               </button>
             );
           })}
