@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, Suspense, useState, useRef, Fragment } from "react";
+import { useEffect, useLayoutEffect, Suspense, useState, useRef, Fragment } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signInWithGoogle, signInWithApple } from "@/lib/auth-client";
 import { useSession } from "next-auth/react";
@@ -228,17 +228,24 @@ function OnboardingInner() {
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const [liveError, setLiveError] = useState<string | null>(null);
-  const [step, setRawStep] = useState<Step>("welcome");
+  const [step, setStep] = useState<Step>("welcome");
+  const prevStepRef = useRef<Step>("welcome");
 
-  const setStep = (next: Step) => {
-    const prevIdx = (ALL_STEPS as readonly string[]).indexOf(step);
-    const nextIdx = (ALL_STEPS as readonly string[]).indexOf(next);
+  // Detect forward vs backward navigation after each step change and toggle
+  // a body class so the slide-in animation runs in the right direction. Uses
+  // useLayoutEffect so the class is set between DOM commit and paint — the
+  // freshly-mounted <main> sees the class when its CSS animations start.
+  useLayoutEffect(() => {
+    const prev = prevStepRef.current;
+    if (prev === step) return;
+    const prevIdx = (ALL_STEPS as readonly string[]).indexOf(prev);
+    const nextIdx = (ALL_STEPS as readonly string[]).indexOf(step);
     const goingBack = prevIdx >= 0 && nextIdx >= 0 && nextIdx < prevIdx;
     if (typeof document !== "undefined") {
       document.body.classList.toggle("onb-anim-back", goingBack);
     }
-    setRawStep(next);
-  };
+    prevStepRef.current = step;
+  }, [step]);
   const [status_, setStatusAnswer] = useState<string | null>(null);
   const [approaches, setApproaches] = useState<string | null>(null);
   const [source, setSource] = useState<string | null>(null);
@@ -1210,7 +1217,7 @@ function OnboardingInner() {
 
   if (step === "trialIntro") {
     return (
-      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-4 pb-6 onb-anim onb-no-divider">
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-4 pb-8 onb-anim onb-no-divider">
         <TrialHeader onClose={() => setStep("auth")} />
 
         <h1 className="mt-2 font-display text-[28px] font-extrabold tracking-tight leading-[1.1] text-center">
@@ -1227,7 +1234,7 @@ function OnboardingInner() {
           </p>
           <button
             onClick={() => setStep("trialReminder")}
-            className="w-full bg-[#1a1a1a] text-white py-[18px] rounded-2xl font-semibold text-[17px] press"
+            className="w-full bg-[#1a1a1a] text-white py-[20px] rounded-2xl font-bold text-[18px] press"
           >
             Try for $0.00
           </button>
@@ -1241,7 +1248,7 @@ function OnboardingInner() {
 
   if (step === "trialReminder") {
     return (
-      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-6 pb-6 onb-anim onb-no-divider">
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-6 pb-8 onb-anim onb-no-divider">
         <TrialHeader onBack={() => setStep("trialIntro")} onClose={() => setStep("auth")} />
 
         <div className="mt-6 text-center">
@@ -1265,7 +1272,7 @@ function OnboardingInner() {
           </p>
           <button
             onClick={() => setStep("trialPayment")}
-            className="w-full bg-[#1a1a1a] text-white py-[18px] rounded-2xl font-semibold text-[17px] press"
+            className="w-full bg-[#1a1a1a] text-white py-[20px] rounded-2xl font-bold text-[18px] press"
           >
             Continue for FREE
           </button>
@@ -1279,7 +1286,7 @@ function OnboardingInner() {
 
   if (step === "trialPayment") {
     return (
-      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-6 pb-6 onb-anim onb-no-divider">
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-6 pb-8 onb-anim onb-no-divider">
         <TrialHeader onBack={() => setStep("trialReminder")} onClose={() => setStep("auth")} />
 
         <div className="mt-6 text-center">
@@ -1311,7 +1318,7 @@ function OnboardingInner() {
           <button
             onClick={handleStartTrial}
             disabled={purchasing}
-            className="w-full bg-[#1a1a1a] text-white py-[18px] rounded-2xl font-semibold text-[17px] press disabled:opacity-60"
+            className="w-full bg-[#1a1a1a] text-white py-[20px] rounded-2xl font-bold text-[18px] press disabled:opacity-60"
           >
             {purchasing ? "Starting…" : "Try for $0.00"}
           </button>
