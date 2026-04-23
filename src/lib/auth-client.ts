@@ -1,5 +1,5 @@
 import { signIn } from "next-auth/react";
-import { isNativePlatform } from "./platform";
+import { isNativePlatform, isNativeAndroid } from "./platform";
 import { initSocialLogin } from "./capacitor";
 
 type Result = { error: null } | { error: string };
@@ -8,9 +8,24 @@ async function nativeSignIn(provider: "apple" | "google"): Promise<Result> {
   try {
     await initSocialLogin();
     const { SocialLogin } = await import("@capgo/capacitor-social-login");
-    const res = provider === "google"
-      ? await SocialLogin.login({ provider: "google", options: { forcePrompt: true } })
-      : await SocialLogin.login({ provider: "apple", options: { scopes: ["name", "email"] } });
+
+    let res;
+    if (provider === "apple") {
+      res = await SocialLogin.login({ provider: "apple", options: { scopes: ["name", "email"] } });
+    } else if (isNativeAndroid()) {
+      // Bottom-sheet Credential Manager path (GetGoogleIdOption). The default
+      // path (GetSignInWithGoogleOption) renders a centered modal dialog and
+      // also hits a [16] reauth bug on freshly-created OAuth clients. Clear
+      // any stale credential state first to avoid that same bug.
+      try { await SocialLogin.logout({ provider: "google" }); } catch {}
+      res = await SocialLogin.login({
+        provider: "google",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        options: { style: "bottom", forcePrompt: false, filterByAuthorizedAccounts: false, autoSelectEnabled: false } as any,
+      });
+    } else {
+      res = await SocialLogin.login({ provider: "google", options: { forcePrompt: true } });
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = res?.result as any;
