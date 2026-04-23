@@ -1179,46 +1179,51 @@ function OnboardingInner() {
   if (step === "trialPayment") {
     return (
       <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim onb-no-divider">
-        <div className="mt-8 text-center">
-          <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.1]">
+        <div className="mt-4 text-center">
+          <h1 className="font-display text-[26px] font-bold tracking-tight leading-[1.1]">
             Start your 3-day <span className="text-green-500">FREE</span> trial to continue.
           </h1>
-          <p className="text-text-muted text-[14px] leading-relaxed mt-3">
-            Cancel anytime. No charge for 3 days.
-          </p>
         </div>
 
-        <div className="flex-1 flex items-center py-6">
+        <div className="flex-1 flex items-center">
           <div className="w-full space-y-3">
-            <div className="bg-bg-card border-2 border-[#1a1a1a] rounded-2xl p-5 relative">
-              <div className="absolute -top-2.5 right-4 bg-[#1a1a1a] text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
-                Best value
-              </div>
-              <div className="flex items-baseline justify-between mb-1">
-                <p className="text-[16px] font-bold">Yearly</p>
-                <p className="font-display text-[22px] font-extrabold tabular-nums">$29.99<span className="text-[12px] font-medium text-text-muted">/yr</span></p>
-              </div>
-              <p className="text-[12px] text-text-muted">Just $2.50/month · save 75%</p>
-            </div>
-            <div className="bg-bg-card border-2 border-border rounded-2xl p-5">
-              <div className="flex items-baseline justify-between mb-1">
-                <p className="text-[16px] font-bold">Monthly</p>
-                <p className="font-display text-[22px] font-extrabold tabular-nums">$9.99<span className="text-[12px] font-medium text-text-muted">/mo</span></p>
-              </div>
-              <p className="text-[12px] text-text-muted">Cancel anytime</p>
-            </div>
+            <FeatureRow
+              emoji="🧠"
+              title="AI coach on call"
+              body="Real-time advice in the moment — specific to where you are and who you're talking to."
+            />
+            <FeatureRow
+              emoji="🎯"
+              title="Your custom weekly plan"
+              body="Weekly approach target, daily rhythm, focus areas built from your answers."
+            />
+            <FeatureRow
+              emoji="💬"
+              title="Openers & scripts"
+              body="Exact lines to open, keep the convo going, and close with a number."
+            />
+            <FeatureRow
+              emoji="📈"
+              title="Daily check-ins & progress"
+              body="Track approaches, build your streak, see your confidence level climb."
+            />
           </div>
         </div>
 
-        <button
-          onClick={() => router.push("/plans")}
-          className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
-        >
-          Start my 3-day free trial
-        </button>
-        <p className="text-center text-[11px] text-text-muted mt-3">
-          No charge for 3 days. Cancel anytime.
-        </p>
+        <div className="shrink-0">
+          <p className="text-center text-[13px] font-semibold text-text-muted mb-2">
+            No Payment Due Now
+          </p>
+          <button
+            onClick={() => router.push("/plans")}
+            className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+          >
+            Start my 3-day free trial
+          </button>
+          <p className="text-center text-[12px] text-text-muted mt-3">
+            <span className="font-semibold text-text">3 days free</span>, then $29.99/year ($2.49/mo)
+          </p>
+        </div>
       </main>
     );
   }
@@ -1481,6 +1486,20 @@ function buildPlan({
       },
     ],
   };
+}
+
+function FeatureRow({ emoji, title, body }: { emoji: string; title: string; body: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="w-10 h-10 rounded-xl bg-bg-input flex items-center justify-center text-[22px] shrink-0" aria-hidden>
+        {emoji}
+      </div>
+      <div className="flex-1 min-w-0 pt-0.5">
+        <p className="text-[15px] font-semibold leading-tight">{title}</p>
+        <p className="text-[12.5px] text-text-muted leading-snug mt-0.5">{body}</p>
+      </div>
+    </div>
+  );
 }
 
 function NotificationsStep({
