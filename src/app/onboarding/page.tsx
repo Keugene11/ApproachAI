@@ -1192,11 +1192,11 @@ function OnboardingInner() {
           We want you to try Wingmate for free.
         </h1>
 
-        <div className="flex-1 flex items-start justify-center min-h-0 pt-4 pb-10 overflow-hidden">
+        <div className="flex-1 flex items-start justify-center min-h-0 pt-4">
           <PhoneMockup width="min(240px, 68vw)" />
         </div>
 
-        <div className="shrink-0 relative bg-bg">
+        <div className="shrink-0 relative bg-bg pt-6">
           <p className="text-center text-[14px] font-medium text-text-muted mb-3">
             No Payment Due Now
           </p>
@@ -1621,16 +1621,16 @@ function TrialHeader({ onBack, onClose }: { onBack?: () => void; onClose: () => 
   return (
     <div className="flex items-center justify-between h-11">
       {onBack ? (
-        <button onClick={onBack} className="p-2 -ml-2 press shrink-0 text-text-muted" aria-label="Back">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <button onClick={onBack} className="p-2 -ml-2 press shrink-0 text-border" aria-label="Back">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
       ) : (
         <div aria-hidden />
       )}
-      <button onClick={onClose} className="p-2 -mr-2 press shrink-0 text-text-muted" aria-label="Close">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <button onClick={onClose} className="p-2 -mr-2 press shrink-0 text-border" aria-label="Close">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 6 6 18" />
           <path d="m6 6 12 12" />
         </svg>
