@@ -251,7 +251,7 @@ function OnboardingInner() {
   const [blocker, setBlocker] = useState<string | null>(null);
   const [weeklyTarget, setWeeklyTarget] = useState<number>(5);
   const [showApple, setShowApple] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
+  const selectedPlan: "yearly" = "yearly";
   const [purchasing, setPurchasing] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [iapPackages, setIapPackages] = useState<{ monthly?: any; yearly?: any }>({});
@@ -299,7 +299,7 @@ function OnboardingInner() {
     setPurchasing(true);
     try {
       if (isNativePlatform()) {
-        const pkg = selectedPlan === "monthly" ? iapPackages.monthly : iapPackages.yearly;
+        const pkg = iapPackages.yearly;
         if (!pkg) {
           setLiveError("This plan isn't available yet. Try again in a moment.");
           return;
@@ -1210,24 +1210,24 @@ function OnboardingInner() {
 
   if (step === "trialIntro") {
     return (
-      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-4 pb-4 onb-anim onb-no-divider">
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-4 pb-6 onb-anim onb-no-divider">
         <TrialHeader onClose={() => setStep("auth")} />
 
         <h1 className="mt-2 font-display text-[28px] font-extrabold tracking-tight leading-[1.1] text-center">
           We want you to try Wingmate for free.
         </h1>
 
-        <div className="flex-1 flex items-start justify-center min-h-0 pt-4">
-          <PhoneMockup width="min(240px, 68vw)" />
+        <div className="flex-1 flex items-center justify-center min-h-0 py-4">
+          <PhoneMockup width="min(220px, 62vw)" />
         </div>
 
-        <div className="shrink-0 relative bg-bg pt-6">
+        <div className="shrink-0 relative pt-2">
           <p className="text-center text-[14px] font-medium text-text-muted mb-3">
             No Payment Due Now
           </p>
           <button
             onClick={() => setStep("trialReminder")}
-            className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+            className="w-full bg-[#1a1a1a] text-white py-[18px] rounded-2xl font-semibold text-[17px] press"
           >
             Try for $0.00
           </button>
@@ -1241,7 +1241,7 @@ function OnboardingInner() {
 
   if (step === "trialReminder") {
     return (
-      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-6 pb-4 onb-anim onb-no-divider">
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-6 pb-6 onb-anim onb-no-divider">
         <TrialHeader onBack={() => setStep("trialIntro")} onClose={() => setStep("auth")} />
 
         <div className="mt-6 text-center">
@@ -1265,7 +1265,7 @@ function OnboardingInner() {
           </p>
           <button
             onClick={() => setStep("trialPayment")}
-            className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+            className="w-full bg-[#1a1a1a] text-white py-[18px] rounded-2xl font-semibold text-[17px] press"
           >
             Continue for FREE
           </button>
@@ -1279,7 +1279,7 @@ function OnboardingInner() {
 
   if (step === "trialPayment") {
     return (
-      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-6 pb-4 onb-anim onb-no-divider">
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-6 pb-6 onb-anim onb-no-divider">
         <TrialHeader onBack={() => setStep("trialReminder")} onClose={() => setStep("auth")} />
 
         <div className="mt-6 text-center">
@@ -1296,72 +1296,27 @@ function OnboardingInner() {
             </div>
           </div>
 
-          <div className="space-y-2 mb-6">
+          <div className="space-y-2">
             <FeatureRow emoji="🧠" title="AI coach in the moment" />
             <FeatureRow emoji="🎯" title="Your custom weekly plan" />
             <FeatureRow emoji="💬" title="Openers & scripts" />
             <FeatureRow emoji="📈" title="Daily check-ins & streaks" />
           </div>
-
-          <div className="space-y-2.5">
-            <button
-              onClick={() => setSelectedPlan("yearly")}
-              className={`relative w-full text-left px-5 py-4 rounded-2xl border-2 transition-colors press ${
-                selectedPlan === "yearly" ? "border-[#1a1a1a] bg-[#1a1a1a] text-white" : "border-border bg-bg-card"
-              }`}
-            >
-              <div className="absolute -top-2.5 right-4 bg-green-500 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
-                3-day free trial
-              </div>
-              <div className="flex items-baseline justify-between">
-                <p className="text-[16px] font-bold">Yearly</p>
-                <p className="font-display text-[20px] font-extrabold tabular-nums">
-                  $29.99<span className={`text-[12px] font-medium ${selectedPlan === "yearly" ? "text-white/60" : "text-text-muted"}`}>/yr</span>
-                </p>
-              </div>
-              <p className={`text-[12px] mt-0.5 ${selectedPlan === "yearly" ? "text-white/60" : "text-text-muted"}`}>
-                Just $2.49/month · save 75%
-              </p>
-            </button>
-
-            <button
-              onClick={() => setSelectedPlan("monthly")}
-              className={`w-full text-left px-5 py-4 rounded-2xl border-2 transition-colors press ${
-                selectedPlan === "monthly" ? "border-[#1a1a1a] bg-[#1a1a1a] text-white" : "border-border bg-bg-card"
-              }`}
-            >
-              <div className="flex items-baseline justify-between">
-                <p className="text-[16px] font-bold">Monthly</p>
-                <p className="font-display text-[20px] font-extrabold tabular-nums">
-                  $9.99<span className={`text-[12px] font-medium ${selectedPlan === "monthly" ? "text-white/60" : "text-text-muted"}`}>/mo</span>
-                </p>
-              </div>
-              <p className={`text-[12px] mt-0.5 ${selectedPlan === "monthly" ? "text-white/60" : "text-text-muted"}`}>
-                No trial · billed right away
-              </p>
-            </button>
-          </div>
         </div>
 
-        <div className="shrink-0">
-          {selectedPlan === "yearly" && (
-            <p className="text-center text-[14px] font-medium text-text-muted mb-3">
-              No Payment Due Now
-            </p>
-          )}
+        <div className="shrink-0 pb-2">
+          <p className="text-center text-[14px] font-medium text-text-muted mb-3">
+            No Payment Due Now
+          </p>
           <button
             onClick={handleStartTrial}
             disabled={purchasing}
-            className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press disabled:opacity-60"
+            className="w-full bg-[#1a1a1a] text-white py-[18px] rounded-2xl font-semibold text-[17px] press disabled:opacity-60"
           >
-            {purchasing ? "Starting…" : selectedPlan === "yearly" ? "Start my 3-day free trial" : "Subscribe monthly"}
+            {purchasing ? "Starting…" : "Try for $0.00"}
           </button>
           <p className="text-center text-[12px] text-text-muted mt-3">
-            {selectedPlan === "yearly" ? (
-              <><span className="font-semibold text-text">3 days free</span>, then $29.99/year ($2.49/mo)</>
-            ) : (
-              <>$9.99/month · No trial</>
-            )}
+            <span className="font-semibold text-text">3 days free</span>, then $29.99/year ($2.49/mo)
           </p>
         </div>
       </main>
