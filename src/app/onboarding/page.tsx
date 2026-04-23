@@ -1271,27 +1271,11 @@ function OnboardingInner() {
             </div>
           </div>
 
-          <div className="space-y-3 mb-6">
-            <FeatureRow
-              emoji="🧠"
-              title="AI coach on call"
-              body="Real-time advice in the moment — specific to where you are and who you're talking to."
-            />
-            <FeatureRow
-              emoji="🎯"
-              title="Your custom weekly plan"
-              body="Weekly approach target, daily rhythm, focus areas built from your answers."
-            />
-            <FeatureRow
-              emoji="💬"
-              title="Openers & scripts"
-              body="Exact lines to open, keep the convo going, and close with a number."
-            />
-            <FeatureRow
-              emoji="📈"
-              title="Daily check-ins & progress"
-              body="Track approaches, build your streak, see your confidence level climb."
-            />
+          <div className="space-y-2 mb-6">
+            <FeatureRow emoji="🧠" title="AI coach in the moment" />
+            <FeatureRow emoji="🎯" title="Your custom weekly plan" />
+            <FeatureRow emoji="💬" title="Openers & scripts" />
+            <FeatureRow emoji="📈" title="Daily check-ins & streaks" />
           </div>
 
           <div className="space-y-2.5">
@@ -1641,15 +1625,15 @@ function TrialHeader({ onBack, onClose }: { onBack?: () => void; onClose: () => 
   );
 }
 
-function FeatureRow({ emoji, title, body }: { emoji: string; title: string; body: string }) {
+function FeatureRow({ emoji, title, body }: { emoji: string; title: string; body?: string }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className="w-10 h-10 rounded-xl bg-bg-input flex items-center justify-center text-[22px] shrink-0" aria-hidden>
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 rounded-xl bg-bg-input flex items-center justify-center text-[18px] shrink-0" aria-hidden>
         {emoji}
       </div>
-      <div className="flex-1 min-w-0 pt-0.5">
+      <div className="flex-1 min-w-0">
         <p className="text-[15px] font-semibold leading-tight">{title}</p>
-        <p className="text-[12.5px] text-text-muted leading-snug mt-0.5">{body}</p>
+        {body && <p className="text-[12.5px] text-text-muted leading-snug mt-0.5">{body}</p>}
       </div>
     </div>
   );
