@@ -61,8 +61,7 @@ const LOCATION_OPTIONS = [
 ] as const;
 
 const STATUS_OPTIONS = [
-  { id: "highschool", label: "High school student", emoji: "🎒" },
-  { id: "college", label: "College student", emoji: "🎓" },
+  { id: "student", label: "Student", emoji: "🎓" },
   { id: "working", label: "In the workforce", emoji: "💼" },
   { id: "other", label: "Other", emoji: "🌟" },
 ] as const;
@@ -1382,7 +1381,7 @@ function buildPlan({
       {
         emoji: "🧠",
         title: "AI coach on call",
-        body: `Real-time advice in the moment — specific to ${status === "highschool" ? "high school" : status === "college" ? "college" : status === "working" ? "workplace" : "your"} settings.`,
+        body: `Real-time advice in the moment — specific to ${status === "student" ? "school" : status === "working" ? "workplace" : "your"} settings.`,
       },
     ],
   };
