@@ -8,16 +8,20 @@ import { hideSplash, setupAuthDeepLinkListener, initSocialLogin } from "@/lib/ca
 
 type Step =
   | "welcome"
+  | "status"
   | "approaches"
   | "source"
   | "experience"
   | "pitch"
+  | "location"
   | "birthday"
   | "goal"
   | "target"
   | "doable"
+  | "blockers"
   | "thanks"
   | "notifications"
+  | "rating"
   | "auth";
 
 const TARGET_MIN = 1;
@@ -28,6 +32,90 @@ const GOAL_OPTIONS = [
   { id: "girlfriend", label: "Get a girlfriend", emoji: "💖" },
   { id: "rizz", label: "Improve my rizz", emoji: "🎯" },
   { id: "memories", label: "Make fun memories", emoji: "🎉" },
+] as const;
+
+const CITIES = [
+  "New York, NY",
+  "Los Angeles, CA",
+  "Chicago, IL",
+  "Houston, TX",
+  "Phoenix, AZ",
+  "Philadelphia, PA",
+  "San Antonio, TX",
+  "San Diego, CA",
+  "Dallas, TX",
+  "San Jose, CA",
+  "Austin, TX",
+  "Jacksonville, FL",
+  "Fort Worth, TX",
+  "Columbus, OH",
+  "Indianapolis, IN",
+  "Charlotte, NC",
+  "San Francisco, CA",
+  "Seattle, WA",
+  "Denver, CO",
+  "Washington, DC",
+  "Boston, MA",
+  "Nashville, TN",
+  "Portland, OR",
+  "Las Vegas, NV",
+  "Detroit, MI",
+  "Memphis, TN",
+  "Baltimore, MD",
+  "Milwaukee, WI",
+  "Sacramento, CA",
+  "Kansas City, MO",
+  "Atlanta, GA",
+  "Raleigh, NC",
+  "Miami, FL",
+  "Oakland, CA",
+  "Minneapolis, MN",
+  "Tampa, FL",
+  "New Orleans, LA",
+  "Cleveland, OH",
+  "Cincinnati, OH",
+  "Pittsburgh, PA",
+  "St. Louis, MO",
+  "Salt Lake City, UT",
+  "Orlando, FL",
+  "Honolulu, HI",
+  "Toronto, Canada",
+  "Vancouver, Canada",
+  "Montreal, Canada",
+  "London, UK",
+  "Manchester, UK",
+  "Dublin, Ireland",
+  "Sydney, Australia",
+  "Melbourne, Australia",
+  "Paris, France",
+  "Berlin, Germany",
+  "Amsterdam, Netherlands",
+  "Madrid, Spain",
+  "Barcelona, Spain",
+  "Tokyo, Japan",
+  "Seoul, South Korea",
+  "Singapore",
+  "Hong Kong",
+  "Dubai, UAE",
+  "Mumbai, India",
+  "Delhi, India",
+  "Mexico City, Mexico",
+  "São Paulo, Brazil",
+];
+
+const STATUS_OPTIONS = [
+  { id: "highschool", label: "High school student", emoji: "🎒" },
+  { id: "college", label: "College student", emoji: "🎓" },
+  { id: "working", label: "In the workforce", emoji: "💼" },
+  { id: "other", label: "Other", emoji: "🌟" },
+] as const;
+
+const BLOCKER_OPTIONS = [
+  { id: "rejection", label: "Fear of rejection", emoji: "😰" },
+  { id: "words", label: "Don't know what to say", emoji: "🤐" },
+  { id: "confidence", label: "Low confidence", emoji: "😔" },
+  { id: "time", label: "Never the right moment", emoji: "⏰" },
+  { id: "nothing", label: "Nothing's stopping me", emoji: "💪" },
 ] as const;
 
 const MONTHS = [
@@ -172,13 +260,16 @@ function OnboardingInner() {
   const { status } = useSession();
   const [liveError, setLiveError] = useState<string | null>(null);
   const [step, setStep] = useState<Step>("welcome");
+  const [status_, setStatusAnswer] = useState<string | null>(null);
   const [approaches, setApproaches] = useState<string | null>(null);
   const [source, setSource] = useState<string | null>(null);
   const [experience, setExperience] = useState<string | null>(null);
+  const [location, setLocation] = useState<string>("");
   const [birthMonth, setBirthMonth] = useState<number | null>(null);
   const [birthDay, setBirthDay] = useState<number | null>(null);
   const [birthYear, setBirthYear] = useState<number | null>(null);
   const [goals, setGoals] = useState<string[]>([]);
+  const [blockers, setBlockers] = useState<string[]>([]);
   const [weeklyTarget, setWeeklyTarget] = useState<number>(5);
   const targetTrackRef = useRef<HTMLDivElement>(null);
   const error = liveError || searchParams.get("error");
@@ -212,6 +303,14 @@ function OnboardingInner() {
 
   const toggleGoal = (id: string) => {
     setGoals((prev) => (prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]));
+  };
+
+  const toggleBlocker = (id: string) => {
+    setBlockers((prev) => {
+      if (id === "nothing") return prev.includes(id) ? [] : [id];
+      const next = prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id];
+      return next.filter((g) => g !== "nothing");
+    });
   };
 
   useEffect(() => {
@@ -252,7 +351,7 @@ function OnboardingInner() {
             </button>
           </p>
           <button
-            onClick={() => setStep("approaches")}
+            onClick={() => setStep("status")}
             className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
           >
             Next
@@ -262,10 +361,70 @@ function OnboardingInner() {
     );
   }
 
+  if (step === "status") {
+    return (
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
+        <QuizHeader onBack={() => setStep("welcome")} progress={0.05} />
+
+        <div className="mt-8">
+          <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15]">
+            What&apos;s your current status?
+          </h1>
+          <p className="text-text-muted text-[15px] leading-relaxed mt-2">
+            This helps us tailor your plan.
+          </p>
+        </div>
+
+        <div className="flex-1 flex items-center">
+          <div className="w-full space-y-3 onb-list">
+            {STATUS_OPTIONS.map((opt) => {
+              const selected = status_ === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => setStatusAnswer(opt.id)}
+                  className={`w-full flex items-center gap-4 text-left px-5 py-4 rounded-2xl border-2 transition-colors press ${
+                    selected
+                      ? "border-[#1a1a1a] bg-[#1a1a1a] text-white"
+                      : "border-border bg-bg-card"
+                  }`}
+                >
+                  <span className="text-[28px] leading-none shrink-0" aria-hidden>
+                    {opt.emoji}
+                  </span>
+                  <p className="text-[17px] font-semibold leading-tight flex-1">{opt.label}</p>
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center ${
+                      selected ? "border-white bg-white" : "border-border"
+                    }`}
+                  >
+                    {selected && (
+                      <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="#1a1a1a" strokeWidth="3">
+                        <path d="M3 8l3 3 7-7" />
+                      </svg>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <button
+          onClick={() => setStep("approaches")}
+          disabled={!status_}
+          className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press disabled:bg-border disabled:text-text-muted disabled:pointer-events-none"
+        >
+          Next
+        </button>
+      </main>
+    );
+  }
+
   if (step === "approaches") {
     return (
       <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
-        <QuizHeader onBack={() => setStep("welcome")} progress={0.1} />
+        <QuizHeader onBack={() => setStep("status")} progress={0.1} />
 
         <div className="mt-8">
           <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15]">
@@ -447,8 +606,78 @@ function OnboardingInner() {
         </div>
 
         <button
-          onClick={() => setStep("birthday")}
+          onClick={() => setStep("location")}
           className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+        >
+          Next
+        </button>
+      </main>
+    );
+  }
+
+  if (step === "location") {
+    const query = location.trim().toLowerCase();
+    const matches = query
+      ? CITIES.filter((c) => c.toLowerCase().includes(query)).slice(0, 6)
+      : CITIES.slice(0, 6);
+    const exactMatch = CITIES.some((c) => c.toLowerCase() === query);
+
+    return (
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
+        <QuizHeader onBack={() => setStep("pitch")} progress={0.45} />
+
+        <div className="mt-8">
+          <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15]">
+            Where do you live?
+          </h1>
+          <p className="text-text-muted text-[15px] leading-relaxed mt-2">
+            Type your city — pick from the list or enter your own.
+          </p>
+        </div>
+
+        <div className="mt-6 onb-list">
+          <div className="relative">
+            <svg
+              className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted"
+              width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Search city..."
+              autoComplete="off"
+              className="w-full pl-11 pr-4 py-4 rounded-2xl border-2 border-border bg-bg-card text-[16px] font-medium outline-none focus:border-[#1a1a1a] transition-colors"
+            />
+          </div>
+
+          {matches.length > 0 && !exactMatch && (
+            <div className="mt-2 space-y-1.5 max-h-[320px] overflow-y-auto">
+              {matches.map((city) => (
+                <button
+                  key={city}
+                  onClick={() => setLocation(city)}
+                  className="w-full flex items-center gap-3 text-left px-5 py-3 rounded-xl border border-border bg-bg-card press hover:border-[#1a1a1a] transition-colors"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-text-muted shrink-0">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <span className="text-[15px] font-medium truncate">{city}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={() => setStep("birthday")}
+          disabled={location.trim().length === 0}
+          className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press disabled:bg-border disabled:text-text-muted disabled:pointer-events-none"
         >
           Next
         </button>
@@ -465,7 +694,7 @@ function OnboardingInner() {
 
     return (
       <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
-        <QuizHeader onBack={() => setStep("pitch")} progress={0.5} />
+        <QuizHeader onBack={() => setStep("location")} progress={0.5} />
 
         <div className="mt-8">
           <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15]">
@@ -630,14 +859,14 @@ function OnboardingInner() {
               <div className="absolute left-0 right-0 h-1 bg-bg-input rounded-full pointer-events-none" />
               {/* Filled portion — reaches thumb center */}
               <div
-                className="absolute left-0 h-1 bg-[#1a1a1a] rounded-full transition-[width] duration-75 pointer-events-none"
+                className="absolute left-0 h-1 bg-[#1a1a1a] rounded-full pointer-events-none"
                 style={{
                   width: `calc(${((weeklyTarget - TARGET_MIN) / (TARGET_MAX - TARGET_MIN)) * 100}% + ${TARGET_THUMB / 2 - ((weeklyTarget - TARGET_MIN) / (TARGET_MAX - TARGET_MIN)) * TARGET_THUMB}px)`,
                 }}
               />
               {/* Clean circular thumb — inset so it stays inside the track */}
               <div
-                className="absolute top-1/2 -translate-y-1/2 pointer-events-none transition-transform"
+                className="absolute top-1/2 -translate-y-1/2 pointer-events-none"
                 style={{
                   left: `calc(${((weeklyTarget - TARGET_MIN) / (TARGET_MAX - TARGET_MIN)) * 100}% - ${((weeklyTarget - TARGET_MIN) / (TARGET_MAX - TARGET_MIN)) * TARGET_THUMB}px)`,
                 }}
@@ -686,8 +915,57 @@ function OnboardingInner() {
         </div>
 
         <button
-          onClick={() => setStep("thanks")}
+          onClick={() => setStep("blockers")}
           className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+        >
+          Next
+        </button>
+      </main>
+    );
+  }
+
+  if (step === "blockers") {
+    return (
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
+        <QuizHeader onBack={() => setStep("doable")} progress={0.85} />
+
+        <div className="mt-8">
+          <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15]">
+            What&apos;s stopping you from reaching your goals?
+          </h1>
+          <p className="text-text-muted text-[15px] leading-relaxed mt-2">
+            Pick any that apply.
+          </p>
+        </div>
+
+        <div className="flex-1 flex items-center">
+          <div className="w-full space-y-3 onb-list">
+            {BLOCKER_OPTIONS.map((opt) => {
+              const selected = blockers.includes(opt.id);
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => toggleBlocker(opt.id)}
+                  className={`w-full flex items-center gap-4 text-left px-5 py-4 rounded-2xl border-2 transition-colors press ${
+                    selected
+                      ? "border-[#1a1a1a] bg-[#1a1a1a] text-white"
+                      : "border-border bg-bg-card"
+                  }`}
+                >
+                  <span className="text-[28px] leading-none shrink-0" aria-hidden>
+                    {opt.emoji}
+                  </span>
+                  <p className="text-[17px] font-semibold leading-tight flex-1">{opt.label}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <button
+          onClick={() => setStep("thanks")}
+          disabled={blockers.length === 0}
+          className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press disabled:bg-border disabled:text-text-muted disabled:pointer-events-none"
         >
           Next
         </button>
@@ -698,7 +976,7 @@ function OnboardingInner() {
   if (step === "thanks") {
     return (
       <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
-        <QuizHeader onBack={() => setStep("doable")} progress={0.9} />
+        <QuizHeader onBack={() => setStep("blockers")} progress={0.9} />
 
         <div className="flex-1 flex flex-col items-center justify-center text-center">
           <div className="w-24 h-24 rounded-full bg-red-50 border border-red-200 flex items-center justify-center mb-8">
@@ -732,7 +1010,7 @@ function OnboardingInner() {
           await Notification.requestPermission();
         }
       } catch {}
-      setStep("auth");
+      setStep("rating");
     };
 
     return (
@@ -772,7 +1050,7 @@ function OnboardingInner() {
 
         <div className="space-y-3">
           <button
-            onClick={() => setStep("auth")}
+            onClick={() => setStep("rating")}
             className="w-full text-center text-text-muted text-[14px] font-medium press py-2"
           >
             Maybe later
@@ -788,11 +1066,68 @@ function OnboardingInner() {
     );
   }
 
+  if (step === "rating") {
+    return (
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-10 pb-4 onb-anim">
+        <QuizHeader onBack={() => setStep("notifications")} progress={1} />
+
+        <div className="mt-8 text-center">
+          <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15]">
+            Guys like you love Wingmate.
+          </h1>
+          <p className="text-text-muted text-[15px] leading-relaxed mt-2">
+            Here&apos;s what they&apos;re saying.
+          </p>
+        </div>
+
+        <div className="mt-8 flex flex-col items-center gap-2">
+          <div className="flex items-center gap-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <svg key={i} width="22" height="22" viewBox="0 0 24 24" fill="#FBBF24" stroke="#FBBF24" strokeWidth="1.5" strokeLinejoin="round">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            ))}
+          </div>
+          <p className="text-[13px] text-text-muted">
+            <span className="font-semibold text-text">4.9</span> out of 5 · 2,400+ reviews
+          </p>
+        </div>
+
+        <div className="flex-1 flex items-center py-6">
+          <div className="w-full space-y-2.5">
+            <ReviewCard
+              name="Marcus T."
+              stars={5}
+              body="Finally actually approached someone. The coach's advice actually works."
+            />
+            <ReviewCard
+              name="Jordan K."
+              stars={5}
+              body="Went from 0 approaches a week to 5. Worth every penny."
+            />
+            <ReviewCard
+              name="Ethan R."
+              stars={5}
+              body="Best confidence app I've tried. No generic fluff — it's specific."
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={() => setStep("auth")}
+          className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+        >
+          Continue
+        </button>
+      </main>
+    );
+  }
+
   return (
     <main key={step} className="h-app max-w-md mx-auto flex flex-col justify-between px-6 pt-10 pb-4 onb-anim">
       <div>
         <button
-          onClick={() => setStep("notifications")}
+          onClick={() => setStep("rating")}
           className="text-text-muted text-[14px] font-medium mb-8 press"
         >
           ← Back
@@ -872,6 +1207,24 @@ function NotifPreview({
         </div>
         <p className="text-[12.5px] leading-snug mt-1 text-text/90 line-clamp-2">{body}</p>
       </div>
+    </div>
+  );
+}
+
+function ReviewCard({ name, stars, body }: { name: string; stars: number; body: string }) {
+  return (
+    <div className="bg-bg-card border border-border rounded-2xl px-4 py-3">
+      <div className="flex items-center justify-between mb-1.5">
+        <p className="text-[13px] font-semibold">{name}</p>
+        <div className="flex items-center gap-0.5">
+          {Array.from({ length: stars }).map((_, i) => (
+            <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill="#FBBF24" stroke="#FBBF24" strokeWidth="1.5" strokeLinejoin="round">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+          ))}
+        </div>
+      </div>
+      <p className="text-[13px] leading-snug text-text/85">{body}</p>
     </div>
   );
 }
