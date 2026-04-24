@@ -15,6 +15,7 @@ import ConversationList from "@/components/ConversationList";
 import DailyCheckin from "@/components/DailyCheckin";
 import type { Tab } from "@/components/BottomNav";
 import PostCard from "@/components/PostCard";
+import PlanView from "@/components/PlanView";
 import StatsView from "@/components/StatsView";
 
 function getGreeting(name?: string): string {
@@ -58,7 +59,7 @@ function HomeInner() {
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     try {
       const saved = typeof window !== "undefined" && sessionStorage.getItem("wingmate-active-tab");
-      if (saved && ["checkin", "coach", "stats", "community", "plans"].includes(saved)) return saved as Tab;
+      if (saved && ["checkin", "coach", "plan", "stats", "community", "plans"].includes(saved)) return saved as Tab;
     } catch {}
     return "checkin";
   });
@@ -91,7 +92,7 @@ function HomeInner() {
   // React to URL tab changes (BottomNav uses Link navigation).
   useEffect(() => {
     const tabParam = searchParams.get("tab") as Tab | null;
-    if (tabParam && ["checkin", "coach", "stats", "community", "plans"].includes(tabParam)) {
+    if (tabParam && ["checkin", "coach", "plan", "stats", "community", "plans"].includes(tabParam)) {
       setActiveTab(tabParam);
       setState(tabParam === "coach" ? "chat" : "tabs");
       try { sessionStorage.setItem("wingmate-active-tab", tabParam); } catch {}
@@ -421,6 +422,13 @@ function HomeInner() {
             isLoggedIn={isLoggedIn === true}
             isPro={isPro === true}
           />
+        </div>
+      )}
+
+      {/* ===== PLAN TAB ===== */}
+      {activeTab === "plan" && (
+        <div className="px-5 pt-14 pb-10 animate-fade-in">
+          <PlanView />
         </div>
       )}
 

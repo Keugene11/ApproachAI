@@ -19,6 +19,7 @@ type Profile = {
   avatar_url: string | null;
   goal: string | null;
   custom_goal: string | null;
+  date_of_birth: string | null;
 };
 
 const GOAL_OPTIONS = [
@@ -56,6 +57,11 @@ export default function ProfilePage() {
   const [goalSelection, setGoalSelection] = useState<Set<string>>(new Set());
   const [customGoalInput, setCustomGoalInput] = useState("");
   const [savingGoals, setSavingGoals] = useState(false);
+
+  // Birthday
+  const [editingBirthday, setEditingBirthday] = useState(false);
+  const [birthdayInput, setBirthdayInput] = useState("");
+  const [savingBirthday, setSavingBirthday] = useState(false);
 
   // Stats
   const [streak, setStreak] = useState(0);
@@ -180,6 +186,52 @@ export default function ProfilePage() {
     }
     setSavingGoals(false);
     setEditingGoals(false);
+  };
+
+  const normalizeDob = (raw: string | null | undefined): string => {
+    if (!raw) return "";
+    // Postgres may return a Date object or an ISO string with time; both
+    // need to collapse to YYYY-MM-DD for <input type="date">.
+    const s = String(raw);
+    return s.length >= 10 ? s.slice(0, 10) : "";
+  };
+
+  // Parse YYYY-MM-DD as a local date to avoid the UTC→local timezone shift
+  // that would turn e.g. "2001-04-15" into April 14 west of UTC.
+  const formatBirthday = (iso: string): string => {
+    const [y, m, d] = iso.split("-").map(Number);
+    if (!y || !m || !d) return "";
+    return new Date(y, m - 1, d).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const startEditingBirthday = () => {
+    setBirthdayInput(normalizeDob(profile?.date_of_birth));
+    setEditingBirthday(true);
+  };
+
+  const saveBirthday = async () => {
+    if (!birthdayInput) {
+      setEditingBirthday(false);
+      return;
+    }
+    setSavingBirthday(true);
+    const res = await fetch("/api/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date_of_birth: birthdayInput }),
+    });
+    const data = await res.json();
+    if (data.profile) {
+      setProfile(data.profile);
+    } else if (data.error) {
+      showToast(data.error);
+    }
+    setSavingBirthday(false);
+    setEditingBirthday(false);
   };
 
   const formatDate = (dateStr: string) =>
@@ -385,6 +437,54 @@ export default function ProfilePage() {
               );
             })()}
           </div>
+        )}
+      </div>
+
+      {/* Birthday */}
+      <div className="bg-bg-card border border-border rounded-xl shadow-card px-4 py-4 mb-3">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[12px] font-semibold text-text-muted uppercase tracking-wide">
+            Birthday
+          </p>
+          {!editingBirthday && (
+            <button onClick={startEditingBirthday} className="text-[12px] font-medium text-text-muted press">
+              Edit
+            </button>
+          )}
+        </div>
+        {editingBirthday ? (
+          <div>
+            <input
+              type="date"
+              value={birthdayInput}
+              onChange={(e) => setBirthdayInput(e.target.value)}
+              max={new Date().toISOString().slice(0, 10)}
+              className="w-full bg-bg-input rounded-xl px-3 py-2.5 text-[14px] font-medium outline-none mb-3"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => setEditingBirthday(false)}
+                className="flex-1 py-2 rounded-xl text-[13px] font-medium bg-bg-input press"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveBirthday}
+                disabled={savingBirthday || !birthdayInput}
+                className="flex-1 py-2 rounded-xl text-[13px] font-medium bg-[#1a1a1a] text-white press disabled:opacity-60"
+              >
+                {savingBirthday ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-[14px] font-medium">
+            {profile?.date_of_birth ? (
+              formatBirthday(normalizeDob(profile.date_of_birth))
+            ) : (
+              <span className="text-text-muted">Not set</span>
+            )}
+          </p>
         )}
       </div>
 

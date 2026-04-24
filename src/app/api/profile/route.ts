@@ -78,7 +78,7 @@ export async function PATCH(req: Request) {
   }
 
   if (body.goal !== undefined) {
-    updates.goal = body.goal;
+    updates.goal = String(body.goal).slice(0, 200);
   }
 
   if (body.custom_goal !== undefined) {
@@ -88,6 +88,49 @@ export async function PATCH(req: Request) {
   if (body.weekly_approach_goal !== undefined) {
     const goal = Math.min(999, Math.max(0, Math.round(Number(body.weekly_approach_goal) || 0)));
     updates.weekly_approach_goal = goal;
+  }
+
+  const VALID_STATUS = ["student", "working", "other"] as const;
+  if (body.status !== undefined) {
+    if (!VALID_STATUS.includes(body.status)) {
+      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+    }
+    updates.status = body.status;
+  }
+
+  const VALID_LOCATION = ["city", "suburb", "town", "rural"] as const;
+  if (body.location !== undefined) {
+    if (!VALID_LOCATION.includes(body.location)) {
+      return NextResponse.json({ error: "Invalid location" }, { status: 400 });
+    }
+    updates.location = body.location;
+  }
+
+  const VALID_BLOCKER = ["rejection", "words", "confidence", "time"] as const;
+  if (body.blocker !== undefined) {
+    if (!VALID_BLOCKER.includes(body.blocker)) {
+      return NextResponse.json({ error: "Invalid blocker" }, { status: 400 });
+    }
+    updates.blocker = body.blocker;
+  }
+
+  if (body.date_of_birth !== undefined) {
+    // Expect YYYY-MM-DD. Reject anything else so we don't store garbage.
+    const dob = String(body.date_of_birth);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) {
+      return NextResponse.json({ error: "Invalid date of birth" }, { status: 400 });
+    }
+    const d = new Date(dob + "T00:00:00Z");
+    if (Number.isNaN(d.getTime())) {
+      return NextResponse.json({ error: "Invalid date of birth" }, { status: 400 });
+    }
+    // Must be at least 13 years old.
+    const now = new Date();
+    const minAgeMs = 13 * 365.25 * 24 * 60 * 60 * 1000;
+    if (now.getTime() - d.getTime() < minAgeMs) {
+      return NextResponse.json({ error: "You must be at least 13 years old" }, { status: 400 });
+    }
+    updates.date_of_birth = dob;
   }
 
   try {
@@ -108,7 +151,11 @@ export async function PATCH(req: Request) {
         avatar_url = COALESCE(${updates.avatar_url ?? null}, avatar_url),
         goal = COALESCE(${updates.goal ?? null}, goal),
         custom_goal = COALESCE(${updates.custom_goal ?? null}, custom_goal),
-        weekly_approach_goal = COALESCE(${updates.weekly_approach_goal ?? null}, weekly_approach_goal)
+        weekly_approach_goal = COALESCE(${updates.weekly_approach_goal ?? null}, weekly_approach_goal),
+        date_of_birth = COALESCE(${updates.date_of_birth ?? null}, date_of_birth),
+        status = COALESCE(${updates.status ?? null}, status),
+        location = COALESCE(${updates.location ?? null}, location),
+        blocker = COALESCE(${updates.blocker ?? null}, blocker)
       WHERE id = ${userId}
       RETURNING *
     `;

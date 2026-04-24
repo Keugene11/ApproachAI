@@ -211,11 +211,7 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
       setMessages([initialMsg]);
       setInitialized(true);
     } else {
-      const initialMsg: Message = {
-        role: "assistant",
-        content: "Too scared to go up to her? That's normal — every guy feels that. Tell me what's going on. Where are you, what's she doing, and what's holding you back right now?",
-      };
-      setMessages([initialMsg]);
+      setMessages([]);
       setInitialized(true);
 
       // Check for pending message saved before OAuth redirect
@@ -225,7 +221,7 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
           if (pending) {
             sessionStorage.removeItem("wingmate-pending-message");
             const userMsg: Message = { role: "user", content: pending };
-            const allMsgs = [initialMsg, userMsg];
+            const allMsgs = [userMsg];
             setMessages(allMsgs);
 
             // Count session + message usage
@@ -481,16 +477,24 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
               onSubmit={handleSubmit}
               className="flex items-end gap-2 bg-bg-card border border-border rounded-2xl shadow-card pl-4 pr-2 py-2"
             >
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={handleTextareaInput}
-                onKeyDown={handleKeyDown}
-                placeholder="What's on your mind..."
-                rows={1}
-                className="flex-1 bg-transparent text-text text-[15px] placeholder-text-muted/60 focus:outline-none resize-none leading-normal py-1"
-                disabled={isLoading}
-              />
+              <div className="flex-1 flex items-end gap-2 min-w-0">
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={handleTextareaInput}
+                  onKeyDown={handleKeyDown}
+                  placeholder="What's on your mind..."
+                  rows={1}
+                  maxLength={2000}
+                  className="flex-1 bg-transparent text-text text-[15px] placeholder-text-muted/60 focus:outline-none resize-none leading-normal py-1 min-w-0"
+                  disabled={isLoading}
+                />
+                {input.length >= 1800 && (
+                  <span className={`text-[11px] pb-1.5 shrink-0 ${input.length >= 2000 ? "text-red-500" : "text-text-muted"}`}>
+                    {2000 - input.length}
+                  </span>
+                )}
+              </div>
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}

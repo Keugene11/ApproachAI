@@ -230,6 +230,10 @@ function OnboardingInner() {
   const [liveError, setLiveError] = useState<string | null>(null);
   const [step, setStep] = useState<Step>("welcome");
   const prevStepRef = useRef<Step>("welcome");
+  // Mirror of `step` readable inside async listeners (e.g. the Android
+  // hardware back button handler) without needing to re-register.
+  const stepRef = useRef<Step>("welcome");
+  stepRef.current = step;
 
   // Detect forward vs backward navigation after each step change and toggle
   // a body class so the slide-in animation runs in the right direction. Uses
@@ -382,6 +386,69 @@ function OnboardingInner() {
       setStep("trialIntro");
     }
   }, [router, status, searchParams]);
+
+  // Intercept the Android hardware back button. Without this, pressing back
+  // pops the webview out of /onboarding and the root route redirects back —
+  // the onboarding state resets to "welcome" (and the root flashes briefly
+  // during the redirect). Map it to a single step back instead.
+  useEffect(() => {
+    if (!isNativePlatform()) return;
+    let handle: { remove: () => void } | undefined;
+    (async () => {
+      try {
+        const { App } = await import("@capacitor/app");
+        handle = await App.addListener("backButton", () => {
+          const idx = (ALL_STEPS as readonly string[]).indexOf(stepRef.current);
+          if (idx > 0) {
+            setStep(ALL_STEPS[idx - 1] as Step);
+          }
+          // idx === 0 ("welcome") or unknown: swallow the event so the app
+          // doesn't exit. User can press home to leave.
+        });
+      } catch {}
+    })();
+    return () => {
+      handle?.remove();
+    };
+  }, []);
+
+  // Once the user is authenticated, flush the birthday collected during
+  // onboarding to their profile. PlanGenerating already stashed the answers
+  // in localStorage; we drain the birth fields here so this only runs once.
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    try {
+      const raw = localStorage.getItem("wingmate:onboarding");
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      const patches: Record<string, unknown> = {};
+      const { birthMonth, birthDay, birthYear } = data;
+      if (birthMonth != null && birthDay != null && birthYear != null) {
+        const m = String(birthMonth + 1).padStart(2, "0");
+        const d = String(birthDay).padStart(2, "0");
+        patches.date_of_birth = `${birthYear}-${m}-${d}`;
+      }
+      if (typeof data.status === "string") patches.status = data.status;
+      if (typeof data.location === "string") patches.location = data.location;
+      if (typeof data.blocker === "string") patches.blocker = data.blocker;
+      if (Array.isArray(data.goals) && data.goals.length > 0) {
+        patches.goal = data.goals.join(",");
+      }
+      if (typeof data.weeklyTarget === "number") {
+        patches.weekly_approach_goal = data.weeklyTarget;
+      }
+      if (Object.keys(patches).length === 0) return;
+      fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patches),
+      }).catch(() => {});
+      for (const k of ["birthMonth", "birthDay", "birthYear", "status", "location", "blocker", "goals", "weeklyTarget"]) {
+        delete data[k];
+      }
+      localStorage.setItem("wingmate:onboarding", JSON.stringify(data));
+    } catch {}
+  }, [status]);
 
   const handleGoogle = async () => {
     setLiveError(null);
