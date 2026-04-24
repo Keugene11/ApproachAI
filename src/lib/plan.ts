@@ -1,7 +1,6 @@
-// 4-week rizz plan. Static structure, but every line is written against the
-// user's own onboarding answers: weekly target, blocker, status, location,
-// and goal. No generic "Eye Contact" labels — the plan speaks in their
-// numbers and in their language.
+// The Plan is a motivational document the user opens in the moment —
+// when they see a girl and the fear kicks in. It reminds them of their
+// goals, reframes their blocker, and fires them up to go.
 
 export type PlanLocation = "city" | "suburb" | "town" | "rural";
 export type PlanStatus = "student" | "working" | "other";
@@ -11,144 +10,96 @@ export type PlanProfile = {
   status: string | null;
   location: string | null;
   blocker: string | null;
-  goal: string | null; // comma-separated ids, e.g. "girlfriend,rizz"
+  goal: string | null; // comma-separated ids
   weekly_approach_goal: number | null;
+  plan_note: string | null;
 };
 
-export type PlanWeek = {
-  number: 1 | 2 | 3 | 4;
-  heading: string;
-  why: string; // may contain \n\n for paragraph breaks
-  tasks: string[];
-  endOfWeek: string;
+export type PlanMotivation = {
+  why: { headline: string; body: string };
+  fear: { lie: string; truth: string };
+  math: string;
+  focus: string | null;
+  weeklyTarget: number;
 };
 
-export type PlanState = {
-  currentWeek: 1 | 2 | 3 | 4;
-  daysIntoWeek: number; // 0-6
-  graduated: boolean;
-};
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-export function derivePlanState(createdAt: string | Date | null | undefined): PlanState {
-  if (!createdAt) return { currentWeek: 1, daysIntoWeek: 0, graduated: false };
-  const start = createdAt instanceof Date ? createdAt.getTime() : new Date(createdAt).getTime();
-  if (Number.isNaN(start)) return { currentWeek: 1, daysIntoWeek: 0, graduated: false };
-  const daysSince = Math.max(0, Math.floor((Date.now() - start) / DAY_MS));
-  const rawWeek = Math.floor(daysSince / 7) + 1;
-  const currentWeek = Math.min(4, Math.max(1, rawWeek)) as 1 | 2 | 3 | 4;
+function whyFromGoal(goal: string | null): { headline: string; body: string } {
+  const goals = (goal || "").split(",").filter(Boolean);
+  if (goals.includes("girlfriend")) {
+    return {
+      headline: "You want a girlfriend.",
+      body: "A real connection. Someone who actually knows you. It starts with walking over.",
+    };
+  }
+  if (goals.includes("hookups")) {
+    return {
+      headline: "You want to meet more girls.",
+      body: "Not the scroll. Not the screen. Real nights, real stories. That starts right now.",
+    };
+  }
+  if (goals.includes("rizz")) {
+    return {
+      headline: "You want to be the guy who can talk to anyone.",
+      body: "That guy was built by reps. Every conversation, even the rough ones, gets you there.",
+    };
+  }
+  if (goals.includes("memories")) {
+    return {
+      headline: "You want memories, not regrets.",
+      body: "The stories worth telling come from the moments you said yes. Not the ones you dodged.",
+    };
+  }
   return {
-    currentWeek,
-    daysIntoWeek: daysSince % 7,
-    graduated: rawWeek > 4,
+    headline: "You're here because you want more.",
+    body: "More life. More conversations. More yes. That's enough reason to go.",
   };
 }
 
-function weeklyTarget(profile: PlanProfile): number {
-  const t = profile.weekly_approach_goal;
-  if (typeof t === "number" && t > 0) return t;
-  return 5;
-}
-
-function spotsFor(profile: PlanProfile): string {
-  const { status, location } = profile;
-  if (status === "student") return "campus — the library café, the student union, between classes";
-  if (status === "working") {
-    if (location === "city") return "the lunch spots near your office, after-work cafés, the gym";
-    if (location === "suburb") return "the grocery store, the gym, the coffee shop on your commute";
-    return "the handful of places you go in a normal week — make every trip count";
-  }
-  if (location === "city") return "coffee shops, busy streets, the gym";
-  if (location === "suburb") return "the mall, the grocery store, the gym";
-  if (location === "town") return "your regular spots — the café, the gym, the bookstore";
-  if (location === "rural") return "the few spots you do go to — don't wait for the perfect moment";
-  return "the spots you're already at every week";
-}
-
-function blockerAddress(blocker: string | null): string {
+function fearFromBlocker(blocker: string | null): { lie: string; truth: string } {
   switch (blocker) {
     case "rejection":
-      return "Fear of rejection is your block — so forget outcomes. Every attempt is the win.";
+      return {
+        lie: "\"She'll reject me.\"",
+        truth:
+          "Rejection is information, not failure. She doesn't know you yet. You still win by going. No one loses respect for a guy who tried.",
+      };
     case "words":
-      return "You never know what to say — so don't try to. \"Hey, how's your day going\" works.";
+      return {
+        lie: "\"I won't know what to say.\"",
+        truth:
+          "You don't need a script. \"Hey, how's it going\" has worked for every guy alive. Your voice works. Just use the words in your mouth.",
+      };
     case "confidence":
-      return "Low confidence is the block — you won't feel ready. Act first, confidence follows.";
+      return {
+        lie: "\"I need to feel ready first.\"",
+        truth:
+          "You won't feel ready. Confident guys aren't born confident — they moved first and the feeling followed. Act. The rest catches up.",
+      };
     case "time":
-      return "You can't find the right moment — so don't wait for one. First 10 seconds or it doesn't happen.";
+      return {
+        lie: "\"The moment isn't right.\"",
+        truth:
+          "There is no right moment. The window closes the longer you stand there. Ten seconds of courage or it doesn't happen.",
+      };
     default:
-      return "You're here to make more moves. That's the first rep.";
+      return {
+        lie: "\"Not today.\"",
+        truth:
+          "Today is the only day you actually have. Every 'not today' adds up to never. Go now — future you will thank you.",
+      };
   }
 }
 
-function goalLine(goal: string | null): string {
-  const goals = (goal || "").split(",").filter(Boolean);
-  if (goals.includes("girlfriend")) return "You want a girlfriend — close only with the ones who actually spark something.";
-  if (goals.includes("hookups")) return "You're playing the dating game — match her energy and escalate.";
-  if (goals.includes("rizz")) return "You're building rizz — the ask is the rep that matters most.";
-  if (goals.includes("memories")) return "You want memories — made by the moments you said yes to.";
-  return "Every closed loop is proof you can do this.";
-}
-
-export function buildWeek(weekNum: 1 | 2 | 3 | 4, profile: PlanProfile): PlanWeek {
-  const weekly = weeklyTarget(profile);
-  const daily = Math.max(1, Math.round(weekly / 7));
-  const halfWeekly = Math.max(1, Math.round(weekly / 2));
-  const halfDaily = Math.max(1, Math.round(halfWeekly / 7));
-  const spots = spotsFor(profile);
-
-  if (weekNum === 1) {
-    return {
-      number: 1,
-      heading: "Build the habit",
-      why: `${blockerAddress(profile.blocker)} Target ${weekly}/week — this week we ramp at half.`,
-      tasks: [
-        `${halfDaily} ${halfDaily === 1 ? "approach" : "approaches"} a day · ${halfWeekly}/week`,
-        `Stay in your lane: ${spots.split(" — ")[0]}`,
-        `Count attempts, not outcomes`,
-      ],
-      endOfWeek: `${halfWeekly} attempts logged.`,
-    };
-  }
-
-  if (weekNum === 2) {
-    return {
-      number: 2,
-      heading: "Hit your number",
-      why: `Warmup's over. Target — ${weekly} approaches. Prove the number wasn't a fantasy.`,
-      tasks: [
-        `${daily} a day · ${weekly}/week`,
-        `Same spots, different faces`,
-        profile.blocker === "time" ? "Use time you already have — café lines, commutes" : "Leaving after the opener still counts",
-      ],
-      endOfWeek: `${weekly} approaches, hit clean.`,
-    };
-  }
-
-  if (weekNum === 3) {
-    return {
-      number: 3,
-      heading: "Go deeper",
-      why: `Past "can I even do this." Stretch — same ${weekly}, but stick around on half.`,
-      tasks: [
-        `${daily} a day · ${weekly}/week`,
-        `Carry 60+ seconds on half. One follow-up, one thing about you`,
-        `Clean exit: "Anyway, I gotta run"`,
-      ],
-      endOfWeek: "One 2-minute conversation that doesn't feel forced.",
-    };
-  }
-
-  // Week 4
+export function buildMotivation(profile: PlanProfile): PlanMotivation {
   return {
-    number: 4,
-    heading: "Close the loop",
-    why: `Stop walking away empty-handed. ${goalLine(profile.goal)}`,
-    tasks: [
-      `${daily} a day · ${weekly}/week`,
-      `1 ask a day: "I gotta go but you seem cool — what's your IG?"`,
-      `If no, clean exit. No wounded energy`,
-    ],
-    endOfWeek: "One closed loop — ghost or not, you closed.",
+    why: whyFromGoal(profile.goal),
+    fear: fearFromBlocker(profile.blocker),
+    math:
+      "Walk over: best case is everything. Worst case is 30 awkward seconds you'll both forget by tomorrow.\nDon't: 100% regret tonight. You already know the feeling.",
+    focus: (profile.plan_note || "").trim() || null,
+    weeklyTarget:
+      typeof profile.weekly_approach_goal === "number" && profile.weekly_approach_goal > 0
+        ? profile.weekly_approach_goal
+        : 5,
   };
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Sparkles, ArrowUp } from "lucide-react";
-import { buildWeek, derivePlanState, type PlanProfile } from "@/lib/plan";
+import { buildMotivation, type PlanProfile } from "@/lib/plan";
 
 type ProfileResponse = {
   status: string | null;
@@ -24,9 +24,6 @@ type PlanUpdates = Partial<{
   plan_note: string;
 }>;
 
-// Parse the coach's "UPDATE <field>=<value>" directives out of an assistant
-// message. Only whitelisted fields + values are accepted — anything else is
-// silently ignored so a bad emission from Claude can't write garbage.
 function parseUpdates(content: string): PlanUpdates {
   const updates: PlanUpdates = {};
   const regex = /^\s*UPDATE\s+(\w+)\s*=\s*(.+?)\s*$/gim;
@@ -50,8 +47,6 @@ function parseUpdates(content: string): PlanUpdates {
   return updates;
 }
 
-// Remove UPDATE directives from the rendered text so the user only sees the
-// conversational part of the coach's reply.
 function stripUpdates(content: string): string {
   return content.replace(/^\s*UPDATE\s+\w+\s*=.*$/gim, "").trim();
 }
@@ -59,7 +54,7 @@ function stripUpdates(content: string): string {
 const OPENING_MESSAGE: Message = {
   role: "assistant",
   content:
-    "What do you want to change about your plan? Tell me what's not clicking for you — the number, the spots, the blocker, or anything else going on.",
+    "What do you want to change? Your goal, your weekly target, what's holding you back, or your focus line for this week — just tell me.",
 };
 
 export default function PlanView() {
@@ -84,7 +79,6 @@ export default function PlanView() {
       .catch(() => setLoading(false));
   }, []);
 
-  // Scroll the conversation to the newest message.
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
@@ -100,19 +94,12 @@ export default function PlanView() {
       blocker: profile?.blocker ?? null,
       goal: profile?.goal ?? null,
       weekly_approach_goal: profile?.weekly_approach_goal ?? null,
+      plan_note: profile?.plan_note ?? null,
     }),
     [profile]
   );
 
-  const state = useMemo(
-    () => derivePlanState(profile?.created_at ?? null),
-    [profile?.created_at]
-  );
-
-  const weeks = useMemo(
-    () => [1, 2, 3, 4].map((n) => buildWeek(n as 1 | 2 | 3 | 4, profileData)),
-    [profileData]
-  );
+  const motivation = useMemo(() => buildMotivation(profileData), [profileData]);
 
   const applyUpdates = async (updates: PlanUpdates) => {
     if (Object.keys(updates).length === 0) return;
@@ -191,7 +178,6 @@ export default function PlanView() {
     }
     setChatLoading(false);
 
-    // Apply any UPDATE directives the coach emitted in this reply.
     const updates = parseUpdates(assistantContent);
     if (Object.keys(updates).length > 0) applyUpdates(updates);
   };
@@ -223,121 +209,75 @@ export default function PlanView() {
     );
   }
 
-  const week = weeks[state.currentWeek - 1];
-  const focus = profile?.plan_note?.trim() || "";
   const hasChatted = messages.some((m) => m.role === "user");
 
   return (
     <div className="animate-fade-in">
       {/* Header */}
       <div className="mb-5">
-        <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.2] mb-1">
+        <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-text-muted mb-1">
+          When your heart's pounding — read this
+        </p>
+        <h1 className="font-display text-[30px] font-extrabold tracking-tight leading-[1.05]">
           Your Plan
         </h1>
-        <p className="text-text-muted text-[14px]">
-          {state.graduated
-            ? "You've made it through the 4 weeks. Keep going."
-            : `Week ${state.currentWeek} of 4 · day ${state.daysIntoWeek + 1}`}
+      </div>
+
+      {/* YOUR WHY — dark block, most prominent */}
+      <div className="bg-[#1a1a1a] text-white rounded-2xl px-5 py-5 mb-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/50 mb-2">
+          Why you're doing this
+        </p>
+        <h2 className="font-display text-[22px] font-extrabold leading-tight mb-2">
+          {motivation.why.headline}
+        </h2>
+        <p className="text-[14px] leading-[1.55] text-white/85">{motivation.why.body}</p>
+        <p className="text-[11px] uppercase tracking-wider text-white/40 mt-4">
+          Your target · {motivation.weeklyTarget}/week
         </p>
       </div>
 
-      {/* Week timeline */}
-      <div className="flex items-start gap-2 mb-5">
-        {weeks.map((w) => {
-          const isCurrent = w.number === state.currentWeek && !state.graduated;
-          const isPast = w.number < state.currentWeek || (state.graduated && w.number <= 4);
-          return (
-            <div key={w.number} className="flex-1">
-              <div
-                className={`h-1.5 rounded-full ${
-                  isPast ? "bg-[#1a1a1a]" : isCurrent ? "bg-[#1a1a1a]" : "bg-border"
-                }`}
-              />
-              <div className="flex items-center gap-1 mt-2">
-                <span
-                  className={`text-[10px] font-bold uppercase tracking-wider ${
-                    isCurrent ? "text-text" : "text-text-muted/60"
-                  }`}
-                >
-                  W{w.number}
-                </span>
-                {isPast && !isCurrent && (
-                  <Check size={10} strokeWidth={3} className="text-[#1a1a1a]" />
-                )}
-              </div>
-              <p
-                className={`text-[11px] leading-tight mt-0.5 ${
-                  isCurrent ? "text-text font-medium" : "text-text-muted/60"
-                }`}
-              >
-                {w.heading}
-              </p>
-            </div>
-          );
-        })}
+      {/* YOUR FEAR — reframed */}
+      <div className="bg-bg-card border border-border rounded-2xl shadow-card px-5 py-4 mb-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted mb-2">
+          The lie your brain tells you
+        </p>
+        <p className="font-display text-[17px] font-bold italic text-text/60 mb-3">
+          {motivation.fear.lie}
+        </p>
+        <p className="text-[14px] leading-[1.55] text-text/90">{motivation.fear.truth}</p>
       </div>
 
-      {/* Focus (if set) */}
-      {focus && (
-        <div
-          className={`bg-[#1a1a1a] text-white rounded-2xl px-4 py-3.5 mb-3 transition-all ${
-            justUpdated ? "ring-2 ring-green-400" : ""
-          }`}
-        >
-          <p className="text-[10px] font-bold uppercase tracking-wider text-white/60 mb-1">
-            Your focus
+      {/* THE MATH */}
+      <div className="bg-bg-card border border-border rounded-2xl shadow-card px-5 py-4 mb-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted mb-2">
+          The math
+        </p>
+        {motivation.math.split("\n").map((line, i) => (
+          <p key={i} className="text-[14px] leading-[1.55] text-text/90 first:mb-2">
+            {line}
           </p>
-          <p className="text-[14px] leading-snug">{focus}</p>
-        </div>
-      )}
+        ))}
+      </div>
 
-      {/* Current week — full card when idle, compact strip while chatting */}
-      {hasChatted ? (
-        <button
-          type="button"
-          onClick={() => setMessages([OPENING_MESSAGE])}
-          className={`w-full flex items-center justify-between gap-3 bg-bg-card border rounded-xl shadow-card px-3.5 py-2.5 mb-3 press text-left transition-colors ${
-            justUpdated ? "border-green-400" : "border-border"
+      {/* YOUR FOCUS — only if set */}
+      {motivation.focus && (
+        <div
+          className={`bg-orange-500 text-white rounded-2xl px-5 py-4 mb-5 transition-all ${
+            justUpdated ? "ring-4 ring-green-400" : ""
           }`}
-          title="Reset the conversation"
         >
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-              W{week.number} · {week.heading} · {profile?.weekly_approach_goal || 5}/wk
-            </p>
-            <p className="text-[12px] leading-snug text-text/80 truncate">
-              {week.endOfWeek}
-            </p>
-          </div>
-          <span className="text-[10px] text-text-muted shrink-0">reset</span>
-        </button>
-      ) : (
-        <div className="bg-bg-card border border-border rounded-2xl shadow-card p-4 mb-4">
-          <h2 className="font-display text-[20px] font-bold leading-tight mb-1.5">
-            {week.heading}
-          </h2>
-          <p className="text-text/75 text-[13.5px] leading-snug mb-4">{week.why}</p>
-
-          <ul className="space-y-1.5 mb-4">
-            {week.tasks.map((task, i) => (
-              <li
-                key={i}
-                className="text-[13.5px] leading-snug text-text/90 flex gap-2"
-              >
-                <span className="text-text-muted shrink-0">·</span>
-                <span>{task}</span>
-              </li>
-            ))}
-          </ul>
-
-          <div className="bg-bg-input rounded-lg px-3 py-2">
-            <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wide mb-0.5">
-              End of week
-            </p>
-            <p className="text-[13px] leading-snug font-medium">{week.endOfWeek}</p>
-          </div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/70 mb-1.5">
+            Your move right now
+          </p>
+          <p className="text-[16px] font-semibold leading-snug">{motivation.focus}</p>
         </div>
       )}
+
+      {/* Close line */}
+      <p className="text-center font-display text-[18px] font-extrabold mb-6 tracking-tight">
+        Now put the phone down and go.
+      </p>
 
       {/* Chat */}
       <div className="bg-bg-card/50 border border-border/60 rounded-2xl p-3">
