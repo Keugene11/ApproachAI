@@ -97,6 +97,22 @@ body {
   animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes edit-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-edit-in {
+  animation: edit-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-edit-in > * {
+  animation: slide-up 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-edit-in > *:nth-child(1) { animation-delay: 30ms; }
+.animate-edit-in > *:nth-child(2) { animation-delay: 80ms; }
+.animate-edit-in > *:nth-child(3) { animation-delay: 130ms; }
+.animate-edit-in > *:nth-child(4) { animation-delay: 180ms; }
+.animate-edit-in > *:nth-child(5) { animation-delay: 230ms; }
+
 .press {
   transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
 }

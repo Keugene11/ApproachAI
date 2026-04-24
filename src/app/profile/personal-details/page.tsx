@@ -181,7 +181,7 @@ export default function PersonalDetailsPage() {
           )}
         </div>
         {editingGoals ? (
-          <div>
+          <div className="animate-edit-in">
             <div className="space-y-2 mb-3">
               {GOAL_OPTIONS.map((g) => (
                 <button
@@ -261,7 +261,7 @@ export default function PersonalDetailsPage() {
           )}
         </div>
         {editingField === "status" ? (
-          <div className="space-y-2">
+          <div className="space-y-2 animate-edit-in">
             {STATUS_OPTIONS.map((opt) => (
               <button
                 key={opt.id}
@@ -299,7 +299,7 @@ export default function PersonalDetailsPage() {
           )}
         </div>
         {editingField === "blocker" ? (
-          <div className="space-y-2">
+          <div className="space-y-2 animate-edit-in">
             {BLOCKER_OPTIONS.map((opt) => (
               <button
                 key={opt.id}
@@ -343,7 +343,7 @@ export default function PersonalDetailsPage() {
           )}
         </div>
         {editingField === "weekly" ? (
-          <div>
+          <div className="animate-edit-in">
             <div className="flex items-center gap-2 bg-bg-input rounded-xl px-3 py-2.5 mb-3">
               <input
                 type="number"
@@ -400,7 +400,7 @@ export default function PersonalDetailsPage() {
           )}
         </div>
         {editingBirthday ? (
-          <div>
+          <div className="animate-edit-in">
             <input
               type="date"
               value={birthdayInput}

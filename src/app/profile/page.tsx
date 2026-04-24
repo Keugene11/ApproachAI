@@ -275,7 +275,7 @@ export default function ProfilePage() {
       <p className="text-[11px] font-bold text-text-muted uppercase tracking-[0.15em] mb-2 px-1">
         Subscription
       </p>
-      <div className="bg-bg-card border border-border rounded-xl shadow-card px-4 py-4 mb-2">
+      <div className={`bg-bg-card border border-border rounded-xl shadow-card px-4 py-4 ${subscription ? "mb-5" : "mb-2"}`}>
         {subscription ? (
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -294,16 +294,16 @@ export default function ProfilePage() {
           <p className="text-text-muted text-[14px]">No active subscription</p>
         )}
       </div>
-      <Link
-        href="/plans"
-        className="flex items-center gap-3.5 w-full bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 text-left press mb-5"
-      >
-        <CreditCard size={18} strokeWidth={1.5} className="text-text-muted shrink-0" />
-        <span className="flex-1 font-medium text-[15px]">
-          {subscription ? "Manage subscription" : "Choose a plan"}
-        </span>
-        <ChevronRight size={16} className="text-border shrink-0" />
-      </Link>
+      {!subscription && (
+        <Link
+          href="/plans"
+          className="flex items-center gap-3.5 w-full bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 text-left press mb-5"
+        >
+          <CreditCard size={18} strokeWidth={1.5} className="text-text-muted shrink-0" />
+          <span className="flex-1 font-medium text-[15px]">Choose a plan</span>
+          <ChevronRight size={16} className="text-border shrink-0" />
+        </Link>
+      )}
 
       {/* About */}
       <p className="text-[11px] font-bold text-text-muted uppercase tracking-[0.15em] mb-2 px-1">
