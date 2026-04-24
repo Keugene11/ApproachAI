@@ -5,6 +5,7 @@ import { ArrowLeft, LogOut, CreditCard, Camera, Check, ChevronRight, Trash2 } fr
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import SignInModal from "@/components/SignInModal";
+import { isNativePlatform } from "@/lib/platform";
 import { useRouter } from "next/navigation";
 
 type Subscription = {
@@ -69,7 +70,28 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     setLoggingOut(true);
-    await signOut({ redirectTo: "/" });
+    // Aggressive clear first — works around Capacitor WebView cookie
+    // persistence where the NextAuth default Max-Age=0 sometimes survives
+    // a force-close + reopen cycle.
+    try {
+      await fetch("/api/auth/native/signout", { method: "POST" });
+    } catch {}
+    // On native, also revoke the Google/Apple credential cache so the
+    // SocialLogin plugin doesn't silently re-auth on next sign-in tap.
+    if (isNativePlatform()) {
+      try {
+        const { SocialLogin } = await import("@capgo/capacitor-social-login");
+        await SocialLogin.logout({ provider: "google" }).catch(() => {});
+        await SocialLogin.logout({ provider: "apple" }).catch(() => {});
+      } catch {}
+    }
+    // NextAuth's own sign-out (no redirect — we force a hard reload instead).
+    try {
+      await signOut({ redirect: false });
+    } catch {}
+    // Hard reload so the WebView commits the cleared cookies to disk before
+    // the user can close the app.
+    window.location.href = "/onboarding";
   };
 
   const saveUsername = async () => {
