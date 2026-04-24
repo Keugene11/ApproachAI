@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, LogOut, CreditCard, Camera, Check, ChevronRight, Trash2 } from "lucide-react";
+import { ArrowLeft, LogOut, CreditCard, Camera, Check, ChevronRight, Trash2, FileText, Shield, Mail } from "lucide-react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import SignInModal from "@/components/SignInModal";
@@ -250,30 +250,32 @@ export default function ProfilePage() {
         <p className="text-text-muted text-[13px] mt-1">{email}</p>
       </div>
 
-      {/* Stats — separate page */}
-      <Link
-        href="/profile/stats"
-        className="flex items-center gap-3.5 bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 press mb-2"
-      >
-        <span className="flex-1 font-medium text-[15px] text-left">Stats</span>
-        <ChevronRight size={16} className="text-border shrink-0" />
-      </Link>
-
-      {/* Personal details — separate page */}
-      <Link
-        href="/profile/personal-details"
-        className="flex items-center gap-3.5 bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 press mb-5"
-      >
-        <span className="flex-1 font-medium text-[15px] text-left">Personal details</span>
-        <ChevronRight size={16} className="text-border shrink-0" />
-      </Link>
-
+      {/* Your profile */}
+      <p className="text-[11px] font-bold text-text-muted uppercase tracking-[0.15em] mb-2 mt-2 px-1">
+        Your profile
+      </p>
+      <div className="space-y-2 mb-5">
+        <Link
+          href="/profile/stats"
+          className="flex items-center gap-3.5 bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 press"
+        >
+          <span className="flex-1 font-medium text-[15px] text-left">Stats</span>
+          <ChevronRight size={16} className="text-border shrink-0" />
+        </Link>
+        <Link
+          href="/profile/personal-details"
+          className="flex items-center gap-3.5 bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 press"
+        >
+          <span className="flex-1 font-medium text-[15px] text-left">Personal details</span>
+          <ChevronRight size={16} className="text-border shrink-0" />
+        </Link>
+      </div>
 
       {/* Subscription */}
-      <div className="bg-bg-card border border-border rounded-xl shadow-card px-4 py-4 mb-3">
-        <p className="text-[12px] font-semibold text-text-muted uppercase tracking-wide mb-2">
-          Subscription
-        </p>
+      <p className="text-[11px] font-bold text-text-muted uppercase tracking-[0.15em] mb-2 px-1">
+        Subscription
+      </p>
+      <div className="bg-bg-card border border-border rounded-xl shadow-card px-4 py-4 mb-2">
         {subscription ? (
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -292,29 +294,56 @@ export default function ProfilePage() {
           <p className="text-text-muted text-[14px]">No active subscription</p>
         )}
       </div>
+      <Link
+        href="/plans"
+        className="flex items-center gap-3.5 w-full bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 text-left press mb-5"
+      >
+        <CreditCard size={18} strokeWidth={1.5} className="text-text-muted shrink-0" />
+        <span className="flex-1 font-medium text-[15px]">
+          {subscription ? "Manage subscription" : "Choose a plan"}
+        </span>
+        <ChevronRight size={16} className="text-border shrink-0" />
+      </Link>
 
-      {/* Actions */}
-      <div className="space-y-2 mt-4">
+      {/* About */}
+      <p className="text-[11px] font-bold text-text-muted uppercase tracking-[0.15em] mb-2 px-1">
+        About
+      </p>
+      <div className="space-y-2 mb-5">
         <Link
-          href="/plans"
-          className="flex items-center gap-3.5 w-full bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 text-left press"
+          href="/terms"
+          className="flex items-center gap-3.5 bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 press"
         >
-          <CreditCard size={18} strokeWidth={1.5} className="text-text-muted shrink-0" />
-          <span className="flex-1 font-medium text-[15px]">
-            {subscription ? "Manage subscription" : "Choose a plan"}
-          </span>
+          <FileText size={18} strokeWidth={1.5} className="text-text-muted shrink-0" />
+          <span className="flex-1 font-medium text-[15px] text-left">Terms of Service</span>
           <ChevronRight size={16} className="text-border shrink-0" />
         </Link>
-
         <Link
-          href="/delete-account"
-          className="flex items-center gap-3.5 w-full bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 text-left press"
+          href="/privacy"
+          className="flex items-center gap-3.5 bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 press"
         >
-          <Trash2 size={18} strokeWidth={1.5} className="text-red-400 shrink-0" />
-          <span className="flex-1 font-medium text-[15px] text-red-500">Delete account</span>
+          <Shield size={18} strokeWidth={1.5} className="text-text-muted shrink-0" />
+          <span className="flex-1 font-medium text-[15px] text-left">Privacy Policy</span>
           <ChevronRight size={16} className="text-border shrink-0" />
         </Link>
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText("keugenelee11@gmail.com");
+            showToast("Support email copied!");
+          }}
+          className="flex items-center gap-3.5 w-full bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 text-left press"
+        >
+          <Mail size={18} strokeWidth={1.5} className="text-text-muted shrink-0" />
+          <span className="flex-1 font-medium text-[15px]">Support</span>
+          <ChevronRight size={16} className="text-border shrink-0" />
+        </button>
+      </div>
 
+      {/* Account */}
+      <p className="text-[11px] font-bold text-text-muted uppercase tracking-[0.15em] mb-2 px-1">
+        Account
+      </p>
+      <div className="space-y-2">
         <button
           onClick={handleSignOut}
           disabled={loggingOut}
@@ -325,24 +354,14 @@ export default function ProfilePage() {
             {loggingOut ? "Signing out..." : "Sign out"}
           </span>
         </button>
-      </div>
-
-      <div className="mt-8 text-center space-x-3">
-        <Link href="/terms" className="text-[12px] text-text-muted underline">
-          Terms of Service
-        </Link>
-        <Link href="/privacy" className="text-[12px] text-text-muted underline">
-          Privacy Policy
-        </Link>
-        <button
-          onClick={() => {
-            navigator.clipboard.writeText("keugenelee11@gmail.com");
-            showToast("Support email copied!");
-          }}
-          className="text-[12px] text-text-muted underline"
+        <Link
+          href="/delete-account"
+          className="flex items-center gap-3.5 w-full bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 text-left press"
         >
-          Support
-        </button>
+          <Trash2 size={18} strokeWidth={1.5} className="text-red-400 shrink-0" />
+          <span className="flex-1 font-medium text-[15px] text-red-500">Delete account</span>
+          <ChevronRight size={16} className="text-border shrink-0" />
+        </Link>
       </div>
 
       {/* Toast */}
