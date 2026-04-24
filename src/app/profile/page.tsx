@@ -5,6 +5,7 @@ import { ArrowLeft, LogOut, CreditCard, Camera, Check, ChevronRight, Trash2, Fla
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import SignInModal from "@/components/SignInModal";
+import StatsView from "@/components/StatsView";
 import { useRouter } from "next/navigation";
 
 type Subscription = {
@@ -89,9 +90,6 @@ export default function ProfilePage() {
   const [weeklyInput, setWeeklyInput] = useState<string>("");
   const [savingField, setSavingField] = useState(false);
 
-  // Stats
-  const [streak, setStreak] = useState(0);
-  const [totalCheckins, setTotalCheckins] = useState(0);
 
   const isLoggedIn = status === "loading" ? null : status === "authenticated";
   const email = session?.user?.email || "";
@@ -116,14 +114,6 @@ export default function ProfilePage() {
       })
       .catch(() => {});
 
-    fetch("/api/checkin")
-      .then((res) => res.json())
-      .then((data) => {
-        setStreak(data.streak || 0);
-        const checked = (data.last7 || []).filter((d: { talked: boolean | null }) => d.talked !== null).length;
-        setTotalCheckins(checked);
-      })
-      .catch(() => {});
   }, [status]);
 
   const handleSignOut = async () => {
@@ -394,18 +384,11 @@ export default function ProfilePage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
-        <div className="bg-bg-card border border-border rounded-xl shadow-card px-4 py-3 text-center">
-          <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Flame size={16} strokeWidth={1.5} className="text-orange-500" />
-            <span className="font-display text-[22px] font-bold">{streak}</span>
-          </div>
-          <p className="text-[12px] text-text-muted">Day streak</p>
-        </div>
-        <div className="bg-bg-card border border-border rounded-xl shadow-card px-4 py-3 text-center">
-          <span className="font-display text-[22px] font-bold">{totalCheckins}</span>
-          <p className="text-[12px] text-text-muted">Check-ins this week</p>
-        </div>
+      <p className="text-[11px] font-bold text-text-muted uppercase tracking-[0.15em] mb-2 mt-2 px-1">
+        Stats
+      </p>
+      <div className="bg-bg-card border border-border rounded-xl shadow-card px-4 py-4 mb-5">
+        <StatsView isPro={subscription?.status === "active"} />
       </div>
 
       {/* Personal Details section heading */}

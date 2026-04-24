@@ -1,16 +1,15 @@
 "use client";
 
-import { Flame, MessageCircle, Users, User, BarChart3, Map } from "lucide-react";
+import { Flame, MessageCircle, Users, User, Map } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
-export type Tab = "checkin" | "coach" | "plan" | "stats" | "community" | "plans";
+export type Tab = "checkin" | "coach" | "plan" | "community" | "plans";
 
 const tabs: { id: Tab; label: string; icon: typeof Flame }[] = [
   { id: "checkin", label: "Today", icon: Flame },
   { id: "coach", label: "Wingmate", icon: MessageCircle },
   { id: "plan", label: "Plan", icon: Map },
-  { id: "stats", label: "Stats", icon: BarChart3 },
   { id: "community", label: "Community", icon: Users },
 ];
 
@@ -22,7 +21,7 @@ function useActiveTab(): { active: Tab | null; isProfile: boolean } {
   if (pathname.startsWith("/community")) return { active: "community", isProfile: false };
   if (pathname === "/") {
     const t = searchParams.get("tab");
-    if (t && (["checkin", "coach", "plan", "stats", "community", "plans"] as const).includes(t as Tab)) {
+    if (t && (["checkin", "coach", "plan", "community", "plans"] as const).includes(t as Tab)) {
       return { active: t as Tab, isProfile: false };
     }
     return { active: "checkin", isProfile: false };

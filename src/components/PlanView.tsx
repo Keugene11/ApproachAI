@@ -223,61 +223,73 @@ export default function PlanView() {
         </h1>
       </div>
 
-      {/* YOUR WHY — dark block, most prominent */}
-      <div className="bg-[#1a1a1a] text-white rounded-2xl px-5 py-5 mb-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/50 mb-2">
+      {/* One big dark motivational card — read top-to-bottom in 15 seconds,
+          put the phone down, go. */}
+      <div
+        className={`bg-[#1a1a1a] text-white rounded-3xl p-6 mb-5 shadow-xl transition-all ${
+          justUpdated ? "ring-4 ring-green-400" : ""
+        }`}
+      >
+        {/* Your why */}
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-2">
           Why you're doing this
         </p>
-        <h2 className="font-display text-[22px] font-extrabold leading-tight mb-2">
+        <h2 className="font-display text-[24px] font-extrabold leading-[1.1] mb-2">
           {motivation.why.headline}
         </h2>
-        <p className="text-[14px] leading-[1.55] text-white/85">{motivation.why.body}</p>
-        <p className="text-[11px] uppercase tracking-wider text-white/40 mt-4">
-          Your target · {motivation.weeklyTarget}/week
+        <p className="text-[14.5px] leading-[1.55] text-white/85 mb-1">
+          {motivation.why.body}
         </p>
-      </div>
+        <p className="text-[11px] uppercase tracking-[0.15em] text-white/40 mt-3">
+          Target · {motivation.weeklyTarget}/week
+        </p>
 
-      {/* YOUR FEAR — reframed */}
-      <div className="bg-bg-card border border-border rounded-2xl shadow-card px-5 py-4 mb-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted mb-2">
+        <div className="h-px bg-white/10 my-5" />
+
+        {/* Your fear */}
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-2">
           The lie your brain tells you
         </p>
-        <p className="font-display text-[17px] font-bold italic text-text/60 mb-3">
+        <p className="font-display text-[17px] font-bold italic text-white/50 mb-3">
           {motivation.fear.lie}
         </p>
-        <p className="text-[14px] leading-[1.55] text-text/90">{motivation.fear.truth}</p>
-      </div>
+        <p className="text-[14.5px] leading-[1.6] text-white/90">
+          {motivation.fear.truth}
+        </p>
 
-      {/* THE MATH */}
-      <div className="bg-bg-card border border-border rounded-2xl shadow-card px-5 py-4 mb-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted mb-2">
+        <div className="h-px bg-white/10 my-5" />
+
+        {/* The math */}
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-2">
           The math
         </p>
         {motivation.math.split("\n").map((line, i) => (
-          <p key={i} className="text-[14px] leading-[1.55] text-text/90 first:mb-2">
+          <p
+            key={i}
+            className="text-[14.5px] leading-[1.6] text-white/90 mb-2 last:mb-0"
+          >
             {line}
           </p>
         ))}
+
+        {motivation.focus && (
+          <>
+            <div className="h-px bg-white/10 my-5" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-300 mb-2">
+              Your move right now
+            </p>
+            <p className="font-display text-[18px] font-semibold leading-snug">
+              {motivation.focus}
+            </p>
+          </>
+        )}
+
+        <div className="h-px bg-white/10 my-5" />
+
+        <p className="text-center font-display text-[20px] font-extrabold tracking-tight">
+          Now put the phone down and go.
+        </p>
       </div>
-
-      {/* YOUR FOCUS — only if set */}
-      {motivation.focus && (
-        <div
-          className={`bg-orange-500 text-white rounded-2xl px-5 py-4 mb-5 transition-all ${
-            justUpdated ? "ring-4 ring-green-400" : ""
-          }`}
-        >
-          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/70 mb-1.5">
-            Your move right now
-          </p>
-          <p className="text-[16px] font-semibold leading-snug">{motivation.focus}</p>
-        </div>
-      )}
-
-      {/* Close line */}
-      <p className="text-center font-display text-[18px] font-extrabold mb-6 tracking-tight">
-        Now put the phone down and go.
-      </p>
 
       {/* Chat */}
       <div className="bg-bg-card/50 border border-border/60 rounded-2xl p-3">
