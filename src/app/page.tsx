@@ -427,7 +427,7 @@ function HomeInner() {
 
       {/* ===== PLAN TAB ===== */}
       {activeTab === "plan" && (
-        <div className="px-5 pt-14 pb-10 animate-fade-in">
+        <div className="px-5 pt-14 pb-4 animate-fade-in">
           <PlanView />
         </div>
       )}

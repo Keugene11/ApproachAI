@@ -38,6 +38,7 @@ export default function PlanView() {
   const [chatLoading, setChatLoading] = useState(false);
   const [savingFocus, setSavingFocus] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/profile")
@@ -48,6 +49,12 @@ export default function PlanView() {
       })
       .catch(() => setLoading(false));
   }, []);
+
+  // Auto-scroll to the latest message so the user sees the new exchange
+  // without having to scroll up past the plan card.
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages]);
 
   const profileData: PlanProfile = useMemo(
     () => ({
@@ -184,6 +191,7 @@ export default function PlanView() {
 
   const week = weeks[state.currentWeek - 1];
   const focus = profile?.plan_note?.trim() || "";
+  const hasChatted = messages.some((m) => m.role === "user");
 
   return (
     <div className="animate-fade-in">
@@ -245,39 +253,57 @@ export default function PlanView() {
         </div>
       )}
 
-      {/* Current week card */}
-      <div className="bg-bg-card border border-border rounded-2xl shadow-card p-4 mb-5">
-        <h2 className="font-display text-[20px] font-bold leading-tight mb-1.5">
-          {week.heading}
-        </h2>
-        <p className="text-text/75 text-[13.5px] leading-snug mb-4">{week.why}</p>
+      {/* Current week — full card when idle, compact strip while chatting
+          so the conversation can take the screen. */}
+      {hasChatted ? (
+        <button
+          type="button"
+          onClick={() =>
+            setMessages([OPENING_MESSAGE])
+          }
+          className="w-full flex items-center justify-between gap-3 bg-bg-card border border-border rounded-xl shadow-card px-3.5 py-2.5 mb-3 press text-left"
+          title="Reset the conversation"
+        >
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+              W{week.number} · {week.heading}
+            </p>
+            <p className="text-[12px] leading-snug text-text/80 truncate">
+              {week.endOfWeek}
+            </p>
+          </div>
+          <span className="text-[10px] text-text-muted shrink-0">reset</span>
+        </button>
+      ) : (
+        <div className="bg-bg-card border border-border rounded-2xl shadow-card p-4 mb-4">
+          <h2 className="font-display text-[20px] font-bold leading-tight mb-1.5">
+            {week.heading}
+          </h2>
+          <p className="text-text/75 text-[13.5px] leading-snug mb-4">{week.why}</p>
 
-        <ul className="space-y-1.5 mb-4">
-          {week.tasks.map((task, i) => (
-            <li
-              key={i}
-              className="text-[13.5px] leading-snug text-text/90 flex gap-2"
-            >
-              <span className="text-text-muted shrink-0">·</span>
-              <span>{task}</span>
-            </li>
-          ))}
-        </ul>
+          <ul className="space-y-1.5 mb-4">
+            {week.tasks.map((task, i) => (
+              <li
+                key={i}
+                className="text-[13.5px] leading-snug text-text/90 flex gap-2"
+              >
+                <span className="text-text-muted shrink-0">·</span>
+                <span>{task}</span>
+              </li>
+            ))}
+          </ul>
 
-        <div className="bg-bg-input rounded-lg px-3 py-2">
-          <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wide mb-0.5">
-            End of week
-          </p>
-          <p className="text-[13px] leading-snug font-medium">{week.endOfWeek}</p>
+          <div className="bg-bg-input rounded-lg px-3 py-2">
+            <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wide mb-0.5">
+              End of week
+            </p>
+            <p className="text-[13px] leading-snug font-medium">{week.endOfWeek}</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Refine section */}
-      <div className="mb-2">
-        <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wide mb-3">
-          Refine your plan
-        </p>
-
+      <div>
         {/* Messages */}
         <div className="space-y-2.5 mb-3">
           {messages.map((m, i) => (
@@ -362,15 +388,8 @@ export default function PlanView() {
             <ArrowUp size={16} strokeWidth={2.5} />
           </button>
         </form>
+        <div ref={messagesEndRef} />
       </div>
-
-      {/* Footer note */}
-      {!state.graduated && state.currentWeek < 4 && (
-        <p className="text-center text-[12px] text-text-muted mt-4">
-          Week {state.currentWeek + 1} unlocks in {7 - state.daysIntoWeek}{" "}
-          {7 - state.daysIntoWeek === 1 ? "day" : "days"}.
-        </p>
-      )}
     </div>
   );
 }
