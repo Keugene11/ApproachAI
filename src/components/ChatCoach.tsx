@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 
 import SignInModal from "@/components/SignInModal";
+import { buildWeek, derivePlanState, type PlanProfile } from "@/lib/plan";
 
 interface Message {
   role: "user" | "assistant";
@@ -218,6 +219,13 @@ export default function ChatCoach({ onBack, checkinMode, planMode, conversationI
       };
       setMessages([initialMsg]);
       setInitialized(true);
+    } else if (planMode) {
+      const initialMsg: Message = {
+        role: "assistant",
+        content: "What do you want to change about your plan? Tell me what's not clicking for you — the number, the spots, the blocker, or something else that's actually going on.",
+      };
+      setMessages([initialMsg]);
+      setInitialized(true);
     } else {
       setMessages([]);
       setInitialized(true);
@@ -247,7 +255,7 @@ export default function ChatCoach({ onBack, checkinMode, planMode, conversationI
         } catch {}
       }
     }
-  }, [initialized, conversationId, checkinMode, streamResponse, ensureConversation, saveMessages]);
+  }, [initialized, conversationId, checkinMode, planMode, streamResponse, ensureConversation, saveMessages]);
 
   useEffect(() => {
     if (!userScrolledUp.current) {
@@ -393,6 +401,37 @@ export default function ChatCoach({ onBack, checkinMode, planMode, conversationI
 
   const [savingFocus, setSavingFocus] = useState(false);
 
+  // Plan banner: fetch profile and compute current week so the user can see
+  // what they're actually refining while chatting.
+  const [planBanner, setPlanBanner] = useState<{ heading: string; label: string; tasks: string[]; currentFocus: string } | null>(null);
+  useEffect(() => {
+    if (!planMode) return;
+    let cancelled = false;
+    fetch("/api/profile")
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled || !d.profile) return;
+        const p = d.profile;
+        const profileData: PlanProfile = {
+          status: p.status ?? null,
+          location: p.location ?? null,
+          blocker: p.blocker ?? null,
+          goal: p.goal ?? null,
+          weekly_approach_goal: p.weekly_approach_goal ?? null,
+        };
+        const state = derivePlanState(p.created_at ?? null);
+        const week = buildWeek(state.currentWeek, profileData);
+        setPlanBanner({
+          heading: week.heading,
+          label: state.graduated ? "Graduated" : `Week ${state.currentWeek}`,
+          tasks: week.tasks,
+          currentFocus: (p.plan_note || "").trim(),
+        });
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [planMode]);
+
   const saveFocus = async () => {
     if (!pendingFocus || savingFocus) return;
     setSavingFocus(true);
@@ -436,6 +475,33 @@ export default function ChatCoach({ onBack, checkinMode, planMode, conversationI
           <div className="w-[34px]" />
         )}
       </div>
+
+      {/* Plan banner — gives the user context about what they're refining */}
+      {planMode && planBanner && (
+        <div className="shrink-0 px-4 pt-3 pb-2 bg-bg">
+          <div className="bg-bg-card border border-border rounded-2xl px-4 py-3 shadow-card">
+            <div className="flex items-baseline justify-between mb-1">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                {planBanner.label}
+              </p>
+              <p className="font-display text-[13px] font-bold">{planBanner.heading}</p>
+            </div>
+            <ul className="space-y-0.5">
+              {planBanner.tasks.map((t, i) => (
+                <li key={i} className="text-[12px] leading-snug text-text/80 flex gap-1.5">
+                  <span className="text-text-muted shrink-0">·</span>
+                  <span className="truncate">{t}</span>
+                </li>
+              ))}
+            </ul>
+            {planBanner.currentFocus && (
+              <p className="text-[11px] text-text-muted mt-2 truncate">
+                Current focus: <span className="text-text">{planBanner.currentFocus}</span>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Messages */}
       <div

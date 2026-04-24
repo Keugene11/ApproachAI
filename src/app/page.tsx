@@ -352,13 +352,15 @@ function HomeInner() {
     );
   }
 
-  // Full-screen: plan-chat (refine your plan's focus via chat)
+  // Plan refinement chat — render inside the tab layout so the bottom nav
+  // stays accessible while the user is chatting.
   if (state === "plan-chat") {
     return (
-      <main className="min-h-app max-w-md mx-auto">
+      <main className="h-app overflow-hidden max-w-md mx-auto">
         <ChatCoach
           onBack={reset}
           planMode
+          showBottomPadding
           onConversationCreated={(id) => setActiveConversationId(id)}
         />
       </main>
