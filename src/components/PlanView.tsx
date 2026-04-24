@@ -57,8 +57,7 @@ function stripUpdates(content: string): string {
 
 const OPENING_MESSAGE: Message = {
   role: "assistant",
-  content:
-    "What do you want to change? Your goal, your weekly target, what's holding you back, or your focus line for this week — just tell me.",
+  content: "What do you want to change about your plan?",
 };
 
 export default function PlanView() {

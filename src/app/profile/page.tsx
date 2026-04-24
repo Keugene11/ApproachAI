@@ -90,6 +90,10 @@ export default function ProfilePage() {
   const [weeklyInput, setWeeklyInput] = useState<string>("");
   const [savingField, setSavingField] = useState(false);
 
+  // Collapsible sections
+  const [statsOpen, setStatsOpen] = useState(false);
+  const [personalOpen, setPersonalOpen] = useState(false);
+
 
   const isLoggedIn = status === "loading" ? null : status === "authenticated";
   const email = session?.user?.email || "";
@@ -383,18 +387,36 @@ export default function ProfilePage() {
         <p className="text-text-muted text-[13px] mt-1">{email}</p>
       </div>
 
-      {/* Stats */}
-      <p className="text-[11px] font-bold text-text-muted uppercase tracking-[0.15em] mb-2 mt-2 px-1">
-        Stats
-      </p>
-      <div className="bg-bg-card border border-border rounded-xl shadow-card px-4 py-4 mb-5">
-        <StatsView isPro={subscription?.status === "active"} />
-      </div>
+      {/* Stats (collapsible) */}
+      <button
+        onClick={() => setStatsOpen((o) => !o)}
+        className="w-full flex items-center gap-3.5 bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 press mb-2"
+      >
+        <span className="flex-1 font-medium text-[15px] text-left">Stats</span>
+        <ChevronRight
+          size={16}
+          className={`text-border shrink-0 transition-transform ${statsOpen ? "rotate-90" : ""}`}
+        />
+      </button>
+      {statsOpen && (
+        <div className="bg-bg-card border border-border rounded-xl shadow-card px-4 py-4 mb-5 animate-fade-in">
+          <StatsView isPro={subscription?.status === "active"} />
+        </div>
+      )}
 
-      {/* Personal Details section heading */}
-      <p className="text-[11px] font-bold text-text-muted uppercase tracking-[0.15em] mb-2 mt-2 px-1">
-        Personal Details
-      </p>
+      {/* Personal Details (collapsible) */}
+      <button
+        onClick={() => setPersonalOpen((o) => !o)}
+        className="w-full flex items-center gap-3.5 bg-bg-card border border-border rounded-xl shadow-card px-4 py-3.5 press mb-2"
+      >
+        <span className="flex-1 font-medium text-[15px] text-left">Personal details</span>
+        <ChevronRight
+          size={16}
+          className={`text-border shrink-0 transition-transform ${personalOpen ? "rotate-90" : ""}`}
+        />
+      </button>
+
+      {personalOpen && (<>
 
       {/* Goal */}
       <div className="bg-bg-card border border-border rounded-xl shadow-card px-4 py-4 mb-3">
@@ -684,6 +706,8 @@ export default function ProfilePage() {
           </p>
         )}
       </div>
+
+      </>)}
 
       {/* Subscription */}
       <div className="bg-bg-card border border-border rounded-xl shadow-card px-4 py-4 mb-3">
