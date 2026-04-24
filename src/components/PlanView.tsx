@@ -221,17 +221,24 @@ export default function PlanView() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="mb-3">
-        <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-text-muted mb-1">
-          When your heart's pounding
-        </p>
+      <div className="mb-4">
         <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.05]">
           Your Plan
         </h1>
       </div>
 
-      {/* Minimal 4-week timeline — reminder of where you are in the run */}
-      <div className="flex items-center gap-1.5 mb-4">
+      {/* Hero — the main weekly goal, big and clear */}
+      <div className="flex items-baseline gap-3 mb-2">
+        <p className="font-display text-[52px] font-extrabold leading-none">
+          {motivation.weeklyTarget}
+        </p>
+        <p className="text-[15px] font-semibold text-text/80">
+          girls this week
+        </p>
+      </div>
+
+      {/* Minimal 4-week timeline underneath the hero number */}
+      <div className="flex items-center gap-1.5 mb-5">
         {[1, 2, 3, 4].map((n) => {
           const isCurrent = n === state.currentWeek && !state.graduated;
           const isPast = n < state.currentWeek || (state.graduated && n <= 4);
@@ -246,9 +253,7 @@ export default function PlanView() {
           );
         })}
         <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted ml-1">
-          {state.graduated
-            ? `Wk 4+ · ${motivation.weeklyTarget}/wk`
-            : `Wk ${state.currentWeek}/4 · ${motivation.weeklyTarget}/wk`}
+          {state.graduated ? "Wk 4+" : `Wk ${state.currentWeek}/4`}
         </span>
       </div>
 
@@ -262,11 +267,8 @@ export default function PlanView() {
         <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted mb-1.5">
           Why
         </p>
-        <p className="font-display text-[18px] font-extrabold leading-snug mb-1">
+        <p className="font-display text-[18px] font-extrabold leading-snug mb-4">
           {motivation.why}
-        </p>
-        <p className="text-[13px] text-text-muted mb-4">
-          Your target this week · <span className="text-text font-semibold">{motivation.weeklyTarget} girls</span>
         </p>
 
         <div className="h-px bg-border my-4" />
