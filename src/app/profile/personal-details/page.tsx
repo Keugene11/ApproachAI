@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Heart, Sparkles, Flame, PartyPopper, Pencil, X } from "lucide-react";
+import { ArrowLeft, Heart, Sparkles, PartyPopper, Pencil, X } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 
@@ -17,8 +17,7 @@ type Profile = {
 const GOAL_OPTIONS = [
   { id: "girlfriend", icon: Heart, label: "Get a girlfriend" },
   { id: "rizz", icon: Sparkles, label: "Improve my rizz" },
-  { id: "hookups", icon: Flame, label: "Meet more people & date casually" },
-  { id: "memories", icon: PartyPopper, label: "Just have fun memories" },
+  { id: "memories", icon: PartyPopper, label: "Make fun memories" },
 ];
 
 const STATUS_OPTIONS = [
