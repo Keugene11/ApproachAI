@@ -43,7 +43,7 @@ const CHECKIN_DIDNT_TALK_PROMPT = `\n\nThe user just checked in that they didn't
 const PLAN_PROMPT = `\n\nThe user is refining their 4-week plan through conversation. You directly edit their plan by emitting UPDATE directives in your reply. The app parses those directives and applies them to the user's profile immediately. THIS IS HOW THE CHAT ACTUALLY CHANGES THE PLAN — without UPDATE lines, nothing happens.
 
 EDITABLE FIELDS (use these exact names):
-- weekly_approach_goal: integer 1-20 (girls per week)
+- weekly_approach_goal: integer 1-10 (girls per week; 10 is the cap)
 - blocker: one of rejection, words, confidence, time
 - location: one of city, suburb, town, rural
 - status: one of student, working, other

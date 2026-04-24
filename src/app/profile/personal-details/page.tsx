@@ -349,7 +349,7 @@ export default function PersonalDetailsPage() {
                 type="number"
                 inputMode="numeric"
                 min={1}
-                max={20}
+                max={10}
                 value={weeklyInput}
                 onChange={(e) => setWeeklyInput(e.target.value)}
                 className="flex-1 bg-transparent text-[14px] outline-none"
@@ -367,8 +367,8 @@ export default function PersonalDetailsPage() {
               <button
                 onClick={() => {
                   const n = parseInt(weeklyInput, 10);
-                  if (Number.isNaN(n) || n < 1 || n > 20) {
-                    showToast("Pick a number between 1 and 20");
+                  if (Number.isNaN(n) || n < 1 || n > 10) {
+                    showToast("Pick a number between 1 and 10");
                     return;
                   }
                   savePersonalField({ weekly_approach_goal: n });

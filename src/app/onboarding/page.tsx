@@ -33,7 +33,7 @@ type Step =
   | "trialPayment";
 
 const TARGET_MIN = 1;
-const TARGET_MAX = 20;
+const TARGET_MAX = 10;
 const TARGET_THUMB = 28;
 
 // Ordered list of every step that renders a progress bar. Used to drive an

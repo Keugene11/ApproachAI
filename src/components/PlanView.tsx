@@ -37,7 +37,7 @@ function parseUpdates(content: string): PlanUpdates {
     raw = raw.replace(/[.,;]+$/, "").trim();
     if (field === "weekly_approach_goal") {
       const n = parseInt(raw, 10);
-      if (!Number.isNaN(n) && n >= 1 && n <= 20) updates.weekly_approach_goal = n;
+      if (!Number.isNaN(n) && n >= 1 && n <= 10) updates.weekly_approach_goal = n;
     } else if (field === "blocker" && ["rejection", "words", "confidence", "time"].includes(raw.toLowerCase())) {
       updates.blocker = raw.toLowerCase();
     } else if (field === "location" && ["city", "suburb", "town", "rural"].includes(raw.toLowerCase())) {
