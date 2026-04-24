@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Sparkles, ArrowUp } from "lucide-react";
-import { buildMotivation, type PlanProfile } from "@/lib/plan";
+import { buildMotivation, derivePlanState, type PlanProfile } from "@/lib/plan";
 
 type ProfileResponse = {
   status: string | null;
@@ -100,6 +100,10 @@ export default function PlanView() {
   );
 
   const motivation = useMemo(() => buildMotivation(profileData), [profileData]);
+  const state = useMemo(
+    () => derivePlanState(profile?.created_at ?? null),
+    [profile?.created_at]
+  );
 
   const applyUpdates = async (updates: PlanUpdates) => {
     if (Object.keys(updates).length === 0) return;
@@ -214,13 +218,35 @@ export default function PlanView() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="mb-4">
+      <div className="mb-3">
         <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-text-muted mb-1">
           When your heart's pounding
         </p>
         <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.05]">
           Your Plan
         </h1>
+      </div>
+
+      {/* Minimal 4-week timeline — reminder of where you are in the run */}
+      <div className="flex items-center gap-1.5 mb-4">
+        {[1, 2, 3, 4].map((n) => {
+          const isCurrent = n === state.currentWeek && !state.graduated;
+          const isPast = n < state.currentWeek || (state.graduated && n <= 4);
+          return (
+            <div key={n} className="flex-1 flex items-center gap-1.5">
+              <div
+                className={`h-1 flex-1 rounded-full ${
+                  isPast || isCurrent ? "bg-[#1a1a1a]" : "bg-border"
+                }`}
+              />
+            </div>
+          );
+        })}
+        <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted ml-1">
+          {state.graduated
+            ? `Wk 4+ · ${motivation.weeklyTarget}/wk`
+            : `Wk ${state.currentWeek}/4 · ${motivation.weeklyTarget}/wk`}
+        </span>
       </div>
 
       {/* Compact motivational card — designed to fit on one screen. */}
@@ -233,8 +259,11 @@ export default function PlanView() {
         <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted mb-1.5">
           Why
         </p>
-        <p className="font-display text-[18px] font-extrabold leading-snug mb-4">
+        <p className="font-display text-[18px] font-extrabold leading-snug mb-1">
           {motivation.why}
+        </p>
+        <p className="text-[13px] text-text-muted mb-4">
+          Your target this week · <span className="text-text font-semibold">{motivation.weeklyTarget} girls</span>
         </p>
 
         <div className="h-px bg-border my-4" />

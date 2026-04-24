@@ -19,7 +19,30 @@ export type PlanMotivation = {
   lie: string;
   truth: string;
   focus: string | null;
+  weeklyTarget: number;
 };
+
+export type PlanState = {
+  currentWeek: 1 | 2 | 3 | 4;
+  daysIntoWeek: number;
+  graduated: boolean;
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export function derivePlanState(createdAt: string | Date | null | undefined): PlanState {
+  if (!createdAt) return { currentWeek: 1, daysIntoWeek: 0, graduated: false };
+  const start = createdAt instanceof Date ? createdAt.getTime() : new Date(createdAt).getTime();
+  if (Number.isNaN(start)) return { currentWeek: 1, daysIntoWeek: 0, graduated: false };
+  const daysSince = Math.max(0, Math.floor((Date.now() - start) / DAY_MS));
+  const rawWeek = Math.floor(daysSince / 7) + 1;
+  const currentWeek = Math.min(4, Math.max(1, rawWeek)) as 1 | 2 | 3 | 4;
+  return {
+    currentWeek,
+    daysIntoWeek: daysSince % 7,
+    graduated: rawWeek > 4,
+  };
+}
 
 function whyFromGoal(goal: string | null): string {
   const goals = (goal || "").split(",").filter(Boolean);
@@ -51,10 +74,12 @@ function truthFromBlocker(blocker: string | null): string {
 }
 
 export function buildMotivation(profile: PlanProfile): PlanMotivation {
+  const raw = profile.weekly_approach_goal;
   return {
     why: whyFromGoal(profile.goal),
     lie: lieFromBlocker(profile.blocker),
     truth: truthFromBlocker(profile.blocker),
     focus: (profile.plan_note || "").trim() || null,
+    weeklyTarget: typeof raw === "number" && raw > 0 ? raw : 5,
   };
 }
