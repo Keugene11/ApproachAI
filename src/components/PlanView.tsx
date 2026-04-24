@@ -16,17 +16,50 @@ type ProfileResponse = {
 
 type Message = { role: "user" | "assistant"; content: string };
 
-function extractFocusLine(content: string): string | null {
-  const m = content.match(/FOCUS:\s*(.+?)(?:\n|$)/i);
-  if (!m) return null;
-  const focus = m[1].trim().replace(/^["']|["']$/g, "");
-  return focus.length > 0 ? focus.slice(0, 500) : null;
+type PlanUpdates = Partial<{
+  weekly_approach_goal: number;
+  blocker: string;
+  location: string;
+  status: string;
+  plan_note: string;
+}>;
+
+// Parse the coach's "UPDATE <field>=<value>" directives out of an assistant
+// message. Only whitelisted fields + values are accepted — anything else is
+// silently ignored so a bad emission from Claude can't write garbage.
+function parseUpdates(content: string): PlanUpdates {
+  const updates: PlanUpdates = {};
+  const regex = /^\s*UPDATE\s+(\w+)\s*=\s*(.+?)\s*$/gim;
+  const matches = [...content.matchAll(regex)];
+  for (const m of matches) {
+    const field = m[1].trim();
+    const raw = m[2].trim().replace(/^["']|["']$/g, "");
+    if (field === "weekly_approach_goal") {
+      const n = parseInt(raw, 10);
+      if (!Number.isNaN(n) && n >= 1 && n <= 20) updates.weekly_approach_goal = n;
+    } else if (field === "blocker" && ["rejection", "words", "confidence", "time"].includes(raw)) {
+      updates.blocker = raw;
+    } else if (field === "location" && ["city", "suburb", "town", "rural"].includes(raw)) {
+      updates.location = raw;
+    } else if (field === "status" && ["student", "working", "other"].includes(raw)) {
+      updates.status = raw;
+    } else if (field === "plan_note") {
+      updates.plan_note = raw.slice(0, 500);
+    }
+  }
+  return updates;
+}
+
+// Remove UPDATE directives from the rendered text so the user only sees the
+// conversational part of the coach's reply.
+function stripUpdates(content: string): string {
+  return content.replace(/^\s*UPDATE\s+\w+\s*=.*$/gim, "").trim();
 }
 
 const OPENING_MESSAGE: Message = {
   role: "assistant",
   content:
-    "What do you want to change about your plan? Tell me what's not clicking for you — the number, the spots, the blocker, or something else that's actually going on.",
+    "What do you want to change about your plan? Tell me what's not clicking for you — the number, the spots, the blocker, or anything else going on.",
 };
 
 export default function PlanView() {
@@ -36,9 +69,10 @@ export default function PlanView() {
   const [messages, setMessages] = useState<Message[]>([OPENING_MESSAGE]);
   const [input, setInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
-  const [savingFocus, setSavingFocus] = useState(false);
+  const [justUpdated, setJustUpdated] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const justUpdatedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     fetch("/api/profile")
@@ -50,11 +84,14 @@ export default function PlanView() {
       .catch(() => setLoading(false));
   }, []);
 
-  // Auto-scroll to the latest message so the user sees the new exchange
-  // without having to scroll up past the plan card.
+  // Scroll the conversation to the newest message.
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
+
+  useEffect(() => () => {
+    if (justUpdatedTimer.current) clearTimeout(justUpdatedTimer.current);
+  }, []);
 
   const profileData: PlanProfile = useMemo(
     () => ({
@@ -77,31 +114,22 @@ export default function PlanView() {
     [profileData]
   );
 
-  const pendingFocus = useMemo(() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const m = messages[i];
-      if (m.role === "assistant" && m.content) {
-        const f = extractFocusLine(m.content);
-        if (f) return f;
-        break;
-      }
-    }
-    return null;
-  }, [messages]);
-
-  const saveFocus = async () => {
-    if (!pendingFocus || savingFocus) return;
-    setSavingFocus(true);
+  const applyUpdates = async (updates: PlanUpdates) => {
+    if (Object.keys(updates).length === 0) return;
     try {
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan_note: pendingFocus }),
+        body: JSON.stringify(updates),
       });
       const data = await res.json();
-      if (data.profile) setProfile(data.profile);
+      if (data.profile) {
+        setProfile(data.profile);
+        setJustUpdated(true);
+        if (justUpdatedTimer.current) clearTimeout(justUpdatedTimer.current);
+        justUpdatedTimer.current = setTimeout(() => setJustUpdated(false), 2500);
+      }
     } catch {}
-    setSavingFocus(false);
   };
 
   const sendMessage = async (text: string) => {
@@ -115,6 +143,7 @@ export default function PlanView() {
     setChatLoading(true);
     if (inputRef.current) inputRef.current.style.height = "auto";
 
+    let assistantContent = "";
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -126,7 +155,6 @@ export default function PlanView() {
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let assistantContent = "";
 
       while (true) {
         const { done, value } = await reader.read();
@@ -158,8 +186,14 @@ export default function PlanView() {
         };
         return updated;
       });
+      setChatLoading(false);
+      return;
     }
     setChatLoading(false);
+
+    // Apply any UPDATE directives the coach emitted in this reply.
+    const updates = parseUpdates(assistantContent);
+    if (Object.keys(updates).length > 0) applyUpdates(updates);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -245,7 +279,11 @@ export default function PlanView() {
 
       {/* Focus (if set) */}
       {focus && (
-        <div className="bg-[#1a1a1a] text-white rounded-2xl px-4 py-3.5 mb-3">
+        <div
+          className={`bg-[#1a1a1a] text-white rounded-2xl px-4 py-3.5 mb-3 transition-all ${
+            justUpdated ? "ring-2 ring-green-400" : ""
+          }`}
+        >
           <p className="text-[10px] font-bold uppercase tracking-wider text-white/60 mb-1">
             Your focus
           </p>
@@ -253,20 +291,19 @@ export default function PlanView() {
         </div>
       )}
 
-      {/* Current week — full card when idle, compact strip while chatting
-          so the conversation can take the screen. */}
+      {/* Current week — full card when idle, compact strip while chatting */}
       {hasChatted ? (
         <button
           type="button"
-          onClick={() =>
-            setMessages([OPENING_MESSAGE])
-          }
-          className="w-full flex items-center justify-between gap-3 bg-bg-card border border-border rounded-xl shadow-card px-3.5 py-2.5 mb-3 press text-left"
+          onClick={() => setMessages([OPENING_MESSAGE])}
+          className={`w-full flex items-center justify-between gap-3 bg-bg-card border rounded-xl shadow-card px-3.5 py-2.5 mb-3 press text-left transition-colors ${
+            justUpdated ? "border-green-400" : "border-border"
+          }`}
           title="Reset the conversation"
         >
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-              W{week.number} · {week.heading}
+              W{week.number} · {week.heading} · {profile?.weekly_approach_goal || 5}/wk
             </p>
             <p className="text-[12px] leading-snug text-text/80 truncate">
               {week.endOfWeek}
@@ -302,18 +339,21 @@ export default function PlanView() {
         </div>
       )}
 
-      {/* Refine section */}
+      {/* Chat */}
       <div className="bg-bg-card/50 border border-border/60 rounded-2xl p-3">
-        {/* Chat header */}
         <div className="flex items-center gap-2 mb-3 px-1">
           <div className="w-6 h-6 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
             <Sparkles size={12} strokeWidth={2.5} className="text-white" />
           </div>
           <p className="text-[12px] font-bold tracking-wide">Chat with Wingmate</p>
-          <span className="text-[11px] text-text-muted ml-1">· refine your plan</span>
+          <span className="text-[11px] text-text-muted ml-1">· change your plan</span>
+          {justUpdated && (
+            <span className="ml-auto text-[11px] font-semibold text-green-600 flex items-center gap-1">
+              <Check size={11} strokeWidth={3} /> Plan updated
+            </span>
+          )}
         </div>
 
-        {/* Messages */}
         <div className="space-y-2.5 mb-3">
           {messages.map((m, i) => {
             if (m.role === "user") {
@@ -325,10 +365,7 @@ export default function PlanView() {
                 </div>
               );
             }
-            // Assistant message — strip the FOCUS: marker from the visible
-            // text so the conversation reads naturally. The Save button
-            // below the input surfaces the extracted focus separately.
-            const display = m.content.replace(/\n?FOCUS:\s*(.+?)(?:\n|$)/i, "").trim();
+            const display = stripUpdates(m.content);
             if (!display && !chatLoading) return null;
             return (
               <div key={i} className="flex items-start gap-2">
@@ -368,25 +405,6 @@ export default function PlanView() {
             )}
         </div>
 
-        {/* Save focus button (appears when coach emits a FOCUS: line) */}
-        {pendingFocus && (
-          <button
-            onClick={saveFocus}
-            disabled={savingFocus || pendingFocus === focus}
-            className="w-full flex items-center justify-center gap-2 bg-[#1a1a1a] text-white rounded-2xl py-3 press disabled:opacity-60 mb-3"
-          >
-            <Sparkles size={14} strokeWidth={2} />
-            <span className="text-[13.5px] font-semibold truncate px-2">
-              {savingFocus
-                ? "Saving..."
-                : pendingFocus === focus
-                ? "Saved as your focus"
-                : `Save as my focus: "${pendingFocus.length > 40 ? pendingFocus.slice(0, 40) + "..." : pendingFocus}"`}
-            </span>
-          </button>
-        )}
-
-        {/* Input — visually anchored to the chat container */}
         <form
           onSubmit={handleSubmit}
           className="flex items-end gap-2 bg-bg border border-border rounded-2xl pl-4 pr-2 py-2"

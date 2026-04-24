@@ -40,17 +40,27 @@ const CHECKIN_TALKED_PROMPT = `\n\nThe user just checked in that they talked to 
 
 const CHECKIN_DIDNT_TALK_PROMPT = `\n\nThe user just checked in that they didn't talk to anyone new today. No shame, no lecture. Find out what got in the way and help them set up tomorrow.`;
 
-const PLAN_PROMPT = `\n\nThe user is refining their 4-week plan. The app already asked them what they want to change.
+const PLAN_PROMPT = `\n\nThe user is refining their 4-week plan through conversation. You can directly change fields on their plan by emitting update directives in your reply. The app parses these and applies them to the user's profile immediately.
+
+The fields you can change:
+- weekly_approach_goal: integer 1-20 (how many girls they want to talk to per week)
+- blocker: "rejection" | "words" | "confidence" | "time" (what stops them)
+- location: "city" | "suburb" | "town" | "rural" (their setting)
+- status: "student" | "working" | "other" (what they do)
+- plan_note: a short free-text personal focus under 120 characters
+
+Format — one update per line, at the end of your reply, exactly like this (no bullet, no quotes around the value):
+UPDATE weekly_approach_goal=3
+UPDATE blocker=words
+UPDATE plan_note=Say hi to the girl at the gym before Friday
 
 Rules for every reply:
-1. Keep it under 3 sentences. Acknowledge what they said, then give them a focus.
-2. ALWAYS end your reply with a FOCUS: line on its own, like this:
-   FOCUS: <one short actionable sentence, under 120 characters>
-3. The FOCUS is tailored to what they just told you. Specific, concrete, this-week.
-4. If they push back, rewrite the FOCUS in the next reply. Always include a fresh FOCUS: line.
-5. Do NOT keep asking questions. Only ask ONE clarifying question total, and only if their message is genuinely empty or uninterpretable.
-
-Never reply without a FOCUS: line. The button that saves it to their plan depends on that line.`;
+1. Keep it to 2-3 sentences of natural conversation. Acknowledge what they said, then (if appropriate) emit the UPDATE lines.
+2. ONLY emit UPDATE lines when the user clearly asked for a change or confirmed a proposal. If they're venting or describing, just chat — no updates.
+3. Never update a field the user didn't mention or agree to.
+4. For plan_note, write a specific, this-week, actionable sentence tailored to what they told you.
+5. At most ONE follow-up question per reply. Don't interrogate.
+6. Never acknowledge the UPDATE directive syntax to the user — it's invisible machinery.`;
 
 export async function POST(req: Request) {
   try {
