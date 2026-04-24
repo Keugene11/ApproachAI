@@ -379,11 +379,28 @@ function OnboardingInner() {
     setupAuthDeepLinkListener();
     initSocialLogin();
     hideSplash();
-    // Users returning from OAuth with ?paywall=1 are mid-onboarding — drop
-    // them on the trial intro. Otherwise, authenticated users stay on the
-    // welcome flow so they can walk through the full onboarding.
+    // Users returning from OAuth with ?paywall=1 are mid-onboarding. If
+    // they're already Pro (e.g. reinstalled the app), skip the trial
+    // paywall and drop them on the real home screen. Otherwise show the
+    // trial intro like a new user.
     if (status === "authenticated" && searchParams.get("paywall") === "1") {
-      setStep("trialIntro");
+      let cancelled = false;
+      fetch("/api/stripe/status")
+        .then((r) => r.json())
+        .then((d) => {
+          if (cancelled) return;
+          if (d.subscribed || d.subscription?.status === "active") {
+            router.replace("/");
+          } else {
+            setStep("trialIntro");
+          }
+        })
+        .catch(() => {
+          if (!cancelled) setStep("trialIntro");
+        });
+      return () => {
+        cancelled = true;
+      };
     }
   }, [router, status, searchParams]);
 
