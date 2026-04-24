@@ -214,80 +214,58 @@ export default function PlanView() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="mb-5">
+      <div className="mb-4">
         <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-text-muted mb-1">
-          When your heart's pounding — read this
+          When your heart's pounding
         </p>
-        <h1 className="font-display text-[30px] font-extrabold tracking-tight leading-[1.05]">
+        <h1 className="font-display text-[28px] font-extrabold tracking-tight leading-[1.05]">
           Your Plan
         </h1>
       </div>
 
-      {/* One big dark motivational card — read top-to-bottom in 15 seconds,
-          put the phone down, go. */}
+      {/* Compact motivational card — designed to fit on one screen. */}
       <div
-        className={`bg-[#1a1a1a] text-white rounded-3xl p-6 mb-5 shadow-xl transition-all ${
-          justUpdated ? "ring-4 ring-green-400" : ""
+        className={`bg-bg-card border border-border rounded-2xl shadow-card p-5 mb-5 transition-all ${
+          justUpdated ? "ring-2 ring-green-400" : ""
         }`}
       >
-        {/* Your why */}
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-2">
-          Why you're doing this
+        {/* Why */}
+        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted mb-1.5">
+          Why
         </p>
-        <h2 className="font-display text-[24px] font-extrabold leading-[1.1] mb-2">
-          {motivation.why.headline}
-        </h2>
-        <p className="text-[14.5px] leading-[1.55] text-white/85 mb-1">
-          {motivation.why.body}
-        </p>
-        <p className="text-[11px] uppercase tracking-[0.15em] text-white/40 mt-3">
-          Target · {motivation.weeklyTarget}/week
+        <p className="font-display text-[18px] font-extrabold leading-snug mb-4">
+          {motivation.why}
         </p>
 
-        <div className="h-px bg-white/10 my-5" />
+        <div className="h-px bg-border my-4" />
 
-        {/* Your fear */}
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-2">
-          The lie your brain tells you
+        {/* Fear → Truth */}
+        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted mb-1.5">
+          Before you walk away
         </p>
-        <p className="font-display text-[17px] font-bold italic text-white/50 mb-3">
-          {motivation.fear.lie}
+        <p className="font-display text-[15px] italic text-text-muted mb-1.5">
+          {motivation.lie}
         </p>
-        <p className="text-[14.5px] leading-[1.6] text-white/90">
-          {motivation.fear.truth}
+        <p className="text-[15px] font-semibold leading-snug">
+          {motivation.truth}
         </p>
-
-        <div className="h-px bg-white/10 my-5" />
-
-        {/* The math */}
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mb-2">
-          The math
-        </p>
-        {motivation.math.split("\n").map((line, i) => (
-          <p
-            key={i}
-            className="text-[14.5px] leading-[1.6] text-white/90 mb-2 last:mb-0"
-          >
-            {line}
-          </p>
-        ))}
 
         {motivation.focus && (
           <>
-            <div className="h-px bg-white/10 my-5" />
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-300 mb-2">
-              Your move right now
+            <div className="h-px bg-border my-4" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-orange-500 mb-1.5">
+              Your move
             </p>
-            <p className="font-display text-[18px] font-semibold leading-snug">
+            <p className="text-[15px] font-semibold leading-snug">
               {motivation.focus}
             </p>
           </>
         )}
 
-        <div className="h-px bg-white/10 my-5" />
+        <div className="h-px bg-border my-4" />
 
-        <p className="text-center font-display text-[20px] font-extrabold tracking-tight">
-          Now put the phone down and go.
+        <p className="text-center font-display text-[22px] font-extrabold tracking-tight">
+          GO.
         </p>
       </div>
 
