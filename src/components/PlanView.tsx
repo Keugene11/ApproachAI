@@ -233,7 +233,7 @@ export default function PlanView() {
           {motivation.weeklyTarget}
         </p>
         <p className="text-[15px] font-semibold text-text/80">
-          girls this week
+          {motivation.weeklyTarget === 1 ? "girl this week" : "girls this week"}
         </p>
       </div>
 
