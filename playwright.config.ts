@@ -12,7 +12,7 @@ export default defineConfig({
   projects: [
     {
       name: "iPad Air",
-      testIgnore: /android-phone-screenshots\.spec\.ts/,
+      testIgnore: /(android-phone|ios-iphone)-screenshots\.spec\.ts/,
       use: {
         ...devices["iPad Mini"],
         // iPad Air 11-inch dimensions (the review device)
@@ -25,7 +25,7 @@ export default defineConfig({
     },
     {
       name: "iPad Air Landscape",
-      testIgnore: /android-phone-screenshots\.spec\.ts/,
+      testIgnore: /(android-phone|ios-iphone)-screenshots\.spec\.ts/,
       use: {
         ...devices["iPad Mini landscape"],
         viewport: { width: 1180, height: 820 },
@@ -37,7 +37,7 @@ export default defineConfig({
     },
     {
       name: "iPhone 15",
-      testIgnore: /android-phone-screenshots\.spec\.ts/,
+      testIgnore: /(android-phone|ios-iphone)-screenshots\.spec\.ts/,
       use: {
         ...devices["iPhone 15"],
       },
@@ -45,6 +45,10 @@ export default defineConfig({
     {
       name: "android-phone",
       testMatch: /android-phone-screenshots\.spec\.ts/,
+    },
+    {
+      name: "ios-iphone",
+      testMatch: /ios-iphone-screenshots\.spec\.ts/,
     },
   ],
 });
