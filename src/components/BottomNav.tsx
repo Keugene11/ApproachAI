@@ -35,7 +35,7 @@ export default function BottomNavBar() {
   return (
     <nav className="shrink-0 bg-bg border-t border-border shadow-nav">
       <div className="bg-bg">
-        <div className="max-w-md mx-auto flex items-center justify-around py-2">
+        <div className="max-w-md mx-auto flex items-center justify-around py-1">
           {tabs.map(({ id, label, icon: Icon }) => {
             const isActive = !isProfile && active === id;
             return (
