@@ -47,12 +47,30 @@ async function nativeSignIn(provider: "apple" | "google", redirectTo: string = "
     window.location.href = redirectTo;
     return { error: null };
   } catch (e: unknown) {
-    const error = e as { code?: string; message?: string };
-    if (error.message?.includes("cancel") || error.code === "SIGN_IN_CANCELLED") {
-      return { error: null };
-    }
-    return { error: error.message || error.code || JSON.stringify(e) };
+    const error = e as { code?: string | number; message?: string };
+    if (isUserCancellation(error)) return { error: null };
+    return { error: error.message || String(error.code) || JSON.stringify(e) };
   }
+}
+
+// Cancel signals across providers and platforms:
+//   - Google Android plugin → code "SIGN_IN_CANCELLED" or message contains "cancel"
+//   - Apple iOS (ASAuthorizationError.canceled = 1001) → message looks like
+//     "The operation couldn't be completed. (com.apple.AuthenticationServices.
+//     AuthorizationError error 1001.)" — no "cancel" word, just code 1001
+//   - Apple iOS unknown failure (1000) is also treated as a quiet bail; the
+//     user typically saw a sheet that auto-dismissed
+//   - Web SDK style → message includes "cancelled" / "user denied"
+function isUserCancellation(e: { code?: string | number; message?: string }): boolean {
+  const msg = (e.message || "").toLowerCase();
+  if (msg.includes("cancel")) return true;
+  if (msg.includes("user denied")) return true;
+  if (msg.includes("error 1001")) return true;
+  if (msg.includes("authorizationerror")) return true;
+  const code = String(e.code ?? "").toLowerCase();
+  if (code === "sign_in_cancelled") return true;
+  if (code === "1001") return true;
+  return false;
 }
 
 export async function signInWithGoogle(redirectTo: string = "/"): Promise<Result> {
