@@ -352,8 +352,45 @@ export default function ChatCoach({ onBack, checkinMode, conversationId, onConve
 
   const [keyboardOffset, setKeyboardOffset] = useState(0);
 
+  // Capacitor Keyboard plugin events on native (iOS/Android) — fire for
+  // floating/split iPad keyboards too, and report the actual keyboard
+  // height. visualViewport doesn't shrink for iPad floating keyboards,
+  // which would leave the input covered.
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.Capacitor?.isNativePlatform()) return;
+    let showSub: { remove: () => Promise<void> } | null = null;
+    let hideSub: { remove: () => Promise<void> } | null = null;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { Keyboard } = await import("@capacitor/keyboard");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const showHandle = await Keyboard.addListener("keyboardWillShow", (info: any) => {
+          setKeyboardOffset(info?.keyboardHeight ?? 0);
+        });
+        const hideHandle = await Keyboard.addListener("keyboardWillHide", () => {
+          setKeyboardOffset(0);
+        });
+        if (cancelled) {
+          showHandle.remove();
+          hideHandle.remove();
+        } else {
+          showSub = showHandle;
+          hideSub = hideHandle;
+        }
+      } catch {}
+    })();
+    return () => {
+      cancelled = true;
+      showSub?.remove();
+      hideSub?.remove();
+    };
+  }, []);
+
+  // Web fallback — visualViewport works on desktop and most mobile browsers.
   useEffect(() => {
     if (typeof window === "undefined" || !window.visualViewport) return;
+    if (window.Capacitor?.isNativePlatform()) return;
     const vv = window.visualViewport;
     const onResize = () => {
       const offset = window.innerHeight - vv.height;

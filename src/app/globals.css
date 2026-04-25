@@ -25,6 +25,10 @@ html {
   height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
+  /* Paint the same bg on html so any seam at the safe-area-inset-top
+     (where iOS WebView's default white can otherwise bleed through)
+     matches the rest of the app. */
+  background: var(--color-bg);
 }
 
 /* Body is viewport-sized and non-scrolling. AppShell provides the internal
