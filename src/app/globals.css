@@ -55,19 +55,13 @@ body {
    system-nav gray. Under targetSdk 36 edge-to-edge, Android's transparent
    nav bar shows the body bg through, and a flat dark area reads cleanest.
    iOS doesn't need this — the home-indicator area should match the app bg. */
-/* Android-only: keep the bottom safe-area-inset region painted in the
-   dark system-nav gray for edge-to-edge under targetSdk 36. We move
-   that gradient onto the AppShell so it works alongside the new
-   AppShell-managed safe-area structure. */
-html.platform-android #app-shell {
-  background:
-    linear-gradient(
-      to bottom,
-      var(--color-bg) 0,
-      var(--color-bg) calc(100% - env(safe-area-inset-bottom)),
-      #374151 calc(100% - env(safe-area-inset-bottom)),
-      #374151 100%
-    );
+/* Android edge-to-edge under targetSdk 36: the system nav bar (home,
+   back, recents) is transparent and overlaps the WebView. Push our
+   BottomNav up by the safe-area-inset-bottom so the icons aren't
+   underneath it. iOS keeps no extra padding — iPad's home indicator
+   is allowed to overlap. */
+html.platform-android nav {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Inside AppShell's flex-1 scroll container — fill the scrollable area and
