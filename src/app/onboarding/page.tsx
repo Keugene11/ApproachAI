@@ -485,7 +485,7 @@ function OnboardingInner() {
         <PhoneMockup />
 
         <h1 className="my-auto font-display text-[34px] font-extrabold tracking-tight leading-[1.05] text-center">
-          Talk to more women
+          Overcome approach anxiety
         </h1>
 
         <div className="space-y-4 shrink-0">
