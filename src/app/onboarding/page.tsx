@@ -1372,6 +1372,12 @@ function OnboardingInner() {
 
   if (step === "trialPayment") {
     const isYearly = selectedPlan === "yearly";
+    const features = [
+      "Unlimited AI coaching",
+      "Approach tracker & stats",
+      "Daily check-ins & streaks",
+      "Community access",
+    ];
     return (
       <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-6 pb-8 onb-anim onb-no-divider">
         <TrialHeader onBack={() => setStep("trialReminder")} onClose={() => setStep("auth")} />
@@ -1380,66 +1386,49 @@ function OnboardingInner() {
           <h1 className="font-display text-[26px] font-bold tracking-tight leading-[1.1]">
             Choose your plan
           </h1>
-          <p className="text-text-muted text-[14px] mt-2">
-            Start with 3 days free on yearly, or go monthly.
-          </p>
         </div>
 
-        <div className="flex-1 flex flex-col justify-center gap-3 min-h-0 py-6">
-          <button
-            onClick={() => setSelectedPlan("yearly")}
-            className={`relative w-full rounded-2xl border-2 p-4 text-left press transition-colors ${
-              isYearly ? "border-[#1a1a1a] bg-bg-card" : "border-border bg-bg-card"
-            }`}
-          >
-            <span className="absolute -top-2.5 left-4 bg-green-500 text-white text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full">
-              3 days free
-            </span>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-[16px]">Yearly</p>
-                <p className="text-[13px] text-text-muted">3 days free, then billed yearly</p>
-              </div>
-              <div className="text-right">
-                <p className="font-display text-[20px] font-extrabold leading-none">$29.99</p>
-                <p className="text-[12px] text-text-muted mt-0.5">/year</p>
-              </div>
-            </div>
-            <div className={`mt-3 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-              isYearly ? "border-[#1a1a1a] bg-[#1a1a1a]" : "border-border"
-            }`}>
-              {isYearly && <Check size={12} strokeWidth={3} className="text-white" />}
-            </div>
-          </button>
-
-          <button
-            onClick={() => setSelectedPlan("monthly")}
-            className={`w-full rounded-2xl border-2 p-4 text-left press transition-colors ${
-              !isYearly ? "border-[#1a1a1a] bg-bg-card" : "border-border bg-bg-card"
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-[16px]">Monthly</p>
-                <p className="text-[13px] text-text-muted">Billed monthly, no free trial</p>
-              </div>
-              <div className="text-right">
-                <p className="font-display text-[20px] font-extrabold leading-none">$9.99</p>
-                <p className="text-[12px] text-text-muted mt-0.5">/month</p>
-              </div>
-            </div>
-            <div className={`mt-3 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-              !isYearly ? "border-[#1a1a1a] bg-[#1a1a1a]" : "border-border"
-            }`}>
-              {!isYearly && <Check size={12} strokeWidth={3} className="text-white" />}
-            </div>
-          </button>
+        <div className="flex-1 flex flex-col justify-center min-h-0 py-6">
+          <ul className="space-y-4">
+            {features.map((f) => (
+              <li key={f} className="flex items-center gap-3">
+                <span className="w-7 h-7 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0">
+                  <Check size={14} strokeWidth={3} className="text-white" />
+                </span>
+                <span className="text-[15px] font-medium">{f}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className="shrink-0 pb-2">
-          <p className="text-center text-[14px] font-medium text-text-muted mb-3">
-            {isYearly ? "No Payment Due Now" : "Billed immediately"}
-          </p>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <button
+              onClick={() => setSelectedPlan("monthly")}
+              className={`rounded-2xl border-2 p-4 text-left press transition-colors bg-bg-card ${
+                !isYearly ? "border-[#1a1a1a]" : "border-border"
+              }`}
+            >
+              <p className="font-semibold text-[15px]">Monthly</p>
+              <p className="font-display text-[22px] font-extrabold leading-none mt-2">$9.99</p>
+              <p className="text-[12px] text-text-muted mt-1">/month</p>
+            </button>
+
+            <button
+              onClick={() => setSelectedPlan("yearly")}
+              className={`relative rounded-2xl border-2 p-4 text-left press transition-colors bg-bg-card ${
+                isYearly ? "border-[#1a1a1a]" : "border-border"
+              }`}
+            >
+              <span className="absolute -top-2.5 right-3 bg-green-500 text-white text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full">
+                3 days free
+              </span>
+              <p className="font-semibold text-[15px]">Yearly</p>
+              <p className="font-display text-[22px] font-extrabold leading-none mt-2">$29.99</p>
+              <p className="text-[12px] text-text-muted mt-1">/year · $2.49/mo</p>
+            </button>
+          </div>
+
           <button
             onClick={handleStartTrial}
             disabled={purchasing}
@@ -1454,11 +1443,11 @@ function OnboardingInner() {
           <p className="text-center text-[12px] text-text-muted mt-3">
             {isYearly ? (
               <>
-                <span className="font-semibold text-text">3 days free</span>, then $29.99/year ($2.49/mo)
+                <span className="font-semibold text-text">3 days free</span>, then $29.99/year. Cancel anytime.
               </>
             ) : (
               <>
-                <span className="font-semibold text-text">$9.99/month</span>, auto-renews until cancelled
+                <span className="font-semibold text-text">$9.99/month</span>, auto-renews until cancelled.
               </>
             )}
           </p>
