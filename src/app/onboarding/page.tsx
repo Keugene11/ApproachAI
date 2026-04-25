@@ -1745,35 +1745,32 @@ function NotificationsStep({
   onBack: () => void;
   onContinue: () => void;
 }) {
-  const promptedRef = useRef(false);
+  const [requesting, setRequesting] = useState(false);
 
-  useEffect(() => {
-    if (promptedRef.current) return;
-    promptedRef.current = true;
-    // Fire the permission prompt as soon as the screen mounts.
-    (async () => {
-      try {
-        // Native (iOS/Android): use Capacitor PushNotifications plugin, which
-        // triggers the actual OS-level permission dialog. WKWebView has no
-        // web Notification API at all and Android WebView silently blocks
-        // it without a user gesture.
-        if (typeof window !== "undefined" && window.Capacitor?.isNativePlatform()) {
-          const { PushNotifications } = await import("@capacitor/push-notifications");
-          const existing = await PushNotifications.checkPermissions();
-          if (existing.receive === "prompt" || existing.receive === "prompt-with-rationale") {
-            await PushNotifications.requestPermissions();
-          }
-          return;
+  // Tied to the Continue button rather than the screen mount — iOS treats
+  // gesture-initiated permission requests as more legitimate, and ties the
+  // dialog appearance to clear user intent. iOS only shows the system
+  // dialog once ever; if the user previously declined, we silently fall
+  // through and continue.
+  const requestAndContinue = async () => {
+    if (requesting) return;
+    setRequesting(true);
+    try {
+      if (typeof window !== "undefined" && window.Capacitor?.isNativePlatform()) {
+        const { PushNotifications } = await import("@capacitor/push-notifications");
+        const existing = await PushNotifications.checkPermissions();
+        if (existing.receive === "prompt" || existing.receive === "prompt-with-rationale") {
+          await PushNotifications.requestPermissions();
         }
-        // Web fallback — only works when the browser doesn't require a gesture.
-        if (typeof window !== "undefined" && "Notification" in window) {
-          if (Notification.permission === "default") {
-            await Notification.requestPermission();
-          }
+      } else if (typeof window !== "undefined" && "Notification" in window) {
+        if (Notification.permission === "default") {
+          await Notification.requestPermission();
         }
-      } catch {}
-    })();
-  }, []);
+      }
+    } catch {}
+    setRequesting(false);
+    onContinue();
+  };
 
   return (
     <main key="notifications" className="h-app max-w-md mx-auto flex flex-col px-6 pt-5 pb-4 onb-anim">
@@ -1811,10 +1808,11 @@ function NotificationsStep({
       </div>
 
       <button
-        onClick={onContinue}
-        className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+        onClick={requestAndContinue}
+        disabled={requesting}
+        className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press disabled:opacity-60"
       >
-        Continue
+        {requesting ? "..." : "Enable notifications"}
       </button>
     </main>
   );
