@@ -354,7 +354,7 @@ export default function PersonalDetailsPage() {
                 className="flex-1 bg-transparent text-[14px] outline-none"
                 autoFocus
               />
-              <span className="text-[13px] text-text-muted">girls / week</span>
+              <span className="text-[13px] text-text-muted">conversations / week</span>
             </div>
             <div className="flex gap-2">
               <button
@@ -381,7 +381,7 @@ export default function PersonalDetailsPage() {
           </div>
         ) : profile?.weekly_approach_goal && profile.weekly_approach_goal > 0 ? (
           <p className="text-[14px] font-medium">
-            {profile.weekly_approach_goal} <span className="text-text-muted font-normal">girls / week</span>
+            {profile.weekly_approach_goal} <span className="text-text-muted font-normal">conversations / week</span>
           </p>
         ) : (
           <p className="text-text-muted text-[14px]">Not set</p>

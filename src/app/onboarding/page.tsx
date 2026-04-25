@@ -573,7 +573,7 @@ function OnboardingInner() {
 
         <div className="mt-8">
           <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15]">
-            How many girls do you talk to per week?
+            How many conversations do you start per week?
           </h1>
           <p className="text-text-muted text-[15px] leading-relaxed mt-2">
             Be honest — we&apos;ll use this to build your plan.
@@ -743,7 +743,7 @@ function OnboardingInner() {
 
         <div className="mt-8">
           <h1 className="font-display text-[30px] font-bold tracking-tight leading-[1.1]">
-            Wingmate helps you talk to more girls.
+            Wingmate helps you start more conversations.
           </h1>
           <p className="text-text-muted text-[15px] leading-relaxed mt-3">
             Here&apos;s what the first month looks like.
@@ -955,7 +955,7 @@ function OnboardingInner() {
 
         <div className="mt-8">
           <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15]">
-            How many girls do you want to talk to per week?
+            How many conversations do you want to start per week?
           </h1>
           <p className="text-text-muted text-[15px] leading-relaxed mt-2">
             Don&apos;t worry — you can change this later.
@@ -968,7 +968,7 @@ function OnboardingInner() {
               {weeklyTarget}
             </span>
             <span className="block text-[14px] text-text-muted font-medium mt-2">
-              {weeklyTarget === 1 ? "girl / week" : "girls / week"}
+              {weeklyTarget === 1 ? "conversation / week" : "conversations / week"}
             </span>
           </div>
 
@@ -1049,7 +1049,7 @@ function OnboardingInner() {
 
           <h1 className="font-display text-[32px] font-extrabold tracking-tight leading-[1.1] mb-4">
             <span className="text-green-500">
-              {weeklyTarget} {weeklyTarget === 1 ? "girl" : "girls"}
+              {weeklyTarget} {weeklyTarget === 1 ? "conversation" : "conversations"}
             </span>{" "}
             a week is totally doable.
           </h1>

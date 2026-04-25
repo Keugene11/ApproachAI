@@ -177,7 +177,7 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
             {greeting && <h1 className="text-[28px] font-bold tracking-tight leading-[1.2] mb-1">{greeting}</h1>}
             <p className="text-text-muted text-[13px] font-medium uppercase tracking-wide mb-1">{todayDate}</p>
             <p className="text-text-muted text-[14px] leading-relaxed">
-              Track how many girls you talked to. Build the habit — check in every day.
+              Track how many conversations you started. Build the habit — check in every day.
             </p>
           </div>
 
@@ -190,7 +190,7 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
 
             <div className="space-y-4 mb-5">
               <div>
-                <p className="text-[13px] text-white/50 mb-2">Girls you talked to</p>
+                <p className="text-[13px] text-white/50 mb-2">Conversations started</p>
                 <div className="flex items-center gap-4">
                   <button onClick={triggerSignIn} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">−</button>
                   <span className="font-display text-[36px] font-extrabold leading-none w-12 text-center">0</span>
@@ -295,7 +295,7 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
             <Target size={14} strokeWidth={1.5} className="text-blue-500" />
             <span className="font-display text-[22px] font-bold">{data.totalApproaches}</span>
           </div>
-          <p className="text-[11px] text-text-muted">Girls talked to</p>
+          <p className="text-[11px] text-text-muted">Conversations started</p>
         </div>
       </div>
     </div>
@@ -309,7 +309,7 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
         <p className="text-text-muted text-[13px] font-medium uppercase tracking-wide mb-1">{todayDate}</p>
         {!data.checkedInToday ? (
           <p className="text-text-muted text-[14px] leading-relaxed">
-            Track how many girls you talked to. Build the habit — check in every day.
+            Track how many conversations you started. Build the habit — check in every day.
           </p>
         ) : (
           <p className="text-text-muted text-[14px] leading-relaxed">
@@ -368,7 +368,7 @@ export default function DailyCheckin({ greeting, onTalkAboutIt, onCheckedIn, isL
 
             <div className="space-y-4 mb-5">
               <div>
-                <p className="text-[13px] text-white/50 mb-2">Girls you talked to</p>
+                <p className="text-[13px] text-white/50 mb-2">Conversations started</p>
                 <div className="flex items-center gap-4">
                   <button onClick={() => guardPro(() => setFlowApproaches(Math.max(0, flowApproaches - 1)))}
                     className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-[18px] font-bold press">−</button>

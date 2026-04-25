@@ -231,12 +231,12 @@ export default function PlanView() {
 
       {/* Hero — the main weekly goal, reads as a sentence */}
       <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0 mb-2">
-        <p className="text-[15px] font-semibold text-text/80">Talk to</p>
+        <p className="text-[15px] font-semibold text-text/80">Start</p>
         <p className="font-display text-[52px] font-extrabold leading-none">
           {motivation.weeklyTarget}
         </p>
         <p className="text-[15px] font-semibold text-text/80">
-          {motivation.weeklyTarget === 1 ? "girl this week" : "girls this week"}
+          {motivation.weeklyTarget === 1 ? "conversation this week" : "conversations this week"}
         </p>
       </div>
 
