@@ -1,4 +1,5 @@
 import type { CapacitorConfig } from "@capacitor/cli";
+import { KeyboardResize } from "@capacitor/keyboard";
 
 const config: CapacitorConfig = {
   appId: "live.wingmate.app",
@@ -30,7 +31,7 @@ const config: CapacitorConfig = {
       backgroundColor: "#1a1a1a",
     },
     Keyboard: {
-      resize: "none",
+      resize: KeyboardResize.None,
       resizeOnFullScreen: false,
     },
     StatusBar: {
