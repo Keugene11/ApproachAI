@@ -35,7 +35,7 @@ export default function BottomNavBar() {
   return (
     <nav className="shrink-0 bg-bg border-t border-border shadow-nav">
       <div className="bg-bg">
-        <div className="max-w-md mx-auto flex items-center justify-around py-1">
+        <div className="max-w-md mx-auto flex items-center justify-around">
           {tabs.map(({ id, label, icon: Icon }) => {
             const isActive = !isProfile && active === id;
             return (
@@ -43,7 +43,7 @@ export default function BottomNavBar() {
                 key={id}
                 href={`/?tab=${id}`}
                 replace
-                className={`flex flex-col items-center gap-0.5 px-4 py-1 press transition-colors ${
+                className={`flex flex-col items-center gap-0.5 px-4 py-1.5 press transition-colors ${
                   isActive ? "text-text" : "text-text-muted"
                 }`}
               >
@@ -54,7 +54,7 @@ export default function BottomNavBar() {
           })}
           <Link
             href="/profile"
-            className={`flex flex-col items-center gap-0.5 px-4 py-1 press transition-colors ${
+            className={`flex flex-col items-center gap-0.5 px-4 py-1.5 press transition-colors ${
               isProfile ? "text-text" : "text-text-muted"
             }`}
           >
