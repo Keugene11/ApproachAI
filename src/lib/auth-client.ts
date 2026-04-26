@@ -84,3 +84,22 @@ export async function signInWithApple(redirectTo: string = "/"): Promise<Result>
   await signIn("apple", { redirectTo });
   return { error: null };
 }
+
+export async function signInAsReviewer(
+  email: string,
+  password: string,
+  redirectTo: string = "/",
+): Promise<Result> {
+  try {
+    const res = await signIn("reviewer", { email, password, redirect: false });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const r = res as any;
+    if (r?.error) return { error: "Invalid reviewer credentials" };
+    if (r?.ok === false) return { error: "Sign-in failed" };
+    window.location.href = redirectTo;
+    return { error: null };
+  } catch (e: unknown) {
+    const error = e as { message?: string };
+    return { error: error.message || "Reviewer sign-in failed" };
+  }
+}

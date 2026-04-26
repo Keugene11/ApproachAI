@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, Suspense, useState, useRef, Fragment } from "react";
 import { Check, MessageCircle, Target, Flame, Users } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signInWithGoogle, signInWithApple } from "@/lib/auth-client";
+import { signInWithGoogle, signInWithApple, signInAsReviewer } from "@/lib/auth-client";
 import { useSession } from "next-auth/react";
 import { hideSplash, setupAuthDeepLinkListener, initSocialLogin } from "@/lib/capacitor";
 import { isApplePlatform, isNativePlatform } from "@/lib/platform";
@@ -269,6 +269,10 @@ function OnboardingInner() {
   const [purchasing, setPurchasing] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [iapPackages, setIapPackages] = useState<{ monthly?: any; yearly?: any }>({});
+  const [reviewerOpen, setReviewerOpen] = useState(false);
+  const [reviewerEmail, setReviewerEmail] = useState("");
+  const [reviewerPassword, setReviewerPassword] = useState("");
+  const [reviewerLoading, setReviewerLoading] = useState(false);
   const targetTrackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -480,6 +484,19 @@ function OnboardingInner() {
     setLiveError(null);
     const r = await signInWithApple("/onboarding?paywall=1");
     if (r.error) setLiveError(r.error);
+  };
+
+  const handleReviewer = async () => {
+    if (reviewerLoading) return;
+    setLiveError(null);
+    setReviewerLoading(true);
+    try {
+      // Reviewer is auto-Pro, so skip the paywall and go straight to the app.
+      const r = await signInAsReviewer(reviewerEmail.trim(), reviewerPassword, "/");
+      if (r.error) setLiveError(r.error);
+    } finally {
+      setReviewerLoading(false);
+    }
   };
 
   if (step === "welcome") {
@@ -1208,33 +1225,40 @@ function OnboardingInner() {
           </p>
         </div>
 
-        <div className="flex-1 flex items-start mt-8">
-          <input
-            value={referralCode}
-            onChange={(e) => setReferralCode(e.target.value.toUpperCase().replace(/\s+/g, ""))}
-            placeholder="e.g. WINGMATE"
-            autoCapitalize="characters"
-            autoCorrect="off"
-            spellCheck={false}
-            maxLength={32}
-            className="w-full bg-bg-card border-2 border-border rounded-2xl px-5 py-4 text-[16px] font-medium tracking-wider text-center placeholder:text-text-muted/50 placeholder:font-normal placeholder:tracking-normal outline-none focus:border-[#1a1a1a] transition-colors"
-          />
+        <div className="flex-1 flex items-center">
+          <form
+            onSubmit={(e) => { e.preventDefault(); setStep("planIntro"); }}
+            className="w-full flex items-center gap-2 bg-bg-card border border-border rounded-full pl-5 pr-1.5 py-1.5 shadow-card"
+          >
+            <input
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value.toUpperCase().replace(/\s+/g, ""))}
+              placeholder="Referral Code"
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
+              maxLength={32}
+              className="flex-1 bg-transparent text-text text-[15px] placeholder-text-muted/60 focus:outline-none py-2 min-w-0"
+            />
+            <button
+              type="submit"
+              disabled={!trimmed}
+              aria-label="Apply referral code"
+              className="bg-[#1a1a1a] disabled:opacity-15 text-white w-9 h-9 flex items-center justify-center rounded-full press shrink-0 transition-opacity"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 19V5M5 12l7-7 7 7" />
+              </svg>
+            </button>
+          </form>
         </div>
 
-        <div className="mt-auto space-y-3">
-          <button
-            onClick={() => setStep("planIntro")}
-            className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
-          >
-            {trimmed ? "Apply" : "Continue"}
-          </button>
-          <button
-            onClick={() => { setReferralCode(""); setStep("planIntro"); }}
-            className="w-full text-text-muted py-2 text-[15px] font-medium press"
-          >
-            Skip
-          </button>
-        </div>
+        <button
+          onClick={() => setStep("planIntro")}
+          className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+        >
+          Continue
+        </button>
       </main>
     );
   }
@@ -1554,6 +1578,59 @@ function OnboardingInner() {
           >
             Skip
           </button>
+
+          <div className="pt-2">
+            {!reviewerOpen ? (
+              <button
+                onClick={() => setReviewerOpen(true)}
+                className="w-full text-text-muted text-[13px] font-medium press py-1 underline underline-offset-4"
+              >
+                Reviewer access
+              </button>
+            ) : (
+              <form
+                onSubmit={(e) => { e.preventDefault(); handleReviewer(); }}
+                className="space-y-2 animate-fade-in"
+              >
+                <p className="text-[12px] text-text-muted text-center">
+                  App Store / Play Store reviewer login.
+                </p>
+                <input
+                  type="email"
+                  value={reviewerEmail}
+                  onChange={(e) => setReviewerEmail(e.target.value)}
+                  placeholder="reviewer email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  className="w-full bg-bg-card border border-border rounded-xl px-4 py-3 text-[15px] outline-none focus:border-text-muted transition-colors"
+                />
+                <input
+                  type="password"
+                  value={reviewerPassword}
+                  onChange={(e) => setReviewerPassword(e.target.value)}
+                  placeholder="password"
+                  className="w-full bg-bg-card border border-border rounded-xl px-4 py-3 text-[15px] outline-none focus:border-text-muted transition-colors"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setReviewerOpen(false); setReviewerEmail(""); setReviewerPassword(""); }}
+                    className="flex-1 bg-bg-card border border-border py-3 rounded-xl font-medium text-[14px] text-text-muted press"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={reviewerLoading || !reviewerEmail.trim() || !reviewerPassword}
+                    className="flex-1 bg-[#1a1a1a] disabled:opacity-40 text-white py-3 rounded-xl font-semibold text-[14px] press"
+                  >
+                    {reviewerLoading ? "Signing in…" : "Sign in"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </main>
