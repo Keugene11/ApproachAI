@@ -25,6 +25,7 @@ type Step =
   | "thanks"
   | "notifications"
   | "rating"
+  | "referral"
   | "planIntro"
   | "planGenerating"
   | "planReady"
@@ -43,7 +44,7 @@ const TARGET_THUMB = 28;
 const PROGRESS_STEPS = [
   "status", "approaches", "source", "experience", "pitch",
   "location", "birthday", "goal", "target", "doable",
-  "blockers", "thanks", "notifications", "rating",
+  "blockers", "thanks", "notifications", "rating", "referral",
   "planIntro", "planReady", "auth",
 ] as const;
 
@@ -53,7 +54,7 @@ const PROGRESS_STEPS = [
 const ALL_STEPS = [
   "welcome", "status", "approaches", "source", "experience", "pitch",
   "location", "birthday", "goal", "target", "doable", "blockers",
-  "thanks", "notifications", "rating", "planIntro", "planGenerating",
+  "thanks", "notifications", "rating", "referral", "planIntro", "planGenerating",
   "planReady", "auth", "trialIntro", "trialReminder", "trialPayment",
 ] as const;
 
@@ -262,6 +263,7 @@ function OnboardingInner() {
   const [goals, setGoals] = useState<string[]>([]);
   const [blocker, setBlocker] = useState<string | null>(null);
   const [weeklyTarget, setWeeklyTarget] = useState<number>(5);
+  const [referralCode, setReferralCode] = useState<string>("");
   const [showApple, setShowApple] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<"yearly" | "monthly">("yearly");
   const [purchasing, setPurchasing] = useState(false);
@@ -1182,7 +1184,7 @@ function OnboardingInner() {
         </div>
 
         <button
-          onClick={() => setStep("planIntro")}
+          onClick={() => setStep("referral")}
           className="mt-auto w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
         >
           Continue
@@ -1191,10 +1193,56 @@ function OnboardingInner() {
     );
   }
 
+  if (step === "referral") {
+    const trimmed = referralCode.trim();
+    return (
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-5 pb-4 onb-anim">
+        <QuizHeader onBack={() => setStep("rating")} progress={progressFor("referral")} />
+
+        <div className="mt-8">
+          <h1 className="font-display text-[28px] font-bold tracking-tight leading-[1.15]">
+            Enter referral code (optional)
+          </h1>
+          <p className="text-text-muted text-[15px] leading-relaxed mt-2">
+            You can skip this step.
+          </p>
+        </div>
+
+        <div className="flex-1 flex items-start mt-8">
+          <input
+            value={referralCode}
+            onChange={(e) => setReferralCode(e.target.value.toUpperCase().replace(/\s+/g, ""))}
+            placeholder="e.g. WINGMATE"
+            autoCapitalize="characters"
+            autoCorrect="off"
+            spellCheck={false}
+            maxLength={32}
+            className="w-full bg-bg-card border-2 border-border rounded-2xl px-5 py-4 text-[16px] font-medium tracking-wider text-center placeholder:text-text-muted/50 placeholder:font-normal placeholder:tracking-normal outline-none focus:border-[#1a1a1a] transition-colors"
+          />
+        </div>
+
+        <div className="mt-auto space-y-3">
+          <button
+            onClick={() => setStep("planIntro")}
+            className="w-full bg-[#1a1a1a] text-white py-4 rounded-2xl font-semibold text-[16px] press"
+          >
+            {trimmed ? "Apply" : "Continue"}
+          </button>
+          <button
+            onClick={() => { setReferralCode(""); setStep("planIntro"); }}
+            className="w-full text-text-muted py-2 text-[15px] font-medium press"
+          >
+            Skip
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   if (step === "planIntro") {
     return (
       <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-5 pb-4 onb-anim">
-        <QuizHeader onBack={() => setStep("rating")} progress={progressFor("planIntro")} />
+        <QuizHeader onBack={() => setStep("referral")} progress={progressFor("planIntro")} />
 
         <div className="flex-1 flex flex-col items-center justify-center text-center">
           <div className="w-24 h-24 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-8">
@@ -2175,7 +2223,88 @@ function QuizHeader({ onBack, progress }: { onBack: () => void; progress: number
   );
 }
 
+type DemoMessage = { from: "user" | "ai"; text: React.ReactNode; typingMs: number; settleMs: number };
+
+const DEMO_SCRIPT: DemoMessage[] = [
+  {
+    from: "user",
+    text: <>She&apos;s right across from me at the coffee shop. What do I say??</>,
+    typingMs: 700,
+    settleMs: 350,
+  },
+  {
+    from: "ai",
+    text: "Go NOW bro. 10 seconds of courage.",
+    typingMs: 900,
+    settleMs: 250,
+  },
+  {
+    from: "ai",
+    text: <>Walk over. Eye contact. &ldquo;Hey, I know this is random but you caught my eye.&rdquo;</>,
+    typingMs: 1300,
+    settleMs: 800,
+  },
+  {
+    from: "user",
+    text: <>It worked. Got her number 🔥</>,
+    typingMs: 700,
+    settleMs: 250,
+  },
+  {
+    from: "ai",
+    text: <>LET&apos;S GOOOO KING 👑</>,
+    typingMs: 800,
+    settleMs: 1800,
+  },
+];
+
 function PhoneMockup({ width = "min(220px, 62vw)" }: { width?: string } = {}) {
+  // Index of how many messages have fully landed in the chat. Cycles back to 0
+  // after the last message + a pause so the demo loops while the welcome
+  // screen is visible.
+  const [shown, setShown] = useState(0);
+  // Whether the next sender is currently "typing" — drives the animated dots
+  // that appear above the next bubble before it lands.
+  const [typing, setTyping] = useState<"user" | "ai" | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+    const wait = (ms: number) =>
+      new Promise<void>((resolve) => {
+        const t = setTimeout(resolve, ms);
+        timeouts.push(t);
+      });
+
+    (async () => {
+      // Small initial pause so the welcome screen renders before messages
+      // start landing.
+      await wait(500);
+      while (!cancelled) {
+        for (let i = 0; i < DEMO_SCRIPT.length; i++) {
+          if (cancelled) return;
+          const msg = DEMO_SCRIPT[i];
+          setTyping(msg.from);
+          await wait(msg.typingMs);
+          if (cancelled) return;
+          setTyping(null);
+          setShown(i + 1);
+          await wait(msg.settleMs);
+        }
+        // Hold the full conversation briefly, then reset and replay.
+        await wait(2400);
+        if (cancelled) return;
+        setShown(0);
+        await wait(400);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      timeouts.forEach(clearTimeout);
+    };
+  }, []);
+
   return (
     <div
       className="mx-auto relative select-none pointer-events-none"
@@ -2262,20 +2391,21 @@ function PhoneMockup({ width = "min(220px, 62vw)" }: { width?: string } = {}) {
               </div>
             </div>
 
-            {/* Messages */}
+            {/* Messages — flex-col-reverse pins the latest message to the
+                bottom, so as new bubbles land older ones scroll up out of
+                view instead of pushing the whole stack down. */}
             <div
-              className="absolute left-0 right-0 px-3 space-y-1.5 overflow-hidden"
+              className="absolute left-0 right-0 px-3 flex flex-col-reverse gap-1.5 overflow-hidden"
               style={{ top: "82px", bottom: "48px" }}
             >
-              <MessageBubble from="user">
-                She&apos;s right across from me at the coffee shop. What do I say??
-              </MessageBubble>
-              <MessageBubble from="ai">Go NOW bro. 10 seconds of courage.</MessageBubble>
-              <MessageBubble from="ai">
-                Walk over. Eye contact. &ldquo;Hey, I know this is random but you caught my eye.&rdquo;
-              </MessageBubble>
-              <MessageBubble from="user">It worked. Got her number 🔥</MessageBubble>
-              <MessageBubble from="ai">LET&apos;S GOOOO KING 👑</MessageBubble>
+              {typing && <TypingBubble from={typing} />}
+              {DEMO_SCRIPT.slice(0, shown)
+                .map((m, i) => (
+                  <MessageBubble key={i} from={m.from}>
+                    {m.text}
+                  </MessageBubble>
+                ))
+                .reverse()}
             </div>
 
             {/* Input bar */}
@@ -2308,7 +2438,7 @@ function PhoneMockup({ width = "min(220px, 62vw)" }: { width?: string } = {}) {
 function MessageBubble({ from, children }: { from: "user" | "ai"; children: React.ReactNode }) {
   const isUser = from === "user";
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex demo-msg-in ${isUser ? "justify-end" : "justify-start"}`}>
       <div
         className={`max-w-[80%] px-2.5 py-1.5 text-[10px] leading-snug ${
           isUser
@@ -2317,6 +2447,26 @@ function MessageBubble({ from, children }: { from: "user" | "ai"; children: Reac
         }`}
       >
         {children}
+      </div>
+    </div>
+  );
+}
+
+function TypingBubble({ from }: { from: "user" | "ai" }) {
+  const isUser = from === "user";
+  return (
+    <div className={`flex demo-msg-in ${isUser ? "justify-end" : "justify-start"}`}>
+      <div
+        className={`px-2.5 py-2 text-[10px] leading-none flex items-center gap-1 ${
+          isUser
+            ? "bg-[#1a1a1a] rounded-[14px] rounded-br-[4px]"
+            : "bg-bg-input rounded-[14px] rounded-bl-[4px]"
+        }`}
+        aria-label="typing"
+      >
+        <span className={`demo-typing-dot ${isUser ? "bg-white/70" : "bg-text-muted"}`} />
+        <span className={`demo-typing-dot ${isUser ? "bg-white/70" : "bg-text-muted"}`} style={{ animationDelay: "150ms" }} />
+        <span className={`demo-typing-dot ${isUser ? "bg-white/70" : "bg-text-muted"}`} style={{ animationDelay: "300ms" }} />
       </div>
     </div>
   );

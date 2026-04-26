@@ -107,6 +107,31 @@ html.platform-android nav {
   animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Onboarding chat demo: bubbles slide up + fade in as they "land" in
+   the conversation. Slightly tighter than .msg-in so the loop feels
+   snappy in the small phone-mockup frame. */
+@keyframes demo-msg-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.demo-msg-in {
+  animation: demo-msg-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: bottom center;
+}
+
+/* Three pulsing dots inside the typing bubble. */
+@keyframes demo-typing-blink {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-1px); }
+}
+.demo-typing-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  display: inline-block;
+  animation: demo-typing-blink 1s ease-in-out infinite;
+}
+
 @keyframes edit-in {
   from { opacity: 0; transform: translateY(-4px) scale(0.985); }
   to { opacity: 1; transform: translateY(0) scale(1); }

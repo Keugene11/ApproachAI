@@ -3,29 +3,15 @@ import { mkdirSync, writeFileSync, existsSync } from "fs";
 
 mkdirSync("public/icons", { recursive: true });
 
-// Build an SVG with a custom geometric W drawn as a single stroked path.
-// - maskable/transparent variants use more padding so Android's adaptive
-//   icon crop doesn't clip the mark.
+// Simple text-based W on a dark rounded background.
+// - maskable/transparent variants shrink the glyph so Android's adaptive
+//   icon crop doesn't clip it.
 // - transparent variants skip the background fill entirely — used for
 //   Android's adaptive icon foreground layer.
 function createSvg(size, { maskable = false, transparent = false } = {}) {
   const loose = maskable || transparent;
-  const radius = loose ? 0 : Math.round(size * 0.22);
-  const pad = loose ? 0.30 : 0.18;
-  const strokeWidth = Math.round(size * (loose ? 0.082 : 0.10));
-
-  const span = 1 - 2 * pad;
-  const x1 = size * pad;
-  const x2 = size * (pad + span * 0.25);
-  const x3 = size * 0.5;
-  const x4 = size * (pad + span * 0.75);
-  const x5 = size * (1 - pad);
-
-  const yTop = size * (pad + 0.08);
-  const yBottom = size * (1 - pad - 0.08);
-  const yMid = yTop + (yBottom - yTop) * 0.70;
-
-  const d = `M ${x1} ${yTop} L ${x2} ${yBottom} L ${x3} ${yMid} L ${x4} ${yBottom} L ${x5} ${yTop}`;
+  const radius = loose ? 0 : Math.round(size * 0.18);
+  const fontSize = Math.round(size * (loose ? 0.38 : 0.42));
 
   const bg = transparent
     ? ""
@@ -33,7 +19,7 @@ function createSvg(size, { maskable = false, transparent = false } = {}) {
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   ${bg}
-  <path d="${d}" stroke="white" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="${size / 2}" y="${size / 2}" fill="white" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="${fontSize}" text-anchor="middle" dominant-baseline="central">W</text>
 </svg>`;
 }
 
