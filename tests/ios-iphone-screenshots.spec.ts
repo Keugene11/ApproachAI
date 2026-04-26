@@ -1,5 +1,7 @@
 import { test, Page } from "@playwright/test";
 import { installMocks } from "./fixtures/demo-mocks";
+import sharp from "sharp";
+import { renameSync } from "fs";
 
 /**
  * iPhone screenshots for App Store Connect. Final image 1290 x 2796
@@ -24,10 +26,16 @@ test.use({
 
 async function snap(page: Page, name: string) {
   await page.waitForTimeout(800);
+  const out = `screenshots/ios-iphone/${name}.png`;
   await page.screenshot({
-    path: `screenshots/ios-iphone/${name}.png`,
+    path: out,
     clip: { x: 0, y: 0, width: VW, height: VH },
   });
+  // Embed an sRGB ICC profile. Without it, App Store Connect's preview
+  // pipeline (which assumes Display P3) renders the upload faded.
+  const tmp = out + ".tmp";
+  await sharp(out).withIccProfile("srgb").png({ compressionLevel: 9 }).toFile(tmp);
+  renameSync(tmp, out);
 }
 
 test("01 — onboarding welcome", async ({ page }) => {

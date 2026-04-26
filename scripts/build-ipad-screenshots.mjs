@@ -108,6 +108,9 @@ async function composite(screen) {
       { input: shadowLayer, left: phoneLeft, top: phoneTop + SHADOW_OFFSET_Y },
       { input: roundedPhone, left: phoneLeft, top: phoneTop },
     ])
+    // Embed an sRGB ICC profile. Without it, App Store Connect's preview
+    // pipeline (which assumes Display P3) renders the upload faded.
+    .withIccProfile("srgb")
     .png()
     .toFile(out);
 
