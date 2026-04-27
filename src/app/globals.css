@@ -72,20 +72,11 @@ html.platform-android nav {
 .min-h-app { min-height: 100%; }
 .h-app { height: 100%; }
 
-/* Onboarding on iPad / tall tablets: cap the card height and let the
-   AppShell flex column center it vertically. Without this the narrow
-   max-w-md column stretches to the full ~1180px viewport, scattering
-   content with huge gaps and pushing the Next button awkwardly far from
-   the visible group. min-width:768px hits iPad portrait + landscape and
-   any larger screen. */
-@media (min-width: 768px) {
-  .onb-anim {
-    max-height: 800px;
-    margin-top: auto;
-    margin-bottom: auto;
-    flex-shrink: 0;
-  }
-}
+/* On iPad+ the narrow max-w-md column stretches to the full viewport.
+   The Next button is meant to sit at the bottom of the screen via
+   mt-auto, and on the welcome step the title centers between phone and
+   CTA via my-auto. That all relies on the main being full-height — which
+   it is, since AppShell's scroll container is now flex-col. */
 
 ::-webkit-scrollbar {
   width: 0px;
