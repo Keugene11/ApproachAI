@@ -1510,7 +1510,7 @@ function OnboardingInner() {
           <p className="text-center text-[12px] text-text-muted mt-3">
             {isYearly ? (
               <>
-                <span className="font-semibold text-text">3 days free</span>, then $2.49/mo. Cancel anytime.
+                <span className="font-semibold text-text">3 days free</span>, then $29.99 per year. Cancel anytime.
               </>
             ) : (
               <>
