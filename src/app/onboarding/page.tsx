@@ -501,7 +501,7 @@ function OnboardingInner() {
 
   if (step === "welcome") {
     return (
-      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-5 pb-4 onb-anim">
+      <main key={step} className="h-app max-w-md mx-auto flex flex-col px-6 pt-5 pb-4 onb-anim onb-no-divider">
         <PhoneMockup />
 
         <h1 className="my-auto font-display text-[34px] font-extrabold tracking-tight leading-[1.05] text-center">
@@ -1380,7 +1380,7 @@ function OnboardingInner() {
         </h1>
 
         <div className="flex-1 flex items-center justify-center min-h-0 py-4">
-          <PhoneMockup width="min(220px, 62vw)" />
+          <PhoneMockup width="clamp(220px, 50vw, 280px)" />
         </div>
 
         <div className="shrink-0 pb-2">
@@ -2330,7 +2330,7 @@ const DEMO_SCRIPT: DemoMessage[] = [
   },
 ];
 
-function PhoneMockup({ width = "min(220px, 62vw)" }: { width?: string } = {}) {
+function PhoneMockup({ width = "clamp(220px, 50vw, 280px)" }: { width?: string } = {}) {
   // Index of how many messages have fully landed in the chat. Cycles back to 0
   // after the last message + a pause so the demo loops while the welcome
   // screen is visible.

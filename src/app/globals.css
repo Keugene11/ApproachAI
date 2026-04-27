@@ -72,6 +72,21 @@ html.platform-android nav {
 .min-h-app { min-height: 100%; }
 .h-app { height: 100%; }
 
+/* Onboarding on iPad / tall tablets: cap the card height and let the
+   AppShell flex column center it vertically. Without this the narrow
+   max-w-md column stretches to the full ~1180px viewport, scattering
+   content with huge gaps and pushing the Next button awkwardly far from
+   the visible group. min-width:768px hits iPad portrait + landscape and
+   any larger screen. */
+@media (min-width: 768px) {
+  .onb-anim {
+    max-height: 800px;
+    margin-top: auto;
+    margin-bottom: auto;
+    flex-shrink: 0;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 0px;
 }
