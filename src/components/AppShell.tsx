@@ -39,7 +39,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         className="shrink-0 bg-bg"
         style={{ height: "env(safe-area-inset-top)" }}
       />
-      <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
         {children}
       </div>
       <Suspense fallback={null}>
